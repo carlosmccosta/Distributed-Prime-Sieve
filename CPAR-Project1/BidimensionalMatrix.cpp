@@ -73,23 +73,6 @@ bool BidimensionalMatrix::initializeMatrixWithSequenceOnLines() {
 }
 
 
-double BidimensionalMatrix::getValue( unsigned int matrixColumn, unsigned int matrixLine ) {
-	return matrixData[numberColumns * matrixLine + matrixColumn];
-}
-
-void BidimensionalMatrix::putValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
-	matrixData[numberColumns * matrixLine + matrixColumn] = value;
-}
-
-
-void BidimensionalMatrix::addValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
-	matrixData[numberColumns * matrixLine + matrixColumn] += value;
-}
-
-void BidimensionalMatrix::multiplyValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
-	matrixData[numberColumns * matrixLine + matrixColumn] *= value;
-}
-
 
 bool BidimensionalMatrix::allocateMemoryForMatrixData() {
 #ifdef _WIN32

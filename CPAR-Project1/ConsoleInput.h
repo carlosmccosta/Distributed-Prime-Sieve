@@ -19,7 +19,7 @@ public:
 	string getLineCin();
 	void clearConsoleScreen();
 	int getIntCin(const char* message, const char* errorMessage, int min = 0, int size = INT_MAX);
-	bool getYesNoCin(const char* message, const char* errorMessage = "Incorrect answer!\nInsert Y or N: ");
+	bool getYesNoCin(const char* message, const char* errorMessage = "    -> Incorrect answer! Insert Y or N!\n");
 
 private:
 	ConsoleInput(void);

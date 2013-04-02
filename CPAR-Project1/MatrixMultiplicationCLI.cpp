@@ -22,7 +22,7 @@ int main() {
 		cout << " 0 - Exit\n\n\n" << endl;
 
 
-		option = ConsoleInput::getInstance()->getIntCin("  >>> Option: ", "Insert one of the listed options!\n", 0, 4);
+		option = ConsoleInput::getInstance()->getIntCin("  >>> Option: ", "    -> Insert one of the listed options!\n", 0, 4);
 
 		if (option == 0) {
 			break;
@@ -45,25 +45,30 @@ int main() {
 		if (loadFromFiles) {
 			cout << "    # Left matrix file: ";
 			leftMatrixFilename = ConsoleInput::getInstance()->getLineCin();
+			leftMatrix = new BidimensionalMatrix();
+			if (!leftMatrix->initializeMatrixFromFile(leftMatrixFilename)) {
+				ConsoleInput::getInstance()->getUserInput();
+				continue;
+			}
 
 			cout << "    # Right matrix file: ";
 			rightMatrixFilename = ConsoleInput::getInstance()->getLineCin();
+			rightMatrix = new BidimensionalMatrix();
+			if (!rightMatrix->initializeMatrixFromFile(rightMatrixFilename)) {
+				ConsoleInput::getInstance()->getUserInput();
+				continue;
+			}
 
 			bool loadResultFile = ConsoleInput::getInstance()->getYesNoCin("\n   ## Load result file to compare? (Y/N): ");
 			if (loadResultFile) {
 				cout << "    # Result matrix file: ";
 				resultFile = ConsoleInput::getInstance()->getLineCin();
 			}
-
-			leftMatrix = new BidimensionalMatrix();
-			leftMatrix->initializeMatrixFromFile(leftMatrixFilename);
-			rightMatrix = new BidimensionalMatrix();
-			rightMatrix->initializeMatrixFromFile(rightMatrixFilename);
 		} else {
 			cout << "    > Using default initialization...\n\n";
-			unsigned int numberOfColumnsOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of left matrix: ", "Insert a number > 1!\n", 2, INT_MAX);
-			unsigned int numberOfLinesOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of lines of left matrix: ", "Insert a number > 1!\n", 2, INT_MAX);
-			unsigned int numberOfColumnsOfRightMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of right matrix: ", "Insert a number > 1!\n", 2, INT_MAX);
+			unsigned int numberOfColumnsOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of left matrix: ", "    -> Insert a number > 1!\n", 2, INT_MAX);
+			unsigned int numberOfLinesOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of lines of left matrix: ", "    -> Insert a number > 1!\n", 2, INT_MAX);
+			unsigned int numberOfColumnsOfRightMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of right matrix: ", "    -> Insert a number > 1!\n", 2, INT_MAX);
 
 
 			leftMatrix = new BidimensionalMatrix(numberOfColumnsOfLeftMatrix, numberOfLinesOfLeftMatrix);
@@ -85,8 +90,8 @@ int main() {
 				}
 
 		case 3: {
-			blockColumnSize = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Block column size: ", "Insert a number > 1!\n", 2, INT_MAX);
-			blockLineSize = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Block line size: ", "Insert a number > 1!\n", 2, INT_MAX);
+			blockColumnSize = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Block column size: ", "    -> Insert a number > 1!\n", 2, INT_MAX);
+			blockLineSize = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Block line size: ", "    -> Insert a number > 1!\n", 2, INT_MAX);
 			matrixMultAlgorithm = new MatrixMultiplicationBlock();
 			break;
 				}
@@ -119,7 +124,7 @@ int main() {
 				cout << "    -> Result matrix incorrect!\n\n";
 			}
 
-			int exportType = ConsoleInput::getInstance()->getIntCin("   ## Export matrices? (1-Only result, 2-All, 0-None):  ", "Insert the number of the option!\n", 0, 3);
+			int exportType = ConsoleInput::getInstance()->getIntCin("   ## Export matrices? (1-Only result, 2-All, 0-None):  ", "    -> Insert the number of the option!\n", 0, 3);
 
 
 			if (exportType == 2) {

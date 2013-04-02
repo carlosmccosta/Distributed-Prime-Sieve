@@ -26,17 +26,29 @@ public:
 	bool allocateMemoryForMatrixData();
 	bool releaseMemoryOfMatrixData();
 
-	double getValue(unsigned int matrixColumn, unsigned int matrixLine);
-	void putValue(unsigned int matrixColumn, unsigned int matrixLine, double value);
-	void addValue(unsigned int matrixColumn, unsigned int matrixLine, double value);
-	void multiplyValue(unsigned int matrixColumn, unsigned int matrixLine, double value);
-
 	bool validateResultOfDefaultMatrixInitialization(unsigned int numberLinesRightMatrix); //sum of powers
 	bool validateResultFromFile(string expectedResultMatrixFilename);
 	bool exportMatrixToFile(string filename);
 
-	unsigned int getNumberColumns() const { return numberColumns; }
-	unsigned int getNumberLines() const { return numberLines; }
+
+	inline double getValue(unsigned int matrixColumn, unsigned int matrixLine) {
+		return matrixData[numberColumns * matrixLine + matrixColumn];
+	}
+
+	inline void putValue(unsigned int matrixColumn, unsigned int matrixLine, double value) {
+		matrixData[numberColumns * matrixLine + matrixColumn] = value;
+	}
+
+	inline void addValue(unsigned int matrixColumn, unsigned int matrixLine, double value) {
+		matrixData[numberColumns * matrixLine + matrixColumn] += value;
+	}
+
+	inline void multiplyValue(unsigned int matrixColumn, unsigned int matrixLine, double value) {
+		matrixData[numberColumns * matrixLine + matrixColumn] *= value;
+	}
+
+	inline unsigned int getNumberColumns() const { return numberColumns; }
+	inline unsigned int getNumberLines() const { return numberLines; }
 
 private:
 	unsigned int numberLines, numberColumns;
