@@ -3,13 +3,14 @@
 MatrixMultiplicationLine::MatrixMultiplicationLine() {}
 MatrixMultiplicationLine::~MatrixMultiplicationLine() {}
 
-shared_ptr<BidimensionalMatrix> MatrixMultiplicationLine::performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix ) {
+shared_ptr<BidimensionalMatrix> MatrixMultiplicationLine::performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix, unsigned int blockColumnSize, unsigned int blockLineSize ) {
 	unsigned int numberColumnsLeftMatrix = leftMatrix.getNumberColumns();
 	unsigned int numberLinesLeftMatrix = leftMatrix.getNumberLines();
 	unsigned int numberColumnsRightMatrix = rightMatrix.getNumberColumns();
 
 	shared_ptr<BidimensionalMatrix> resultMatrix = make_shared<BidimensionalMatrix>(numberColumnsRightMatrix, numberLinesLeftMatrix);
-	resultMatrix->allocateMemoryForMatrixData();
+	BidimensionalMatrix* resultMatrixPtr = resultMatrix.get();
+	resultMatrixPtr->allocateMemoryForMatrixData();
 
 	unsigned int columnOfLeftMatrix, lineOfLeftMatrix, columnOfRightMatrix;
 	double parcialResultMatrixCellValue;
@@ -22,7 +23,7 @@ shared_ptr<BidimensionalMatrix> MatrixMultiplicationLine::performMultiplication(
 			double firstMatrixLineValue = leftMatrix.getValue(columnOfLeftMatrix, lineOfLeftMatrix);
 			for (columnOfRightMatrix = 0; columnOfRightMatrix < numberColumnsRightMatrix; ++columnOfRightMatrix) {
 				parcialResultMatrixCellValue = firstMatrixLineValue * rightMatrix.getValue(columnOfRightMatrix, columnOfLeftMatrix);
-				resultMatrix->addValue(columnOfRightMatrix, lineOfLeftMatrix, parcialResultMatrixCellValue);
+				resultMatrixPtr->addValue(columnOfRightMatrix, lineOfLeftMatrix, parcialResultMatrixCellValue);
 			}
 		}
 	}

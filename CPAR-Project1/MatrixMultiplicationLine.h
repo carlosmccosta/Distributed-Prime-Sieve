@@ -10,5 +10,5 @@ public:
 	MatrixMultiplicationLine();
 	virtual ~MatrixMultiplicationLine();
 
-	virtual shared_ptr<BidimensionalMatrix> performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix );
+	virtual shared_ptr<BidimensionalMatrix> performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix, unsigned int blockColumnSize = 1, unsigned int blockLineSize = 1 );
 };

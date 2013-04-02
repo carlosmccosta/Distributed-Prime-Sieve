@@ -10,7 +10,7 @@ class MatrixMultiplication {
 public:
 	MatrixMultiplication();
 	virtual ~MatrixMultiplication();
-	virtual shared_ptr<BidimensionalMatrix> performMultiplication(BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix) = 0;
+	virtual shared_ptr<BidimensionalMatrix> performMultiplication(BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix, unsigned int blockColumnSize = 1, unsigned int blockLineSize = 1) = 0;
 	
 	PerformanceTimer getPerformanceTimer() const { return performanceTimer; }
 
