@@ -83,6 +83,7 @@ bool BidimensionalMatrix::allocateMemoryForMatrixData() {
 
 	matrixData = (double*)GlobalLock(memoryHandle);
 	if (matrixData == NULL) {
+		GlobalFree(memoryHandle);
 		return false;
 	}	
 

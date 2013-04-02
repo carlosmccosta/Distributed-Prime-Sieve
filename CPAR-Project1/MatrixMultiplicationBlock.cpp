@@ -7,6 +7,17 @@ shared_ptr<BidimensionalMatrix> MatrixMultiplicationBlock::performMultiplication
 	unsigned int numberColumnsLeftMatrix = leftMatrix.getNumberColumns();
 	unsigned int numberLinesLeftMatrix = leftMatrix.getNumberLines();
 	unsigned int numberColumnsRightMatrix = rightMatrix.getNumberColumns();
+	unsigned int numberLinesRightMatrix = rightMatrix.getNumberLines();
+
+	if (blockColumnSize > numberColumnsLeftMatrix || blockColumnSize > numberColumnsRightMatrix) {
+		blockColumnSize = min(numberColumnsLeftMatrix, numberColumnsRightMatrix);
+		cout << "\n\n    -> Maximum block column size exceeded! Changed to limit: " << blockColumnSize << "\n";
+	}
+
+	if (blockLineSize > numberLinesLeftMatrix || blockLineSize > numberLinesRightMatrix) {
+		blockLineSize = min(numberLinesLeftMatrix, numberLinesRightMatrix);
+		cout << "    -> Maximum block line size exceeded! Changed to limit: " << blockColumnSize << "\n\n";
+	}
 
 	shared_ptr<BidimensionalMatrix> resultMatrix = make_shared<BidimensionalMatrix>(numberColumnsRightMatrix, numberLinesLeftMatrix);
 	BidimensionalMatrix* resultMatrixPtr = resultMatrix.get();
