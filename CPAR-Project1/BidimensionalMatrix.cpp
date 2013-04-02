@@ -6,10 +6,10 @@ BidimensionalMatrix::BidimensionalMatrix() :
 BidimensionalMatrix::BidimensionalMatrix( unsigned int numberOfColumns, unsigned int numberOfLines ) :
 	numberColumns(numberOfColumns), numberLines(numberOfLines), matrixData(NULL), memoryHandle(NULL) {}
 
-
 BidimensionalMatrix::~BidimensionalMatrix() {
 	releaseMemoryOfMatrixData();
 }
+
 
 bool BidimensionalMatrix::initializeMatrix( double defaultValue ) {
 	if (allocateMemoryForMatrixData()) {
@@ -99,6 +99,7 @@ bool BidimensionalMatrix::allocateMemoryForMatrixData() {
 #endif
 }
 
+
 bool BidimensionalMatrix::releaseMemoryOfMatrixData() {
 #ifdef _WIN32
 	if (memoryHandle != NULL) {
@@ -185,4 +186,3 @@ bool BidimensionalMatrix::exportMatrixToFile( string filename ) {
 		cout << "    -> Export of file " << filename << " failed!\n\n";
 	}
 }
-

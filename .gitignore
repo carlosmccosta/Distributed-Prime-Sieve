@@ -1,0 +1,9 @@
+/CPAR-Project1/rightMatrix.txt
+/CPAR-Project1/leftMatrix.txt
+/CPAR-Project1/resultMatrix.txt
+
+/CPAR-Project1/*.sdf
+
+/CPAR-Project1/Debug
+/CPAR-Project1/*.opensdf
+/CPAR-Project1/Release
