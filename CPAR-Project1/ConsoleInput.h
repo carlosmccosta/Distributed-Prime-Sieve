@@ -26,4 +26,3 @@ private:
 	virtual ~ConsoleInput(void);
 	static ConsoleInput* instance;
 };
-

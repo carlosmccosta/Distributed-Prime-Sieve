@@ -1,17 +1,15 @@
 #pragma once
 
-
 #ifdef _WIN32   // Windows system specific
 #include <windows.h>
-#else          // Unix based system specific
+#else           // Unix based system specific
 #include <sys/time.h>
 #endif
 
 #include <stdlib.h>
 
 
-class PerformanceTimer
-{
+class PerformanceTimer {
 public:
 	PerformanceTimer(void);
 	virtual ~PerformanceTimer(void);
@@ -39,4 +37,3 @@ private:
 
 	double getElapsedTime(double timeConversionOffset);
 };
-

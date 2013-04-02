@@ -43,7 +43,6 @@ void ConsoleInput::clearConsoleScreen() {
 
 
 int ConsoleInput::getIntCin(const char* message, const char* errorMessage, int min, int size) {
-
 	int number;
 	do {
 		cout << message;
@@ -71,8 +70,7 @@ int ConsoleInput::getIntCin(const char* message, const char* errorMessage, int m
 
 
 
-bool ConsoleInput::getYesNoCin(const char* message, const char* errorMessage)
-{
+bool ConsoleInput::getYesNoCin(const char* message, const char* errorMessage) {
 	bool stop = false;
 	bool incorrectOption;
 	string option;
@@ -101,8 +99,7 @@ bool ConsoleInput::getYesNoCin(const char* message, const char* errorMessage)
 	return stop;
 }
 
-ConsoleInput* ConsoleInput::getInstance()
-{
+ConsoleInput* ConsoleInput::getInstance() {
 	if (instance == NULL) {
 		instance = new ConsoleInput();
 	}

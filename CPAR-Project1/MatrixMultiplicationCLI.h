@@ -6,10 +6,8 @@
 #include "MatrixMultiplicationLine.h"
 #include "MatrixMultiplicationBlock.h"
 
-class MatrixMultiplicationCLI
-{
+class MatrixMultiplicationCLI {
 public:
 	MatrixMultiplicationCLI(void);
 	virtual ~MatrixMultiplicationCLI(void);
 };
-

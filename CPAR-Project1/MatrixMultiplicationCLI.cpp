@@ -4,8 +4,7 @@ MatrixMultiplicationCLI::MatrixMultiplicationCLI(void) {}
 MatrixMultiplicationCLI::~MatrixMultiplicationCLI(void) {}
 
 
-int main( int argc, char *argv[] )
-{
+int main() {
 	ConsoleInput::getInstance()->clearConsoleScreen();
 
 	int option = 1;

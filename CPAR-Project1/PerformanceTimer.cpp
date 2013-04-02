@@ -1,25 +1,15 @@
 #include "PerformanceTimer.h"
 
 
-PerformanceTimer::PerformanceTimer(void)
-{
+PerformanceTimer::PerformanceTimer(void) {
 	reset();
 }
 
-
-PerformanceTimer::~PerformanceTimer(void)
-{
-}
+PerformanceTimer::~PerformanceTimer(void) {}
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// start timer.
-// startCount will be set at this point.
-///////////////////////////////////////////////////////////////////////////////
-void PerformanceTimer::start()
-{
-	stopped = 0; // reset stop flag
+void PerformanceTimer::start() {
+	stopped = 0;
 #ifdef _WIN32
 	QueryPerformanceCounter(&startCount);
 #else
@@ -28,14 +18,8 @@ void PerformanceTimer::start()
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// stop the timer.
-// endCount will be set at this point.
-///////////////////////////////////////////////////////////////////////////////
-void PerformanceTimer::stop()
-{
-	stopped = 1; // set timer stopped flag
+void PerformanceTimer::stop() {
+	stopped = 1;
 
 #ifdef _WIN32
 	QueryPerformanceCounter(&endCount);
@@ -46,9 +30,7 @@ void PerformanceTimer::stop()
 
 
 
-
-void PerformanceTimer::reset()
-{
+void PerformanceTimer::reset() {
 #ifdef _WIN32
 	QueryPerformanceFrequency(&frequency);
 	startCount.QuadPart = 0;
@@ -63,42 +45,25 @@ void PerformanceTimer::reset()
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// compute elapsed time in micro-second resolution.
-// other getElapsedTime will call this first, then convert to correspond resolution.
-///////////////////////////////////////////////////////////////////////////////
-double PerformanceTimer::getElapsedTimeInMicroSec()
-{
+double PerformanceTimer::getElapsedTimeInMicroSec() {
 	return this->getElapsedTime(1000000.0);
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// divide elapsedTimeInMicroSec by 1000
-///////////////////////////////////////////////////////////////////////////////
-double PerformanceTimer::getElapsedTimeInMilliSec()
-{
+double PerformanceTimer::getElapsedTimeInMilliSec() {
 
 	return this->getElapsedTime(1000.0);
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// divide elapsedTimeInMicroSec by 1000000
-///////////////////////////////////////////////////////////////////////////////
-double PerformanceTimer::getElapsedTimeInSec()
-{
+double PerformanceTimer::getElapsedTimeInSec() {
 	return this->getElapsedTime(1.0);
 }
 
 
 
 
-double PerformanceTimer::getElapsedTime(double timeConversionOffset)
-{
+double PerformanceTimer::getElapsedTime(double timeConversionOffset) {
 #ifdef _WIN32
 	if(!stopped) {
 		QueryPerformanceCounter(&endCount);

@@ -1,10 +1,7 @@
 #include "MatrixMultiplicationBasic.h"
-#include "BidimensionalMatrix.h"
-
 
 MatrixMultiplicationBasic::MatrixMultiplicationBasic() {}
 MatrixMultiplicationBasic::~MatrixMultiplicationBasic() {}
-
 
 shared_ptr<BidimensionalMatrix> MatrixMultiplicationBasic::performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix ) {
 	unsigned int numberColumnsLeftMatrix = leftMatrix.getNumberColumns();
@@ -34,5 +31,3 @@ shared_ptr<BidimensionalMatrix> MatrixMultiplicationBasic::performMultiplication
 
 	return resultMatrix;
 }
-
-

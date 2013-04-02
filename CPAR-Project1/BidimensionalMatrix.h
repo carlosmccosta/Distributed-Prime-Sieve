@@ -13,8 +13,7 @@ using std::ofstream;
 using std::istringstream;
 using std::endl;
 
-class BidimensionalMatrix
-{
+class BidimensionalMatrix {
 public:
 	BidimensionalMatrix();
 	BidimensionalMatrix(unsigned int numberOfColumns, unsigned int numberOfLines);
@@ -27,8 +26,10 @@ public:
 	bool allocateMemoryForMatrixData();
 	bool releaseMemoryOfMatrixData();
 
-	void putValue(unsigned int matrixColum, unsigned int matrixLine, double value);
-	double getValue(unsigned int matrixColum, unsigned int matrixLine);
+	double getValue(unsigned int matrixColumn, unsigned int matrixLine);
+	void putValue(unsigned int matrixColumn, unsigned int matrixLine, double value);
+	void addValue(unsigned int matrixColumn, unsigned int matrixLine, double value);
+	void multiplyValue(unsigned int matrixColumn, unsigned int matrixLine, double value);
 
 	bool validateResultOfDefaultMatrixInitialization(unsigned int numberLinesRightMatrix); //sum of powers
 	bool validateResultFromFile(string expectedResultMatrixFilename);
@@ -36,11 +37,9 @@ public:
 
 	unsigned int getNumberColumns() const { return numberColumns; }
 	unsigned int getNumberLines() const { return numberLines; }
-	
 
 private:
 	unsigned int numberLines, numberColumns;
 	double* matrixData;
 	HGLOBAL memoryHandle;
 };
-

@@ -72,15 +72,27 @@ bool BidimensionalMatrix::initializeMatrixWithSequenceOnLines() {
 	return true;
 }
 
-void BidimensionalMatrix::putValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
-	matrixData[numberColumns * matrixLine + matrixColumn] = value;
-}
 
 double BidimensionalMatrix::getValue( unsigned int matrixColumn, unsigned int matrixLine ) {
 	return matrixData[numberColumns * matrixLine + matrixColumn];
 }
 
+void BidimensionalMatrix::putValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
+	matrixData[numberColumns * matrixLine + matrixColumn] = value;
+}
+
+
+void BidimensionalMatrix::addValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
+	matrixData[numberColumns * matrixLine + matrixColumn] += value;
+}
+
+void BidimensionalMatrix::multiplyValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
+	matrixData[numberColumns * matrixLine + matrixColumn] *= value;
+}
+
+
 bool BidimensionalMatrix::allocateMemoryForMatrixData() {
+#ifdef _WIN32
 	memoryHandle = GlobalAlloc(GMEM_FIXED, numberColumns * numberLines * sizeof(double));
 	if (memoryHandle == NULL) {
 		return false;
@@ -92,9 +104,19 @@ bool BidimensionalMatrix::allocateMemoryForMatrixData() {
 	}	
 
 	return true;
+#else
+	matrixData = (double*)malloc(numberColumns * numberLines * sizeof(double));
+	if (matrixData == NULL) {
+		return false;
+	} else {
+		return true;
+	}
+
+#endif
 }
 
 bool BidimensionalMatrix::releaseMemoryOfMatrixData() {
+#ifdef _WIN32
 	if (memoryHandle != NULL) {
 		GlobalUnlock(memoryHandle);
 		GlobalFree(memoryHandle);
@@ -103,7 +125,12 @@ bool BidimensionalMatrix::releaseMemoryOfMatrixData() {
 	}
 
 	return true;
+#else
+	free matrixData;
+	return true;
+#endif
 }
+
 
 bool BidimensionalMatrix::validateResultOfDefaultMatrixInitialization(unsigned int numberLinesRightMatrix) {
 	double sumOfPowers = (numberLinesRightMatrix * (numberLinesRightMatrix + 1)) / 2;
@@ -133,7 +160,7 @@ bool BidimensionalMatrix::validateResultFromFile(string expectedResultMatrixFile
 		for (linePos = 0; linePos < numberLines; ++linePos) {
 			for (columnPos = 0; columnPos < numberColumns; ++columnPos) {
 				inputStream >> newValFromFile;
-				
+
 				if (newValFromFile != getValue(columnPos, linePos)) {
 					return false;
 				}
@@ -174,3 +201,4 @@ bool BidimensionalMatrix::exportMatrixToFile( string filename ) {
 		cout << "    -> Export of file " << filename << " failed!\n\n";
 	}
 }
+

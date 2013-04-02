@@ -1,13 +1,11 @@
 #pragma once
+
 #include "MatrixMultiplication.h"
-class MatrixMultiplicationBlock :
-	public MatrixMultiplication
-{
+
+class MatrixMultiplicationBlock : public MatrixMultiplication {
 public:
-	MatrixMultiplicationBlock(void);
-	virtual ~MatrixMultiplicationBlock(void);
+	MatrixMultiplicationBlock();
+	virtual ~MatrixMultiplicationBlock();
 
 	virtual shared_ptr<BidimensionalMatrix> performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix );
-
 };
-

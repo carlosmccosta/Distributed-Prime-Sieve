@@ -1,14 +1,8 @@
 #include "MatrixMultiplicationBlock.h"
 
 
-MatrixMultiplicationBlock::MatrixMultiplicationBlock(void)
-{
-}
-
-
-MatrixMultiplicationBlock::~MatrixMultiplicationBlock(void)
-{
-}
+MatrixMultiplicationBlock::MatrixMultiplicationBlock() {}
+MatrixMultiplicationBlock::~MatrixMultiplicationBlock() {}
 
 shared_ptr<BidimensionalMatrix> MatrixMultiplicationBlock::performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix )
 {

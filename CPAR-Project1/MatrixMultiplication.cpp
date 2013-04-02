@@ -2,4 +2,3 @@
 
 MatrixMultiplication::MatrixMultiplication() {}
 MatrixMultiplication::~MatrixMultiplication() {}
-

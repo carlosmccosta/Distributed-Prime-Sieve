@@ -1,13 +1,12 @@
 #pragma once
+
 #include "BidimensionalMatrix.h"
 #include "PerformanceTimer.h"
-
 #include <memory>
 
 using std::shared_ptr;
 
-class MatrixMultiplication
-{
+class MatrixMultiplication {
 public:
 	MatrixMultiplication();
 	virtual ~MatrixMultiplication();
@@ -18,4 +17,3 @@ public:
 protected:
 	PerformanceTimer performanceTimer;
 };
-
