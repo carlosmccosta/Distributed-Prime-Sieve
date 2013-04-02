@@ -1,17 +1,7 @@
 #include "MatrixMultiplicationCLI.h"
 
-
-
-
-MatrixMultiplicationCLI::MatrixMultiplicationCLI(void)
-{
-}
-
-
-MatrixMultiplicationCLI::~MatrixMultiplicationCLI(void)
-{
-}
-
+MatrixMultiplicationCLI::MatrixMultiplicationCLI(void) {}
+MatrixMultiplicationCLI::~MatrixMultiplicationCLI(void) {}
 
 
 int main( int argc, char *argv[] )
@@ -34,42 +24,68 @@ int main( int argc, char *argv[] )
 
 
 		option = ConsoleInput::getInstance()->getIntCin("  >>> Option: ", "Insert one of the listed options!\n", 0, 4);
+
+		if (option == 0) {
+			break;
+		}
+
 		bool validOption = true;
 		bool loadFromFiles = false;
 
 		BidimensionalMatrix leftMatrix, rightMatrix;
 		MatrixMultiplication* matrixMultAlgorithm;
 
-		switch (option) {
-		case 1: {
-			loadFromFiles = ConsoleInput::getInstance()->getYesNoCin("   ## Load matrices from files? (Y/N): ");
-			if (loadFromFiles) {
-
-			} else {
-				cout << "    > Using default initialization...\n\n";
-				unsigned int numberOfColumnsOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of left matrix: ", "Insert a number > 1!\n", 0, INT_MAX);
-				unsigned int numberOfLinesOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of lines of left matrix: ", "Insert a number > 1!\n", 0, INT_MAX);
-				unsigned int numberOfColumnsOfRightMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of right matrix: ", "Insert a number > 1!\n", 0, INT_MAX);
+		string leftMatrixFilename;
+		string rightMatrixFilename;
+		string resultFile = "";
 
 
-				leftMatrix = BidimensionalMatrix(numberOfColumnsOfLeftMatrix, numberOfLinesOfLeftMatrix);
-				leftMatrix.initializeMatrix();
-				rightMatrix = BidimensionalMatrix(numberOfColumnsOfRightMatrix, numberOfColumnsOfLeftMatrix);
-				rightMatrix.initializeMatrixWithSequenceOnLines();
 
-				matrixMultAlgorithm = new MatrixMultiplicationBasic();
+		loadFromFiles = ConsoleInput::getInstance()->getYesNoCin("\n   ## Load matrices from files? (Y/N): ");
+		if (loadFromFiles) {
+			cout << "    # Left matrix file: ";
+			leftMatrixFilename = ConsoleInput::getInstance()->getLineCin();
+
+			cout << "    # Right matrix file: ";
+			rightMatrixFilename = ConsoleInput::getInstance()->getLineCin();
+
+			bool loadResultFile = ConsoleInput::getInstance()->getYesNoCin("\n   ## Load result file to compare? (Y/N): ");
+			if (loadResultFile) {
+				cout << "    # Result matrix file: ";
+				resultFile = ConsoleInput::getInstance()->getLineCin();
 			}
 
+			leftMatrix = BidimensionalMatrix();
+			leftMatrix.initializeMatrixFromFile(leftMatrixFilename);
+			rightMatrix = BidimensionalMatrix();
+			rightMatrix.initializeMatrixFromFile(rightMatrixFilename);
+		} else {
+			cout << "    > Using default initialization...\n\n";
+			unsigned int numberOfColumnsOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of left matrix: ", "Insert a number > 1!\n", 0, INT_MAX);
+			unsigned int numberOfLinesOfLeftMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of lines of left matrix: ", "Insert a number > 1!\n", 0, INT_MAX);
+			unsigned int numberOfColumnsOfRightMatrix = (unsigned int)ConsoleInput::getInstance()->getIntCin("   ## Number of columns of right matrix: ", "Insert a number > 1!\n", 0, INT_MAX);
+
+
+			leftMatrix = BidimensionalMatrix(numberOfColumnsOfLeftMatrix, numberOfLinesOfLeftMatrix);
+			leftMatrix.initializeMatrix();
+			rightMatrix = BidimensionalMatrix(numberOfColumnsOfRightMatrix, numberOfColumnsOfLeftMatrix);
+			rightMatrix.initializeMatrixWithSequenceOnLines();
+		}
+
+
+		switch (option) {
+		case 1: {
+			matrixMultAlgorithm = new MatrixMultiplicationBasic();
 			break;
 				}
 
 		case 2: {
-
+			matrixMultAlgorithm = new MatrixMultiplicationLine();
 			break;
 				}
 
 		case 3: {
-
+			matrixMultAlgorithm = new MatrixMultiplicationBlock();
 			break;
 				}
 
@@ -84,36 +100,39 @@ int main( int argc, char *argv[] )
 			shared_ptr<BidimensionalMatrix> resultMatrix = matrixMultAlgorithm->performMultiplication(leftMatrix, rightMatrix);
 			cout << "\n    -> Multiplication finished in " << matrixMultAlgorithm->getPerformanceTimer().getElapsedTimeInSec() <<  " seconds\n" << endl;
 
+			bool validationResult;
+
 			if (loadFromFiles) {				
-				bool exportResult = ConsoleInput::getInstance()->getYesNoCin("   # Export result matrix? (Y/N): ");
+				cout << "    > Validating result matrix with result file supplied...\n";
+				validationResult = resultMatrix->validateResultFromFile(resultFile);
 			} else {
 				cout << "    > Validating result matrix from default initialization (result should be sum of powers)...\n";
-				bool validationResult = resultMatrix->validateResultOfDefaultMatrixInitialization(rightMatrix.getNumberLines());
-
-				if (validationResult) {
-					cout << "    -> Result matrix validated!\n\n";
-
-					int exportType = ConsoleInput::getInstance()->getIntCin("   ## Export matrices? (1-Only result, 2-All, 0-None):  ", "Insert the number of the option!\n", 0, INT_MAX);
-
-
-					if (exportType == 2) {
-						leftMatrix.exportMatrixToFile("leftMatrix.txt");
-						cout << "    > Exporting left matrix to leftMatrix.txt...\n";
-						rightMatrix.exportMatrixToFile("rightMatrix.txt");
-						cout << "    > Exporting right matrix to rightMatrix.txt...\n";
-					}
-
-					if (exportType == 1 || exportType == 2) {
-						cout << "    > Exporting result matrix to resultMatrix.txt...\n";
-						resultMatrix->exportMatrixToFile("resultMatrix.txt");
-					}
-
-					cout << "    -> Export finished!\n";
-				} else {
-					cout << "    -> Result matrix incorrect!\n";
-				}
-
+				validationResult = resultMatrix->validateResultOfDefaultMatrixInitialization(rightMatrix.getNumberLines());
 			}
+
+
+			if (validationResult) {
+				cout << "    -> Result matrix validated!\n\n";
+			} else {
+				cout << "    -> Result matrix incorrect!\n\n";
+			}
+
+			int exportType = ConsoleInput::getInstance()->getIntCin("   ## Export matrices? (1-Only result, 2-All, 0-None):  ", "Insert the number of the option!\n", 0, INT_MAX);
+
+
+			if (exportType == 2) {
+				leftMatrix.exportMatrixToFile("leftMatrix.txt");
+				cout << "    > Exporting left matrix to leftMatrix.txt...\n";
+				rightMatrix.exportMatrixToFile("rightMatrix.txt");
+				cout << "    > Exporting right matrix to rightMatrix.txt...\n";
+			}
+
+			if (exportType == 1 || exportType == 2) {
+				cout << "    > Exporting result matrix to resultMatrix.txt...\n";
+				resultMatrix->exportMatrixToFile("resultMatrix.txt");
+			}
+
+			cout << "    -> Export finished!\n";
 
 			delete matrixMultAlgorithm;
 			cout << endl << endl;

@@ -1,11 +1,16 @@
 #pragma once
 
 #include <windows.h>
+#include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 
+using std::cout;
 using std::string;
+using std::ifstream;
 using std::ofstream;
+using std::istringstream;
 using std::endl;
 
 class BidimensionalMatrix
@@ -26,6 +31,7 @@ public:
 	double getValue(unsigned int matrixColum, unsigned int matrixLine);
 
 	bool validateResultOfDefaultMatrixInitialization(unsigned int numberLinesRightMatrix); //sum of powers
+	bool validateResultFromFile(string expectedResultMatrixFilename);
 	bool exportMatrixToFile(string filename);
 
 	unsigned int getNumberColumns() const { return numberColumns; }

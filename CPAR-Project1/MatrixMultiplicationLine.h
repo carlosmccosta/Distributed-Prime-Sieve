@@ -4,7 +4,10 @@ class MatrixMultiplicationLine :
 	public MatrixMultiplication
 {
 public:
-	MatrixMultiplicationLine(void);
-	virtual ~MatrixMultiplicationLine(void);
+	MatrixMultiplicationLine();
+	virtual ~MatrixMultiplicationLine();
+
+	virtual shared_ptr<BidimensionalMatrix> performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix );
+
 };
 

@@ -6,5 +6,8 @@ class MatrixMultiplicationBlock :
 public:
 	MatrixMultiplicationBlock(void);
 	virtual ~MatrixMultiplicationBlock(void);
+
+	virtual shared_ptr<BidimensionalMatrix> performMultiplication( BidimensionalMatrix& leftMatrix, BidimensionalMatrix& rightMatrix );
+
 };
 

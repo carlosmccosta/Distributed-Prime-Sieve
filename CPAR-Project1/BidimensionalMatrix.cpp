@@ -7,13 +7,11 @@ BidimensionalMatrix::BidimensionalMatrix( unsigned int numberOfColumns, unsigned
 	numberColumns(numberOfColumns), numberLines(numberOfLines), matrixData(NULL), memoryHandle(NULL) {}
 
 
-BidimensionalMatrix::~BidimensionalMatrix()
-{
+BidimensionalMatrix::~BidimensionalMatrix() {
 	releaseMemoryOfMatrixData();
 }
 
-bool BidimensionalMatrix::initializeMatrix( double defaultValue )
-{
+bool BidimensionalMatrix::initializeMatrix( double defaultValue ) {
 	if (allocateMemoryForMatrixData()) {
 		for (unsigned int line = 0; line < numberLines; ++line) {
 			for (unsigned int column = 0; column < numberColumns; ++column) {
@@ -28,7 +26,35 @@ bool BidimensionalMatrix::initializeMatrix( double defaultValue )
 }
 
 bool BidimensionalMatrix::initializeMatrixFromFile( string initializationFile ) {
-	return true;
+	ifstream inputStream;
+	inputStream.open(initializationFile);
+
+	if (inputStream.is_open()) {
+		string fileLine;
+		getline(inputStream, fileLine);
+		istringstream iSStrAttrs(fileLine);
+		iSStrAttrs >> numberColumns >> numberLines;
+
+		if (allocateMemoryForMatrixData()) {
+			unsigned int columnPos = 0, linePos = 0;
+			while (getline(inputStream, fileLine)) {
+				istringstream iSStr(fileLine);
+				double fileNumber;
+				while (iSStr >> fileNumber) {
+					putValue(columnPos, linePos, fileNumber);
+					++columnPos;
+				}
+				++linePos;
+				columnPos = 0;
+			}
+
+		}
+		inputStream.close();
+		return true;
+	} else {
+		cout << "    -> Loading of input file failed!\n\n";
+		return false;
+	}
 }
 
 bool BidimensionalMatrix::initializeMatrixWithSequenceOnLines() {
@@ -46,12 +72,12 @@ bool BidimensionalMatrix::initializeMatrixWithSequenceOnLines() {
 	return true;
 }
 
-void BidimensionalMatrix::putValue( unsigned int matrixColum, unsigned int matrixLine, double value ) {
-	matrixData[numberColumns*matrixLine + matrixColum] = value;
+void BidimensionalMatrix::putValue( unsigned int matrixColumn, unsigned int matrixLine, double value ) {
+	matrixData[numberColumns * matrixLine + matrixColumn] = value;
 }
 
 double BidimensionalMatrix::getValue( unsigned int matrixColumn, unsigned int matrixLine ) {
-	return matrixData[numberColumns*matrixLine + matrixColumn];
+	return matrixData[numberColumns * matrixLine + matrixColumn];
 }
 
 bool BidimensionalMatrix::allocateMemoryForMatrixData() {
@@ -95,6 +121,34 @@ bool BidimensionalMatrix::validateResultOfDefaultMatrixInitialization(unsigned i
 	return true;
 }
 
+
+bool BidimensionalMatrix::validateResultFromFile(string expectedResultMatrixFilename) {
+	ifstream inputStream;
+	inputStream.open(expectedResultMatrixFilename);
+
+	if (inputStream.is_open()) {
+		unsigned int columnPos, linePos;
+
+		double newValFromFile;
+		for (linePos = 0; linePos < numberLines; ++linePos) {
+			for (columnPos = 0; columnPos < numberColumns; ++columnPos) {
+				inputStream >> newValFromFile;
+				
+				if (newValFromFile != getValue(columnPos, linePos)) {
+					return false;
+				}
+			}
+		}
+
+		inputStream.close();
+		return true;
+	} else {
+		cout << "    -> Loading of result file failed!\n\n";
+		return false;
+	}
+}
+
+
 bool BidimensionalMatrix::exportMatrixToFile( string filename ) {
 	ofstream outputStream;
 	outputStream.open(filename);
@@ -117,5 +171,6 @@ bool BidimensionalMatrix::exportMatrixToFile( string filename ) {
 		return true;
 	} else {
 		return false;
+		cout << "    -> Export of file " << filename << " failed!\n\n";
 	}
 }

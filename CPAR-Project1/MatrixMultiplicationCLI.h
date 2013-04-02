@@ -3,6 +3,8 @@
 #include "ConsoleInput.h"
 #include "BidimensionalMatrix.h"
 #include "MatrixMultiplicationBasic.h"
+#include "MatrixMultiplicationLine.h"
+#include "MatrixMultiplicationBlock.h"
 
 class MatrixMultiplicationCLI
 {
