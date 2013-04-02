@@ -12,7 +12,7 @@ int main() {
 
 	do {
 		ConsoleInput::getInstance()->clearConsoleScreen();
-		cout << "#########################   Parallel computing - Project 1   ##########################\n";
+		cout << "###############   Parallel computing - Project 1 - Carlos Costa   #####################\n";
 		cout << "  >>>                           Matrix multiplication                             <<<  \n";
 		cout << "#######################################################################################\n\n\n";
 

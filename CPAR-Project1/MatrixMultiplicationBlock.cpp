@@ -22,35 +22,31 @@ shared_ptr<BidimensionalMatrix> MatrixMultiplicationBlock::performMultiplication
 
 	for (beginBlockLineOfLeftMatrix = 0;
 		beginBlockLineOfLeftMatrix < numberLinesLeftMatrix;
-		beginBlockLineOfLeftMatrix += blockLineSize) {
-		for (beginBlockColumnOfLeftMatrix = 0;
-			beginBlockColumnOfLeftMatrix < numberColumnsLeftMatrix;
-			beginBlockColumnOfLeftMatrix += blockColumnSize) {
-			for (beginBlockColumnOfRightMatrix = 0;
-				beginBlockColumnOfRightMatrix < numberColumnsRightMatrix;
-				beginBlockColumnOfRightMatrix += blockColumnSize) {
+		beginBlockLineOfLeftMatrix = endBlockLineOfLeftMatrix, endBlockLineOfLeftMatrix = min(numberLinesLeftMatrix, endBlockLineOfLeftMatrix + blockLineSize)) {
+			for (beginBlockColumnOfLeftMatrix = 0;
+				beginBlockColumnOfLeftMatrix < numberColumnsLeftMatrix;
+				beginBlockColumnOfLeftMatrix = endBlockColumnOfLeftMatrix, endBlockColumnOfLeftMatrix = min(numberColumnsLeftMatrix, endBlockColumnOfLeftMatrix + blockColumnSize)) {
+					for (beginBlockColumnOfRightMatrix = 0;
+						beginBlockColumnOfRightMatrix < numberColumnsRightMatrix;
+						beginBlockColumnOfRightMatrix = endBlockColumnOfRightMatrix, endBlockColumnOfRightMatrix = min(numberColumnsRightMatrix, endBlockColumnOfRightMatrix + blockColumnSize)) {
 
-				for (lineOfLeftMatrix = beginBlockLineOfLeftMatrix;
-					lineOfLeftMatrix < endBlockLineOfLeftMatrix;
-					++lineOfLeftMatrix) {
-					for (columnOfLeftMatrix = beginBlockColumnOfLeftMatrix;
-						columnOfLeftMatrix < endBlockColumnOfLeftMatrix;
-						++columnOfLeftMatrix) {
-						double firstMatrixLineValue = leftMatrix.getValue(columnOfLeftMatrix, lineOfLeftMatrix);
-						for (columnOfRightMatrix = beginBlockColumnOfRightMatrix;
-							columnOfRightMatrix < endBlockColumnOfRightMatrix;
-							++columnOfRightMatrix) {
-							parcialResultMatrixCellValue = firstMatrixLineValue * rightMatrix.getValue(columnOfRightMatrix, columnOfLeftMatrix);
-							resultMatrixPtr->addValue(columnOfRightMatrix, lineOfLeftMatrix, parcialResultMatrixCellValue);
-						}
-					}
-				}
-				endBlockLineOfLeftMatrix = min(numberLinesLeftMatrix, endBlockLineOfLeftMatrix + blockLineSize);
-				endBlockColumnOfLeftMatrix = min(numberColumnsLeftMatrix, endBlockColumnOfLeftMatrix + blockColumnSize);
-				endBlockColumnOfRightMatrix = min(numberColumnsRightMatrix, endBlockColumnOfRightMatrix + blockColumnSize);
-
+							for (lineOfLeftMatrix = beginBlockLineOfLeftMatrix;
+								lineOfLeftMatrix < endBlockLineOfLeftMatrix;
+								++lineOfLeftMatrix) {
+									for (columnOfLeftMatrix = beginBlockColumnOfLeftMatrix;
+										columnOfLeftMatrix < endBlockColumnOfLeftMatrix;
+										++columnOfLeftMatrix) {
+											double firstMatrixLineValue = leftMatrix.getValue(columnOfLeftMatrix, lineOfLeftMatrix);
+											for (columnOfRightMatrix = beginBlockColumnOfRightMatrix;
+												columnOfRightMatrix < endBlockColumnOfRightMatrix;
+												++columnOfRightMatrix) {
+													parcialResultMatrixCellValue = firstMatrixLineValue * rightMatrix.getValue(columnOfRightMatrix, columnOfLeftMatrix);
+													resultMatrixPtr->addValue(columnOfRightMatrix, lineOfLeftMatrix, parcialResultMatrixCellValue);
+											}	
+									}
+							}
+					}	
 			}
-		}
 	}
 
 
