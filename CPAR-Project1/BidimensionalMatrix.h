@@ -1,10 +1,14 @@
 #pragma once
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 using std::cout;
 using std::string;
@@ -51,7 +55,11 @@ public:
 	inline unsigned int getNumberLines() const { return numberLines; }
 
 private:
-	unsigned int numberLines, numberColumns;
+	unsigned int numberColumns, numberLines;
 	double* matrixData;
+
+#ifdef _WIN32
 	HGLOBAL memoryHandle;
+#endif
+
 };

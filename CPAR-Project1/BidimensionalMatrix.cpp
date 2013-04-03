@@ -1,10 +1,18 @@
 #include "BidimensionalMatrix.h"
 
 BidimensionalMatrix::BidimensionalMatrix() :
-	numberColumns(2), numberLines(2), matrixData(NULL), memoryHandle(NULL) {}
+	numberColumns(2), numberLines(2), matrixData(NULL) {
+#ifdef _WIN32
+		memoryHandle = NULL;
+#endif
+}
 
 BidimensionalMatrix::BidimensionalMatrix( unsigned int numberOfColumns, unsigned int numberOfLines ) :
-	numberColumns(numberOfColumns), numberLines(numberOfLines), matrixData(NULL), memoryHandle(NULL) {}
+	numberColumns(numberOfColumns), numberLines(numberOfLines), matrixData(NULL) {
+#ifdef _WIN32
+		memoryHandle = NULL;
+#endif
+}
 
 BidimensionalMatrix::~BidimensionalMatrix() {
 	releaseMemoryOfMatrixData();
@@ -153,11 +161,12 @@ bool BidimensionalMatrix::validateResultFromFile(string expectedResultMatrixFile
 		}
 
 		inputStream.close();
-		return true;
 	} else {
 		cout << "    -> Loading of result file failed!\n\n";
 		return false;
 	}
+
+	return true;
 }
 
 
@@ -180,9 +189,10 @@ bool BidimensionalMatrix::exportMatrixToFile( string filename ) {
 		}
 
 		outputStream.close();
-		return true;
 	} else {
-		return false;
 		cout << "    -> Export of file " << filename << " failed!\n\n";
+		return false;
 	}
+
+	return true;
 }
