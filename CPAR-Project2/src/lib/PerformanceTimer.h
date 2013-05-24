@@ -16,22 +16,21 @@ class PerformanceTimer {
 		void start();                             // start timer
 		void stop();                              // stop the timer
 		void reset();
-		double getElapsedTimeInSec();               // get elapsed time in second
-		double getElapsedTimeInMilliSec();          // get elapsed time in milli-second
-		double getElapsedTimeInMicroSec();          // get elapsed time in micro-second
+		double getElapsedTimeInSec();             // get elapsed time in second
+		double getElapsedTimeInMilliSec();        // get elapsed time in milli-second
+		double getElapsedTimeInMicroSec();        // get elapsed time in micro-second
 		
 	private:
-		double startTimeInMicroSec;                 // starting time in micro-second
-		double endTimeInMicroSec;                   // ending time in micro-second
-		int stopped;                             // stop flag 
+		double elapsedTimeMicroSec;               // starting time in micro-second
+		bool stopped;                             // stop flag
 #ifdef _WIN32
-		LARGE_INTEGER frequency;                    // ticks per second
-		LARGE_INTEGER startCount;
-		LARGE_INTEGER endCount;
+		LARGE_INTEGER frequencyWin;               // ticks per second
+		LARGE_INTEGER startCountWin;
+		LARGE_INTEGER endCountWin;
 #else
 		timeval startCount;
 		timeval endCount;
 #endif
 		
-		double getElapsedTime(double timeConversionOffset);
+		void calculateElapsedTimeMicroSec();
 };

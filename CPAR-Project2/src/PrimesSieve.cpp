@@ -1,9 +1,13 @@
 #include "PrimesSieve.h"
 
 bool PrimesSieve::checkComputedPrimes(const vector<size_t>& expectedPrimes) {
-	if (primesValues.size() != expectedPrimes.size())
+	if (primesValues.size() != expectedPrimes.size() || expectedPrimes.empty())
 		return false;
 	
+	if (!primesCompositesBitset.empty()) {
+		extractPrimesFromBitset();
+	}
+
 	size_t iSize = primesValues.size();
 	for (size_t i = 0; i < iSize; ++i) {
 		if (primesValues[i] != expectedPrimes[i])
@@ -14,6 +18,10 @@ bool PrimesSieve::checkComputedPrimes(const vector<size_t>& expectedPrimes) {
 }
 
 bool PrimesSieve::checkPrimesFromFile(string filename) {
+	if (!primesCompositesBitset.empty() && primesValues.empty()) {
+		extractPrimesFromBitset();
+	}
+
 	ifstream inputStream(filename.c_str());
 	
 	if (inputStream.is_open()) {
@@ -39,15 +47,39 @@ bool PrimesSieve::savePrimesToFile(string filename) {
 	ofstream outputStream(filename.c_str());
 	
 	if (outputStream.is_open()) {
-		size_t iSize = primesValues.size();
-		for (size_t i = 0; i < iSize; ++i) {
-			outputStream << primesValues[i] << endl;
+		if (primesValues.empty()) {
+			size_t iSize = primesCompositesBitset.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				if (!primesCompositesBitset[i]) {
+					outputStream << getNumberAssociatedWithBitSetPosition(i) << endl;
+				}
+			}
+		} else {
+			size_t iSize = primesValues.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				outputStream << primesValues[i] << endl;
+			}
 		}
-		
 		return true;
 	}
 	
 	return false;
+}
+
+void PrimesSieve::printPrimesToConsole() {
+	if (primesValues.empty()) {
+		size_t iSize = primesCompositesBitset.size();
+		for (size_t i = 0; i < iSize; ++i) {
+			if (!primesCompositesBitset[i]) {
+				cout << getNumberAssociatedWithBitSetPosition(i) << endl;
+			}
+		}
+	} else {
+		size_t iSize = primesValues.size();
+		for (size_t i = 0; i < iSize; ++i) {
+			cout << primesValues[i] << endl;
+		}
+	}
 }
 
 vector<size_t>& PrimesSieve::extractPrimesFromBitset() {
@@ -61,13 +93,6 @@ vector<size_t>& PrimesSieve::extractPrimesFromBitset() {
 	}
 	
 	return primesValues;
-}
-
-void PrimesSieve::printPrimesToConsole() {
-	size_t iSize = primesValues.size();
-	for (size_t i = 0; i < iSize; ++i) {
-		cout << primesValues[i] << endl;
-	}
 }
 
 void PrimesSieve::initPrimesCompositeBitset(size_t maxRange) {

@@ -13,6 +13,6 @@ class PrimesSieveSequencialDivision: public PrimesSieve {
 		virtual ~PrimesSieveSequencialDivision() {
 		}
 		
-		vector<size_t>& computePrimes(size_t maxRange);
+		void computePrimes(size_t maxRange);
 };
 

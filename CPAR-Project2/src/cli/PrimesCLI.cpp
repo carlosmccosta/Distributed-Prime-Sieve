@@ -40,7 +40,7 @@ int main() {
 			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be > 2", 3);
 		}
 		
-		cout << "   ## Output result to file (empty to print to console): ";
+		cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 		string resultFilename = ConsoleInput::getInstance()->getLineCin();
 		
 		cout << "   ## Confirm results from file (empty to skip confirmation): ";
@@ -83,9 +83,10 @@ int main() {
 		if (validOption) {
 			cout << "\n    > Computing primes from 2 to " << inputMaxRange << "..." << endl;
 			primesSieve->computePrimes(inputMaxRange);
-			cout << "    --> Computed " << primesSieve->getPrimesValues().size() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeInSec() << " seconds.\n" << endl;
+			primesSieve->extractPrimesFromBitset();
+			cout << "    --> Computed " << primesSieve->getNumberPrimesFound() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeInSec() << " seconds.\n" << endl;
 			
-			if (!primesSieve->getPrimesValues().empty()) {
+			if (!primesSieve->getNumberPrimesFound() != 1) {
 				bool validationResult;
 				
 				if (resultConfirmationFilename != "") {
@@ -99,14 +100,14 @@ int main() {
 					}
 				}
 				
-				if (resultFilename != "") {
-					cout << "    > Exporting results to file " << resultFilename << "...";
-					primesSieve->savePrimesToFile(resultFilename);
-					cout << "\n    --> Export finished!\n";
-				} else {
+				if (resultFilename == "stdout") {
 					cout << "\n=============================================  Computed primes  =============================================\n\n";
 					primesSieve->printPrimesToConsole();
 					cout << endl;
+				} else if (resultFilename != "") {
+					cout << "    > Exporting results to file " << resultFilename << "...";
+					primesSieve->savePrimesToFile(resultFilename);
+					cout << "\n    --> Export finished!\n";
 				}
 			}
 			

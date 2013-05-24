@@ -1,9 +1,9 @@
 #include "PrimesSieveSequencialDivision.h"
 
-vector<size_t>& PrimesSieveSequencialDivision::computePrimes(size_t maxRange) {
+void PrimesSieveSequencialDivision::computePrimes(size_t maxRange) {
 	initPrimesCompositeBitset(maxRange);
 	size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
-	
+
 	performanceTimer.reset();
 	performanceTimer.start();
 	
@@ -20,6 +20,5 @@ vector<size_t>& PrimesSieveSequencialDivision::computePrimes(size_t maxRange) {
 	}
 	
 	performanceTimer.stop();
-	
-	return extractPrimesFromBitset();
+	primesValues.clear();
 }

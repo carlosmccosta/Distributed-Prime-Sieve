@@ -47,7 +47,7 @@ class PrimesSieve {
 			return (number << 1) + 3;
 		}
 		
-		virtual vector<size_t>& computePrimes(size_t maxRange) = 0;
+		virtual void computePrimes(size_t maxRange) = 0;
 		vector<size_t>& extractPrimesFromBitset();
 
 		bool checkComputedPrimes(const vector<size_t>& expectedPrimes);
@@ -79,6 +79,10 @@ class PrimesSieve {
 		
 		const vector<size_t>& getPrimesValues() const {
 			return primesValues;
+		}
+		
+		size_t getNumberPrimesFound() const {
+			return primesValues.size();
 		}
 };
 
