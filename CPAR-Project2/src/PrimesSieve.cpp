@@ -19,12 +19,12 @@ bool PrimesSieve::checkPrimesFromFile(string filename) {
 	if (inputStream.is_open()) {
 		size_t numberRead;
 		size_t iSize = primesValues.size();
-		for (size_t i = 0; i < iSize; ++i) {
-			inputStream >> numberRead;
-			
-			if (numberRead != primesValues[i]) {
+		size_t i = 0;
+		while (inputStream >> numberRead) {
+			if (i >= iSize || numberRead != primesValues[i]) {
 				return false;
 			}
+			++i;
 		}
 		
 		return true;

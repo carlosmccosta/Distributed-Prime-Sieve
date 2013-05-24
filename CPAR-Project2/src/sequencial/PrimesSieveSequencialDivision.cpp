@@ -11,7 +11,7 @@ vector<size_t>& PrimesSieveSequencialDivision::computePrimes(size_t maxRange) {
 		// for each number not marked as composite (prime number)
 		if (!getPrimesBitsetValue(primeNumber)) {
 			//use it to calculate his composites
-			for (size_t compositeNumber = primeNumber * primeNumber; compositeNumber < maxRange; compositeNumber += 2) {
+			for (size_t compositeNumber = primeNumber * primeNumber; compositeNumber <= maxRange; compositeNumber += 2) {
 				if ((compositeNumber % primeNumber) == 0) {
 					setPrimesBitsetValue(compositeNumber, true);
 				}
