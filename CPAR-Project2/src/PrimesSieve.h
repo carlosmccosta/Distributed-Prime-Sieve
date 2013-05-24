@@ -55,6 +55,7 @@ class PrimesSieve {
 		}
 		
 		virtual void computePrimes(size_t maxRange) = 0;
+
 		vector<size_t>& extractPrimesFromBitset() {
 			primesValues.clear();
 			primesValues.push_back(2);
@@ -115,6 +116,7 @@ class PrimesSieve {
 			ofstream outputStream(filename.c_str());
 			
 			if (outputStream.is_open()) {
+				outputStream << 2 << endl;
 				if (primesValues.empty()) {
 					size_t iSize = primesCompositesBitset.size();
 					for (size_t i = 0; i < iSize; ++i) {
@@ -135,6 +137,7 @@ class PrimesSieve {
 		}
 		
 		void printPrimesToConsole() {
+			cout << 2 << endl;
 			if (primesValues.empty()) {
 				size_t iSize = primesCompositesBitset.size();
 				for (size_t i = 0; i < iSize; ++i) {
