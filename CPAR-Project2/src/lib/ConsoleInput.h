@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <limits>
 
 
 using std::string;
+using std::stringstream;
 using std::getline;
 using std::cin;
 using std::cout;
@@ -16,6 +18,7 @@ class ConsoleInput {
 public:
 	static ConsoleInput* getInstance();
 
+	void flushStandardInput();
 	void getUserInput();
 	string getLineCin();
 	void clearConsoleScreen();

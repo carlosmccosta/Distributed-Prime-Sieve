@@ -1,17 +1,27 @@
 #pragma once
 
+#include "lib/PerformanceTimer.h"
+
 #include <stddef.h>
+#include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
+using std::cout;
+using std::cerr;
+using std::endl;
 using std::vector;
 using std::string;
+using std::ofstream;
+using std::ifstream;
 
 class PrimesSieve {
 	protected:
 		size_t maxRange;
-		vector<bool> primesBitset;
-		vector<int> primesValues;
+		vector<bool> primesCompositesBitset;
+		vector<size_t> primesValues;
+		PerformanceTimer performanceTimer;
 
 	public:
 		PrimesSieve() :
@@ -19,10 +29,6 @@ class PrimesSieve {
 		}
 		virtual ~PrimesSieve() {
 		}
-
-		virtual vector<int>& computePrimes(size_t maxRange) = 0;
-		bool checkPrimesFromFile(string filename);
-		bool savePrimesToFile(string filename);
 
 		/**
 		 * Compute the number of bits to store in the bitset according to max range
@@ -37,12 +43,44 @@ class PrimesSieve {
 			return (number - 3) >> 1;
 		}
 
+		static inline size_t getNumberAssociatedWithBitSetPosition(size_t number) {
+			return (number << 1) + 3;
+		}
+
+
+		virtual vector<size_t>& computePrimes(size_t maxRange) = 0;
+		vector<size_t>& extractPrimesFromBitset();
+
+		bool checkComputedPrimes(const vector<size_t>& expectedPrimes);
+		bool checkPrimesFromFile(string filename);
+		bool savePrimesToFile(string filename);
+		void printPrimesToConsole();
+
 		inline bool getPrimesBitsetValue(size_t number) {
-			return primesBitset[getBitSetPositionToNumber(number)];
+			return primesCompositesBitset[getBitSetPositionToNumber(number)];
 		}
 
 		inline void setPrimesBitsetValue(size_t number, bool newValue) {
-			primesBitset[getBitSetPositionToNumber(number)] = newValue;
+			primesCompositesBitset[getBitSetPositionToNumber(number)] = newValue;
+		}
+		
+		void initPrimesCompositeBitset(size_t maxRange);
+
+
+		size_t getMaxRange() const {
+			return maxRange;
+		}
+		
+		PerformanceTimer& getPerformanceTimer() {
+			return performanceTimer;
+		}
+		
+		const vector<bool>& getPrimesCompositesBitset() const {
+			return primesCompositesBitset;
+		}
+		
+		const vector<size_t>& getPrimesValues() const {
+			return primesValues;
 		}
 };
 

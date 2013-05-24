@@ -1,12 +1,11 @@
 #include "PerformanceTimer.h"
 
-
-PerformanceTimer::PerformanceTimer(void) {
+PerformanceTimer::PerformanceTimer() {
 	reset();
 }
 
-PerformanceTimer::~PerformanceTimer(void) {}
-
+PerformanceTimer::~PerformanceTimer() {
+}
 
 void PerformanceTimer::start() {
 	stopped = 0;
@@ -17,7 +16,6 @@ void PerformanceTimer::start() {
 #endif
 }
 
-
 void PerformanceTimer::stop() {
 	stopped = 1;
 
@@ -27,8 +25,6 @@ void PerformanceTimer::stop() {
 	gettimeofday(&endCount, NULL);
 #endif
 }
-
-
 
 void PerformanceTimer::reset() {
 #ifdef _WIN32
@@ -44,24 +40,18 @@ void PerformanceTimer::reset() {
 	endTimeInMicroSec = 0;
 }
 
-
-double PerformanceTimer::getElapsedTimeInMicroSec() {
-	return this->getElapsedTime(1000000.0);
+double PerformanceTimer::getElapsedTimeInSec() {
+	return this->getElapsedTime(1.0);
 }
-
 
 double PerformanceTimer::getElapsedTimeInMilliSec() {
 
 	return this->getElapsedTime(1000.0);
 }
 
-
-double PerformanceTimer::getElapsedTimeInSec() {
-	return this->getElapsedTime(1.0);
+double PerformanceTimer::getElapsedTimeInMicroSec() {
+	return this->getElapsedTime(1000000.0);
 }
-
-
-
 
 double PerformanceTimer::getElapsedTime(double timeConversionOffset) {
 #ifdef _WIN32
@@ -72,7 +62,7 @@ double PerformanceTimer::getElapsedTime(double timeConversionOffset) {
 	startTimeInMicroSec = startCount.QuadPart * (timeConversionOffset / frequency.QuadPart);
 	endTimeInMicroSec = endCount.QuadPart * (timeConversionOffset / frequency.QuadPart);
 #else
-	if(!stopped)
+	if (!stopped)
 		gettimeofday(&endCount, NULL);
 
 	startTimeInMicroSec = (startCount.tv_sec * timeConversionOffset) + startCount.tv_usec;

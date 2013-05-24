@@ -30,12 +30,12 @@ int main() {
 			break;
 		}
 
-		bool inputRangeInBits = ConsoleInput::getInstance()->getYesNoCin("\n   ## Max primes search range in bits (2^n)?\nNo for direct max search range specification.\n(Y/N): ");
+		bool inputRangeInBits = ConsoleInput::getInstance()->getYesNoCin("\n   ## Max primes search range in bits (2^n)? (No for direct max search range specification)\n(Y/N): ");
 		size_t inputMaxRange;
 
 		if (inputRangeInBits) {
 			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [0, 32]", 0, 33);
-			inputMaxRange = (size_t)pow(2, inputMaxRange);
+			inputMaxRange = (size_t) pow(2, inputMaxRange);
 		} else {
 			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be > 2", 3);
 		}
@@ -47,9 +47,10 @@ int main() {
 		string resultConfirmationFilename = ConsoleInput::getInstance()->getLineCin();
 
 		validOption = true;
+		PrimesSieve* primesSieve;
 		switch (option) {
 			case 1: {
-
+				primesSieve = new PrimesSieveSequencialDivision();
 				break;
 			}
 
@@ -80,33 +81,36 @@ int main() {
 		}
 
 		if (validOption) {
-			cout << "\n\n    > Computing primes from 2 to " << inputMaxRange << "...\n" << endl;
+			cout << "\n    > Computing primes from 2 to " << inputMaxRange << "..." << endl;
+			primesSieve->computePrimes(inputMaxRange);
+			cout << "    -> Computed " << primesSieve->getPrimesValues().size() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeInSec() << " seconds.\n" << endl;
 
-			//TODO:
+			if (!primesSieve->getPrimesValues().empty()) {
+				bool validationResult;
 
-			cout << "\n    -> Computation of primes finished in " << 2 << " seconds\n" << endl;
+				if (resultConfirmationFilename != "") {
+					cout << "    > Validating computed primes with result file supplied...\n";
+					validationResult = primesSieve->checkPrimesFromFile(resultConfirmationFilename);
 
-			bool validationResult;
+					if (validationResult) {
+						cout << "    -> Computed primes are correct!\n\n";
+					} else {
+						cout << "    -> Computed primes are different from the ones in supplied file!\n\n";
+					}
+				}
 
-			if (resultConfirmationFilename != "") {
-				cout << "    > Validating computed primes with result file supplied...\n";
-				validationResult = true;
-
-				if (validationResult) {
-					cout << "    -> Computed primes correct!\n\n";
+				if (resultFilename != "") {
+					cout << "    -> Exporting results to file " << resultFilename << "...";
+					primesSieve->savePrimesToFile(resultFilename);
+					cout << "    -> Export finished!\n";
 				} else {
-					cout << "    -> Computed primes are different from the ones in supplied file!\n\n";
+					cout << "\n=============================================  Computed primes  =============================================\n\n";
+					primesSieve->printPrimesToConsole();
+					cout << endl;
 				}
 			}
 
-			if (resultFilename != "") {
-				cout << "    -> Exporting results to file " << resultFilename << "...";
-				cout << "    -> Export finished!\n";
-			} else {
-				cout << "\n\n    -> Computed primes:\n\n";
-
-			}
-
+			delete primesSieve;
 
 			cout << endl << endl;
 			ConsoleInput::getInstance()->getUserInput();

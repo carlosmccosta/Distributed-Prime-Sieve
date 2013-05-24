@@ -2,11 +2,17 @@
 
 #include "../PrimesSieve.h"
 
+#include <cmath>
+
+using std::sqrt;
+
 class PrimesSieveSequencialDivision: public PrimesSieve {
 	public:
-		PrimesSieveSequencialDivision() {}
-		virtual ~PrimesSieveSequencialDivision() {}
+		PrimesSieveSequencialDivision() {
+		}
+		virtual ~PrimesSieveSequencialDivision() {
+		}
 
-		vector<int>& computePrimes(size_t maxRange);
+		vector<size_t>& computePrimes(size_t maxRange);
 };
 

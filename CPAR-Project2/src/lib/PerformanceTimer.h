@@ -11,8 +11,8 @@
 
 class PerformanceTimer {
 public:
-	PerformanceTimer(void);
-	virtual ~PerformanceTimer(void);
+	PerformanceTimer();
+	virtual ~PerformanceTimer();
 
 	void   start();                             // start timer
 	void   stop();                              // stop the timer
