@@ -24,7 +24,7 @@ void PerformanceTimer::stop() {
 #else
 	gettimeofday(&endCount, NULL);
 #endif
-
+	
 	calculateElapsedTimeMicroSec();
 }
 
@@ -37,7 +37,7 @@ void PerformanceTimer::reset() {
 	startCount.tv_sec = startCount.tv_usec = 0;
 	endCount.tv_sec = endCount.tv_usec = 0;
 #endif
-
+	
 	stopped = false;
 	elapsedTimeMicroSec = 0;
 }
@@ -60,7 +60,7 @@ double PerformanceTimer::getElapsedTimeInMicroSec() {
 #endif
 		calculateElapsedTimeMicroSec();
 	}
-
+	
 	return elapsedTimeMicroSec;
 }
 
@@ -70,5 +70,5 @@ void PerformanceTimer::calculateElapsedTimeMicroSec() {
 #else
 	elapsedTimeMicroSec = (endCount.tv_sec - startCount.tv_sec) * 1000000 + (endCount.tv_usec - startCount.tv_usec);
 #endif
-
+	
 }

@@ -2,9 +2,8 @@
 #include "sequencial/PrimesSieveSequencialDivision.h"
 
 BOOST_AUTO_TEST_SUITE(PrimesSieveSequencialDivision_test)
-
 	BOOST_AUTO_TEST_CASE(compute100Primes) {
-		PrimesSieveSequencialDivision primesSieveSequencialDivision;
+		PrimesSieveSequencialDivision<vector<bool> > primesSieveSequencialDivision;
 		primesSieveSequencialDivision.computePrimes(541);
 		primesSieveSequencialDivision.savePrimesToFile("tests/testresults/v1primes100.txt");
 		
@@ -13,7 +12,7 @@ BOOST_AUTO_TEST_SUITE(PrimesSieveSequencialDivision_test)
 	}
 	
 	BOOST_AUTO_TEST_CASE(compute1000Primes) {
-		PrimesSieveSequencialDivision primesSieveSequencialDivision;
+		PrimesSieveSequencialDivision<vector<bool> > primesSieveSequencialDivision;
 		primesSieveSequencialDivision.computePrimes(7919);
 		primesSieveSequencialDivision.savePrimesToFile("tests/testresults/v1primes1000.txt");
 		

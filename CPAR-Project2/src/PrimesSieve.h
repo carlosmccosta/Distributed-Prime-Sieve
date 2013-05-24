@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <string>
 #include <fstream>
 
@@ -12,14 +13,19 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::vector;
+using std::deque;
 using std::string;
 using std::ofstream;
 using std::ifstream;
 
+//typedef vector<bool> PrimesBitset;
+//typedef vector<unsigned char> PrimesBitset;
+
+template<typename FlagsContainer>
 class PrimesSieve {
 	protected:
 		size_t maxRange;
-		vector<bool> primesCompositesBitset;
+		FlagsContainer primesCompositesBitset;
 		vector<size_t> primesValues;
 		PerformanceTimer performanceTimer;
 
@@ -27,6 +33,7 @@ class PrimesSieve {
 		PrimesSieve() :
 				maxRange(0) {
 		}
+		
 		virtual ~PrimesSieve() {
 		}
 		
@@ -48,13 +55,101 @@ class PrimesSieve {
 		}
 		
 		virtual void computePrimes(size_t maxRange) = 0;
-		vector<size_t>& extractPrimesFromBitset();
-
-		bool checkComputedPrimes(const vector<size_t>& expectedPrimes);
-		bool checkPrimesFromFile(string filename);
-		bool savePrimesToFile(string filename);
-		void printPrimesToConsole();
-
+		vector<size_t>& extractPrimesFromBitset() {
+			primesValues.clear();
+			primesValues.push_back(2);
+			size_t iSize = primesCompositesBitset.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				if (!primesCompositesBitset[i]) {
+					primesValues.push_back(getNumberAssociatedWithBitSetPosition(i));
+				}
+			}
+			
+			return primesValues;
+		}
+		
+		bool checkComputedPrimes(const vector<size_t>& expectedPrimes) {
+			if (primesValues.size() != expectedPrimes.size() || expectedPrimes.empty())
+				return false;
+			
+			if (!primesCompositesBitset.empty()) {
+				extractPrimesFromBitset();
+			}
+			
+			size_t iSize = primesValues.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				if (primesValues[i] != expectedPrimes[i])
+					return false;
+			}
+			
+			return true;
+		}
+		
+		bool checkPrimesFromFile(string filename) {
+			if (!primesCompositesBitset.empty() && primesValues.empty()) {
+				extractPrimesFromBitset();
+			}
+			
+			ifstream inputStream(filename.c_str());
+			
+			if (inputStream.is_open()) {
+				size_t numberRead;
+				size_t iSize = primesValues.size();
+				size_t i = 0;
+				while (inputStream >> numberRead) {
+					if (i >= iSize || numberRead != primesValues[i]) {
+						return false;
+					}
+					++i;
+				}
+				
+				return true;
+			} else {
+				cerr << "    -> File " << filename << " is not available!" << endl;
+			}
+			
+			return false;
+		}
+		
+		bool savePrimesToFile(string filename) {
+			ofstream outputStream(filename.c_str());
+			
+			if (outputStream.is_open()) {
+				if (primesValues.empty()) {
+					size_t iSize = primesCompositesBitset.size();
+					for (size_t i = 0; i < iSize; ++i) {
+						if (!primesCompositesBitset[i]) {
+							outputStream << getNumberAssociatedWithBitSetPosition(i) << endl;
+						}
+					}
+				} else {
+					size_t iSize = primesValues.size();
+					for (size_t i = 0; i < iSize; ++i) {
+						outputStream << primesValues[i] << endl;
+					}
+				}
+				return true;
+			}
+			
+			return false;
+		}
+		
+		void printPrimesToConsole() {
+			if (primesValues.empty()) {
+				size_t iSize = primesCompositesBitset.size();
+				for (size_t i = 0; i < iSize; ++i) {
+					if (!primesCompositesBitset[i]) {
+						cout << getNumberAssociatedWithBitSetPosition(i) << endl;
+					}
+				}
+			} else {
+				size_t iSize = primesValues.size();
+				for (size_t i = 0; i < iSize; ++i) {
+					cout << primesValues[i] << endl;
+				}
+			}
+		}
+		
 		inline bool getPrimesBitsetValue(size_t number) {
 			return primesCompositesBitset[getBitSetPositionToNumber(number)];
 		}
@@ -63,8 +158,15 @@ class PrimesSieve {
 			primesCompositesBitset[getBitSetPositionToNumber(number)] = newValue;
 		}
 		
-		void initPrimesCompositeBitset(size_t maxRange);
-
+		void initPrimesCompositeBitset(size_t maxRange) {
+			this->maxRange = maxRange;
+			primesCompositesBitset = FlagsContainer(getNumberBitsToStore(maxRange));
+			size_t iSize = primesCompositesBitset.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				primesCompositesBitset[i] = false;
+			}
+		}
+		
 		size_t getMaxRange() const {
 			return maxRange;
 		}
@@ -73,7 +175,7 @@ class PrimesSieve {
 			return performanceTimer;
 		}
 		
-		const vector<bool>& getPrimesCompositesBitset() const {
+		const FlagsContainer& getPrimesCompositesBitset() const {
 			return primesCompositesBitset;
 		}
 		
@@ -84,5 +186,6 @@ class PrimesSieve {
 		size_t getNumberPrimesFound() const {
 			return primesValues.size();
 		}
+		
 };
 

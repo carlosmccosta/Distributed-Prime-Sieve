@@ -6,13 +6,36 @@
 
 using std::sqrt;
 
-class PrimesSieveSequencialDivision: public PrimesSieve {
+template<typename FlagsContainer>
+class PrimesSieveSequencialDivision: public PrimesSieve<FlagsContainer> {
 	public:
 		PrimesSieveSequencialDivision() {
 		}
+		
 		virtual ~PrimesSieveSequencialDivision() {
 		}
 		
-		void computePrimes(size_t maxRange);
-};
+		void computePrimes(size_t maxRange) {
+			this->template initPrimesCompositeBitset(maxRange);
+			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
+			
+			this->template performanceTimer.reset();
+			this->template performanceTimer.start();
+
+			for (size_t primeNumber = 3; primeNumber <= maxRangeSquareRoot; primeNumber += 2) {
+				// for each number not marked as composite (prime number)
+				if (!(this->template getPrimesBitsetValue(primeNumber))) {
+					//use it to calculate his composites
+					for (size_t compositeNumber = primeNumber * primeNumber; compositeNumber <= maxRange; compositeNumber += 2) {
+						if ((compositeNumber % primeNumber) == 0) {
+							this->template setPrimesBitsetValue(compositeNumber, true);
+						}
+					}
+				}
+			}
+			
+			this->template performanceTimer.stop();
+			this->template primesValues.clear();
+		}
+	};
 

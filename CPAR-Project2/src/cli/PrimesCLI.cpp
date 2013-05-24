@@ -47,10 +47,10 @@ int main() {
 		string resultConfirmationFilename = ConsoleInput::getInstance()->getLineCin();
 		
 		validOption = true;
-		PrimesSieve* primesSieve;
+		PrimesSieve<vector<bool> >* primesSieve;
 		switch (option) {
 			case 1: {
-				primesSieve = new PrimesSieveSequencialDivision();
+				primesSieve = new PrimesSieveSequencialDivision<vector<bool> >();
 				break;
 			}
 				
