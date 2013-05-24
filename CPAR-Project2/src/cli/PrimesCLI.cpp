@@ -31,12 +31,13 @@ int main() {
 		}
 
 		bool inputRangeInBits = ConsoleInput::getInstance()->getYesNoCin("\n   ## Max primes search range in bits (2^n)?\nNo for direct max search range specification.\n(Y/N): ");
-		int inputRange = 100;
+		size_t inputMaxRange;
 
 		if (inputRangeInBits) {
-			inputRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [0, 32]", 0, 33);
+			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [0, 32]", 0, 33);
+			inputMaxRange = (size_t)pow(2, inputMaxRange);
 		} else {
-			inputRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be > 2", 3);
+			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be > 2", 3);
 		}
 
 		cout << "   ## Output result to file (empty to print to console): ";
@@ -79,13 +80,9 @@ int main() {
 		}
 
 		if (validOption) {
-			cout << "\n\n    > Computing primes from 2 to ";
-			if (inputRangeInBits) {
-				cout << pow(2, inputRange);
-			} else {
-				cout << inputRange;
-			}
-			cout << "...\n" << endl;
+			cout << "\n\n    > Computing primes from 2 to " << inputMaxRange << "...\n" << endl;
+
+			//TODO:
 
 			cout << "\n    -> Computation of primes finished in " << 2 << " seconds\n" << endl;
 
