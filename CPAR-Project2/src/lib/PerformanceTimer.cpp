@@ -18,7 +18,7 @@ void PerformanceTimer::start() {
 
 void PerformanceTimer::stop() {
 	stopped = 1;
-
+	
 #ifdef _WIN32
 	QueryPerformanceCounter(&endCount);
 #else
@@ -45,7 +45,7 @@ double PerformanceTimer::getElapsedTimeInSec() {
 }
 
 double PerformanceTimer::getElapsedTimeInMilliSec() {
-
+	
 	return this->getElapsedTime(1000.0);
 }
 
@@ -64,10 +64,10 @@ double PerformanceTimer::getElapsedTime(double timeConversionOffset) {
 #else
 	if (!stopped)
 		gettimeofday(&endCount, NULL);
-
+	
 	startTimeInMicroSec = (startCount.tv_sec * timeConversionOffset) + startCount.tv_usec;
 	endTimeInMicroSec = (endCount.tv_sec * timeConversionOffset) + endCount.tv_usec;
 #endif
-
+	
 	return endTimeInMicroSec - startTimeInMicroSec;
 }

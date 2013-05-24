@@ -3,50 +3,50 @@
 bool PrimesSieve::checkComputedPrimes(const vector<size_t>& expectedPrimes) {
 	if (primesValues.size() != expectedPrimes.size())
 		return false;
-
+	
 	size_t iSize = primesValues.size();
 	for (size_t i = 0; i < iSize; ++i) {
 		if (primesValues[i] != expectedPrimes[i])
 			return false;
 	}
-
+	
 	return true;
 }
 
 bool PrimesSieve::checkPrimesFromFile(string filename) {
 	ifstream inputStream(filename.c_str());
-
+	
 	if (inputStream.is_open()) {
 		size_t numberRead;
 		size_t iSize = primesValues.size();
 		for (size_t i = 0; i < iSize; ++i) {
 			inputStream >> numberRead;
-
+			
 			if (numberRead != primesValues[i]) {
 				return false;
 			}
 		}
-
+		
 		return true;
 	} else {
-		cerr << endl << "    -> File " << filename << " is not available!\n" << endl;
+		cerr << "    -> File " << filename << " is not available!" << endl;
 	}
-
+	
 	return false;
 }
 
 bool PrimesSieve::savePrimesToFile(string filename) {
 	ofstream outputStream(filename.c_str());
-
+	
 	if (outputStream.is_open()) {
 		size_t iSize = primesValues.size();
 		for (size_t i = 0; i < iSize; ++i) {
 			outputStream << primesValues[i] << endl;
 		}
-
+		
 		return true;
 	}
-
+	
 	return false;
 }
 
@@ -59,7 +59,7 @@ vector<size_t>& PrimesSieve::extractPrimesFromBitset() {
 			primesValues.push_back(getNumberAssociatedWithBitSetPosition(i));
 		}
 	}
-
+	
 	return primesValues;
 }
 

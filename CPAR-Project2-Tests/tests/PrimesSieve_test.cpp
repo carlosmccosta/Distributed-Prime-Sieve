@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(PrimesSieve_test)
 		BOOST_CHECK_EQUAL(PrimesSieve::getNumberBitsToStore(13), 6);
 		BOOST_CHECK_EQUAL(PrimesSieve::getNumberBitsToStore(14), 6);
 	}
-
+	
 	BOOST_AUTO_TEST_CASE(getBitSetPositionToNumber) {
 		BOOST_CHECK_EQUAL(PrimesSieve::getBitSetPositionToNumber(3), 0);
 		BOOST_CHECK_EQUAL(PrimesSieve::getBitSetPositionToNumber(4), 0);
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(PrimesSieve_test)
 		BOOST_CHECK_EQUAL(PrimesSieve::getBitSetPositionToNumber(13), 5);
 		BOOST_CHECK_EQUAL(PrimesSieve::getBitSetPositionToNumber(14), 5);
 	}
-
+	
 	BOOST_AUTO_TEST_CASE(getNumberAssociatedWithBitSetPosition) {
 		BOOST_CHECK_EQUAL(PrimesSieve::getNumberAssociatedWithBitSetPosition(0), 3);
 		BOOST_CHECK_EQUAL(PrimesSieve::getNumberAssociatedWithBitSetPosition(1), 5);

@@ -29,7 +29,7 @@ class PrimesSieve {
 		}
 		virtual ~PrimesSieve() {
 		}
-
+		
 		/**
 		 * Compute the number of bits to store in the bitset according to max range
 		 * @param maxRange Maximum number to include in the primes search [3, maxRange]
@@ -38,16 +38,15 @@ class PrimesSieve {
 		static inline size_t getNumberBitsToStore(size_t maxRange) {
 			return ((maxRange - 3) >> 1) + 1;
 		}
-
+		
 		static inline size_t getBitSetPositionToNumber(size_t number) {
 			return (number - 3) >> 1;
 		}
-
+		
 		static inline size_t getNumberAssociatedWithBitSetPosition(size_t number) {
 			return (number << 1) + 3;
 		}
-
-
+		
 		virtual vector<size_t>& computePrimes(size_t maxRange) = 0;
 		vector<size_t>& extractPrimesFromBitset();
 
@@ -59,13 +58,12 @@ class PrimesSieve {
 		inline bool getPrimesBitsetValue(size_t number) {
 			return primesCompositesBitset[getBitSetPositionToNumber(number)];
 		}
-
+		
 		inline void setPrimesBitsetValue(size_t number, bool newValue) {
 			primesCompositesBitset[getBitSetPositionToNumber(number)] = newValue;
 		}
 		
 		void initPrimesCompositeBitset(size_t maxRange);
-
 
 		size_t getMaxRange() const {
 			return maxRange;

@@ -14,7 +14,7 @@ void ConsoleInput::getUserInput() {
 string ConsoleInput::getLineCin() {
 	string input;
 	getline(cin, input);
-
+	
 //	cin.clear();
 //	cin.sync();
 	return input;
@@ -24,7 +24,7 @@ void ConsoleInput::clearConsoleScreen() {
 	for (size_t i = 0; i < 80; ++i) {
 		cout << "\n";
 	}
-
+	
 	cout << endl;
 }
 
@@ -32,10 +32,10 @@ int ConsoleInput::getIntCin(const char* message, const char* errorMessage, int m
 	int number;
 	do {
 		cout << message << std::flush;
-
+		
 		string numberStr = getLineCin();
 		stringstream strstream(numberStr);
-
+		
 		if (strstream >> number) {
 			if (number >= min && number < size)
 				break;
@@ -44,9 +44,9 @@ int ConsoleInput::getIntCin(const char* message, const char* errorMessage, int m
 		} else {
 			cout << errorMessage << endl;
 		}
-
+		
 	} while (true);
-
+	
 	return number;
 }
 
@@ -54,10 +54,10 @@ bool ConsoleInput::getYesNoCin(const char* message, const char* errorMessage) {
 	bool stop = false;
 	bool incorrectOption;
 	string option;
-
+	
 	do {
 		cout << message << std::flush;
-
+		
 		option = getLineCin();
 		if ((option == "Y") || (option == "y")) {
 			stop = true;
@@ -70,7 +70,7 @@ bool ConsoleInput::getYesNoCin(const char* message, const char* errorMessage) {
 			incorrectOption = true;
 		}
 	} while (incorrectOption);
-
+	
 	return stop;
 }
 
@@ -78,7 +78,7 @@ ConsoleInput* ConsoleInput::getInstance() {
 	if (instance == NULL) {
 		instance = new ConsoleInput();
 	}
-
+	
 	return instance;
 }
 

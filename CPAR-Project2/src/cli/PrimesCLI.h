@@ -5,9 +5,8 @@
 
 #include <cmath>
 
-
 class PrimesCLI {
-public:
-	PrimesCLI(void);
-	virtual ~PrimesCLI(void);
+	public:
+		PrimesCLI(void);
+		virtual ~PrimesCLI(void);
 };
