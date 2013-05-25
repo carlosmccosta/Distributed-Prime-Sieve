@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TimeUtils.h"
+
 #ifdef _WIN32   // Windows system specific
 #include <windows.h>
 #else           // Unix based system specific
@@ -7,6 +9,11 @@
 #endif
 
 #include <stdlib.h>
+#include <string>
+#include <sstream>
+
+using std::string;
+using std::stringstream;
 
 class PerformanceTimer {
 	public:
@@ -19,7 +26,9 @@ class PerformanceTimer {
 		double getElapsedTimeInSec();             // get elapsed time in second
 		double getElapsedTimeInMilliSec();        // get elapsed time in milli-second
 		double getElapsedTimeInMicroSec();        // get elapsed time in micro-second
-		
+		string getElapsedTimeFormated();
+
+
 	private:
 		double elapsedTimeMicroSec;               // starting time in micro-second
 		bool stopped;                             // stop flag

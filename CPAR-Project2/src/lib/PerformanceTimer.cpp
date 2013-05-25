@@ -72,3 +72,8 @@ void PerformanceTimer::calculateElapsedTimeMicroSec() {
 #endif
 	
 }
+
+string PerformanceTimer::getElapsedTimeFormated() {
+	return TimeUtils::formatSecondsToDate(getElapsedTimeInSec());
+}
+

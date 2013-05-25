@@ -55,7 +55,7 @@ int main() {
 			}
 				
 			case 2: {
-				
+				primesSieve = new PrimesSieveSequencialMultiples<vector<bool> >();
 				break;
 			}
 				
@@ -84,7 +84,7 @@ int main() {
 			cout << "\n    > Computing primes from 2 to " << inputMaxRange << "..." << endl;
 			primesSieve->computePrimes(inputMaxRange);
 			primesSieve->extractPrimesFromBitset();
-			cout << "    --> Computed " << primesSieve->getNumberPrimesFound() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeInSec() << " seconds.\n" << endl;
+			cout << "    --> Computed " << primesSieve->getNumberPrimesFound() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeFormated() << "\n" << endl;
 			
 			if (!primesSieve->getNumberPrimesFound() != 1) {
 				bool validationResult;
