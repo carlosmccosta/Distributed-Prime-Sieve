@@ -178,11 +178,11 @@ class PrimesSieve {
 			return performanceTimer;
 		}
 		
-		const FlagsContainer& getPrimesCompositesBitset() const {
+		const FlagsContainer& getPrimesBitset() {
 			return primesBitset;
 		}
 		
-		const vector<size_t>& getPrimesValues() const {
+		const vector<size_t>& getPrimesValues() {
 			return primesValues;
 		}
 		

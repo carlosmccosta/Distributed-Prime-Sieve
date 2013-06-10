@@ -60,7 +60,7 @@ int main() {
 			}
 				
 			case 3: {
-				
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> >();
 				break;
 			}
 				
