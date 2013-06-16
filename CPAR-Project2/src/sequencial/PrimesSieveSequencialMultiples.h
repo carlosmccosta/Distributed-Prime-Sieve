@@ -16,6 +16,7 @@ class PrimesSieveSequencialMultiples: public PrimesSieve<FlagsContainer> {
 		}
 		
 		void computePrimes(size_t maxRange) {
+			this->template primesValues.clear();
 			this->template initPrimesBitset(maxRange);
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
 			
@@ -34,7 +35,6 @@ class PrimesSieveSequencialMultiples: public PrimesSieve<FlagsContainer> {
 			}
 			
 			this->template performanceTimer.stop();
-			this->template primesValues.clear();
 		}
 	};
 

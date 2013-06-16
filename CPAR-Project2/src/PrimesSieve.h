@@ -50,8 +50,8 @@ class PrimesSieve {
 			return (number - 3) >> 1;
 		}
 		
-		static inline size_t getNumberAssociatedWithBitsetPosition(size_t number) {
-			return (number << 1) + 3;
+		static inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
+			return (position << 1) + 3;
 		}
 		
 		inline bool getPrimesBitsetValue(size_t number) {
@@ -62,9 +62,17 @@ class PrimesSieve {
 			primesBitset[getBitsetPositionToNumber(number)] = newValue;
 		}
 
+		inline bool getPrimesBitsetValueBlock(size_t number, size_t blockBeginNumber) {
+			return primesBitset[(number - blockBeginNumber) >> 1];
+		}
+
+		inline void setPrimesBitsetValueBlock(size_t number, size_t blockBeginNumber, bool newValue) {
+			primesBitset[(number - blockBeginNumber) >> 1] = newValue;
+		}
+
 		virtual void computePrimes(size_t maxRange) = 0;
 
-		vector<size_t>& extractPrimesFromBitset() {
+		virtual vector<size_t>& extractPrimesFromBitset() {
 			primesValues.clear();
 			primesValues.push_back(2);
 			size_t iSize = primesBitset.size();
@@ -170,23 +178,39 @@ class PrimesSieve {
 			}
 		}
 		
-		size_t getMaxRange() const {
+		void initPrimesBitsetBlock(size_t blockSize) {
+			this->maxRange = blockSize;
+			primesBitset = FlagsContainer(blockSize);
+			size_t iSize = primesBitset.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				primesBitset[i] = true;
+			}
+		}
+
+		void resetPrimesBitsetBlock() {
+			size_t iSize = primesBitset.size();
+			for (size_t i = 0; i < iSize; ++i) {
+				primesBitset[i] = true;
+			}
+		}
+
+		inline size_t getMaxRange() const {
 			return maxRange;
 		}
 		
-		PerformanceTimer& getPerformanceTimer() {
+		inline PerformanceTimer& getPerformanceTimer() {
 			return performanceTimer;
 		}
 		
-		const FlagsContainer& getPrimesBitset() {
+		inline FlagsContainer& getPrimesBitset() {
 			return primesBitset;
 		}
 		
-		const vector<size_t>& getPrimesValues() {
+		inline vector<size_t>& getPrimesValues() {
 			return primesValues;
 		}
 		
-		size_t getNumberPrimesFound() const {
+		inline size_t getNumberPrimesFound() const {
 			return primesValues.size();
 		}
 };

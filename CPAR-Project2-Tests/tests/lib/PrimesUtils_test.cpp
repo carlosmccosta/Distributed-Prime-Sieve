@@ -9,5 +9,11 @@ BOOST_AUTO_TEST_SUITE(PrimesUtils_test)
 		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(3, 11), 9);
 		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(3, 12), 12);
 		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(5, 22), 20);
+
+
+		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(7, 266), 266);
+		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(7, 267), 266);
+		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(7, 268), 266);
+		BOOST_CHECK_EQUAL(PrimesUtils::closestPrimeMultiple(7, 269), 266);
 	}
 	BOOST_AUTO_TEST_SUITE_END()
