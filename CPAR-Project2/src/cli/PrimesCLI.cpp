@@ -19,12 +19,13 @@ int main() {
 		
 		cout << " 1 - Single processor implementation (using division to check for primes)\n";
 		cout << " 2 - Single processor implementation (using multiples to check for primes)\n";
-		cout << " 3 - Single processor implementation (using block search)\n";
-		cout << " 4 - OpenMP implementation\n";
-		cout << " 5 - OpenMPI implementation\n\n";
+		cout << " 3 - Single processor implementation (using block search with bitset with all numbers)\n";
+		cout << " 4 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
+		cout << " 5 - OpenMP implementation\n";
+		cout << " 6 - OpenMPI implementation\n\n";
 		cout << " 0 - Exit\n\n\n" << endl;
 		
-		option = ConsoleInput::getInstance()->getIntCin("  >>> Option [0,5]: ", "    -> Insert one of the listed options!\n", 0, 4);
+		option = ConsoleInput::getInstance()->getIntCin("  >>> Option [0,6]: ", "    -> Insert one of the listed options!\n", 0, 7);
 		
 		if (option == 0) {
 			break;
@@ -40,6 +41,11 @@ int main() {
 			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be > 2", 3);
 		}
 		
+		size_t blockSize = 0;
+		if (option == 3 || option == 4) {
+			blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
+		}
+
 		cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 		string resultFilename = ConsoleInput::getInstance()->getLineCin();
 		
@@ -48,6 +54,7 @@ int main() {
 		
 		validOption = true;
 		PrimesSieve<vector<bool> >* primesSieve;
+
 		switch (option) {
 			case 1: {
 				primesSieve = new PrimesSieveSequencialDivision<vector<bool> >();
@@ -60,16 +67,21 @@ int main() {
 			}
 				
 			case 3: {
-				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> >();
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> >(blockSize);
 				break;
 			}
 				
 			case 4: {
-				
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCache<vector<bool> >(blockSize);
 				break;
 			}
 				
 			case 5: {
+
+				break;
+			}
+				
+			case 6: {
 				
 				break;
 			}

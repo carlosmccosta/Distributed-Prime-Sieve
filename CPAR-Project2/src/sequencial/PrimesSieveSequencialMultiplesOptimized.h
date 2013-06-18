@@ -21,16 +21,16 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 		}
 
 		void computePrimes(size_t maxRange) {
+			this->template clearPrimesValues();
+			this->template initPrimesBitSetBlock(maxRange);
+
 			// adjustment of maxRange in order to calculate the primes <= maxRange instead of < maxRange
 			if (maxRange % 2 == 0)
 				++maxRange;
 			else
 				maxRange += 2;
 
-			this->template clearPrimesValues();
-			this->template initPrimesBitSetBlock(maxRange);
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
-
 			size_t maxIndexRange = this->template getNumberBitsToStore(maxRange) - 1;
 			size_t numberBlocks = ceil((double) maxIndexRange / (double) _blockSizeInElements);
 			size_t blockIndexBegin = 0;
