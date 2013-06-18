@@ -39,21 +39,20 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 			this->template performanceTimer.reset();
 			this->template performanceTimer.start();
 
-			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
-				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
-				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
-
-				if (blockNumber != 0) {
-					this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, blockIndexBegin);
-				}
-
-				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot);
-
-				blockIndexBegin = blockIndexEnd;   // because it calculates primes <= blockIndexEnd
+			size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
+			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot);
+			for (size_t blockNumber = 1; blockNumber < numberBlocks; ++blockNumber) {
+				blockIndexBegin = blockIndexEnd;
 				blockIndexEnd += _blockSizeInElements;
 				if (blockIndexEnd > maxIndexRange)
 					blockIndexEnd = maxIndexRange;
 
+				blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
+				blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+
+				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, blockIndexBegin);
+				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot);
 			}
 
 			this->template performanceTimer.stop();

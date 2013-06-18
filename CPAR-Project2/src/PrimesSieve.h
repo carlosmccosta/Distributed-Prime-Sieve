@@ -180,11 +180,11 @@ class PrimesSieve {
 		
 		void initPrimesBitsetBlock(size_t blockSize) {
 			this->maxRange = blockSize;
-			primesBitset = FlagsContainer(blockSize);
-			size_t iSize = primesBitset.size();
-			for (size_t i = 0; i < iSize; ++i) {
-				primesBitset[i] = true;
-			}
+			primesBitset = FlagsContainer(blockSize, true);
+//			size_t iSize = primesBitset.size();
+//			for (size_t i = 0; i < iSize; ++i) {
+//				primesBitset[i] = true;
+//			}
 		}
 
 		void resetPrimesBitsetBlock() {

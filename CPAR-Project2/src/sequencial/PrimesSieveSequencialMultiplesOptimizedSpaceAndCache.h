@@ -35,8 +35,8 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCache: public PrimesSieveSe
 			}
 		}
 
-		void calculatePrimesInBlock(size_t primeNumber, size_t maxNumberInBlock, size_t maxRangeSquareRoot) {
-			size_t maxPrimeNumberSearch = min(maxRangeSquareRoot+1, maxNumberInBlock);
+		void calculatePrimesInBlock(size_t primeNumber, size_t blockEndNumber, size_t maxRangeSquareRoot) {
+			size_t maxPrimeNumberSearch = min(maxRangeSquareRoot+1, blockEndNumber);
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber += 2) {
 				// for each number not marked as composite (prime number)
@@ -44,7 +44,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCache: public PrimesSieveSe
 					//use it to calculate his composites
 					size_t primeDoubled = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
-					for (; compositeNumber < maxNumberInBlock; compositeNumber += primeDoubled) {
+					for (; compositeNumber < blockEndNumber; compositeNumber += primeDoubled) {
 						this->template setPrimesBitsetValue(compositeNumber, false);
 					}
 				}

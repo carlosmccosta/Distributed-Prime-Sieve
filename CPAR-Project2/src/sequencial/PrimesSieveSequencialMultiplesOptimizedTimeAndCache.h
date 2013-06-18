@@ -12,7 +12,7 @@ using std::max;
 template<typename FlagsContainer>
 class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSequencialMultiplesOptimized<FlagsContainer> {
 	public:
-		PrimesSieveSequencialMultiplesOptimizedTimeAndCache(size_t blockSizeInBytes = 64 * 1024) :
+		PrimesSieveSequencialMultiplesOptimizedTimeAndCache(size_t blockSizeInBytes = sizeof(size_t) * 1024) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes / sizeof(size_t)) {
 		}
 		
