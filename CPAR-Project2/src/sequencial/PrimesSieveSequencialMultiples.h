@@ -16,12 +16,12 @@ class PrimesSieveSequencialMultiples: public PrimesSieve<FlagsContainer> {
 		}
 		
 		void computePrimes(size_t maxRange) {
-			this->template primesValues.clear();
+			this->template getPerformanceTimer().reset();
+			this->template getPerformanceTimer().start();
+
+			this->template getPrimesValues().clear();
 			this->template initPrimesBitset(maxRange);
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
-			
-			this->template performanceTimer.reset();
-			this->template performanceTimer.start();
 
 			for (size_t primeNumber = 3; primeNumber <= maxRangeSquareRoot; primeNumber += 2) {
 				// for each number not marked as composite (prime number)
@@ -33,8 +33,8 @@ class PrimesSieveSequencialMultiples: public PrimesSieve<FlagsContainer> {
 					}
 				}
 			}
-			
-			this->template performanceTimer.stop();
+
+			this->template getPerformanceTimer().stop();
 		}
 	};
 

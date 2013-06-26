@@ -20,9 +20,10 @@ int main() {
 		cout << " 1 - Single processor implementation (using division to check for primes)\n";
 		cout << " 2 - Single processor implementation (using multiples to check for primes)\n";
 		cout << " 3 - Single processor implementation (using block search with bitset with all numbers)\n";
-		cout << " 4 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
-		cout << " 5 - OpenMP implementation\n";
-		cout << " 6 - OpenMPI implementation\n\n";
+		cout << " 4 - Single processor implementation (using block search with bitset with all numbers optimized for time)\n";
+		cout << " 5 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
+		cout << " 6 - OpenMP implementation\n";
+		cout << " 7 - OpenMPI implementation\n\n";
 		cout << " 0 - Exit\n\n\n" << endl;
 		
 		option = ConsoleInput::getInstance()->getIntCin("  >>> Option [0,6]: ", "    -> Insert one of the listed options!\n", 0, 7);
@@ -42,7 +43,7 @@ int main() {
 		}
 		
 		size_t blockSize = 0;
-		if (option == 3 || option == 4) {
+		if (option > 2 && option < 6) {
 			blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
 		}
 
@@ -72,12 +73,12 @@ int main() {
 			}
 				
 			case 4: {
-				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCache<vector<bool> >(blockSize);
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache<vector<bool> >(blockSize);
 				break;
 			}
 				
 			case 5: {
-
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCache<vector<bool> >(blockSize);
 				break;
 			}
 				
@@ -86,6 +87,11 @@ int main() {
 				break;
 			}
 				
+			case 7: {
+
+				break;
+			}
+
 			default: {
 				validOption = false;
 				break;
@@ -95,7 +101,7 @@ int main() {
 		if (validOption) {
 			cout << "\n    > Computing primes from 2 to " << inputMaxRange << "..." << endl;
 			primesSieve->computePrimes(inputMaxRange);
-			primesSieve->extractPrimesFromBitset();
+//			primesSieve->extractPrimesFromBitset();
 			cout << "    --> Computed " << primesSieve->getNumberPrimesFound() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeFormated() << "\n" << endl;
 			
 			if (!primesSieve->getNumberPrimesFound() != 1) {

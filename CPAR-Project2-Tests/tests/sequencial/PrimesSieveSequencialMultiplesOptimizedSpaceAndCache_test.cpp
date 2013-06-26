@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(compute100Primes) {
 	}
 
 	BOOST_AUTO_TEST_CASE(compute1000PrimesBlocks10) {
-		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(64*10/8); // 10 elements block
+		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(10/8); // 10 elements block
 		primesSieveSequencialMultiples.computePrimes(7919);
 		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedSpaceAndCachePrimes1000_Blocks10.txt");
 
@@ -19,15 +19,15 @@ BOOST_AUTO_TEST_CASE(compute100Primes) {
 	}
 
 	BOOST_AUTO_TEST_CASE(compute1000PrimesBlocks32) {
-		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(64*32/8); // 32 elements block
+		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(32/8); // 32 elements block
 		primesSieveSequencialMultiples.computePrimes(7919);
-		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedSpaceAndCachePrimes1000_Blocks10.txt");
+		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedSpaceAndCachePrimes1000_Blocks32.txt");
 
 		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/1000.txt"));
 	}
 
 	BOOST_AUTO_TEST_CASE(compute1000PrimesBlocks100) {
-		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(64*100/8); // 100 elements block
+		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(100/8); // 100 elements block
 		primesSieveSequencialMultiples.computePrimes(7919);
 		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedSpaceAndCachePrimes1000_Blocks100.txt");
 
@@ -35,9 +35,17 @@ BOOST_AUTO_TEST_CASE(compute100Primes) {
 	}
 
 	BOOST_AUTO_TEST_CASE(compute1000PrimesBlocks1000) {
-		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(64*1000/8); // 1000 elements block
+		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(1000/8); // 1000 elements block
 		primesSieveSequencialMultiples.computePrimes(7919);
 		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedSpaceAndCachePrimes1000_Blocks1000.txt");
+
+		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/1000.txt"));
+	}
+
+	BOOST_AUTO_TEST_CASE(compute1000PrimesBlocks2000) {
+		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> > primesSieveSequencialMultiples(2000/8); // 2000 elements block
+		primesSieveSequencialMultiples.computePrimes(7919);
+		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedSpaceAndCachePrimes1000_Blocks2000.txt");
 
 		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/1000.txt"));
 	}
