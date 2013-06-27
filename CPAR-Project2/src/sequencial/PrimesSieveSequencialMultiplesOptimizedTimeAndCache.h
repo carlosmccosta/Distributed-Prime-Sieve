@@ -107,9 +107,10 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 			return this->template getPrimesValues();
 		}
 
-		virtual void initPrimesBitSetBlock(size_t maxRange) {
+		virtual void initPrimesBitSetSize(size_t maxRange) {
+			this->template setMaxRange(maxRange);
 			size_t numberElements = min(this->template getNumberBitsToStore(maxRange), this->template getBlockSizeInElements());
-			this->template initPrimesBitsetBlock(numberElements);
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(numberElements);
 		}
 };
 

@@ -4,8 +4,10 @@
 #include "../sequencial/PrimesSieveSequencialDivision.h"
 #include "../sequencial/PrimesSieveSequencialMultiples.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceAndCache.h"
-#include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedTimeAndCache.h"
+#include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache.h"
+#include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel.h"
+
 
 #include <cmath>
 

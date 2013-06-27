@@ -20,10 +20,12 @@ int main() {
 		cout << " 1 - Single processor implementation (using division to check for primes)\n";
 		cout << " 2 - Single processor implementation (using multiples to check for primes)\n";
 		cout << " 3 - Single processor implementation (using block search with bitset with all numbers)\n";
-		cout << " 4 - Single processor implementation (using block search with bitset with all numbers optimized for time)\n";
-		cout << " 5 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
-		cout << " 6 - OpenMP implementation\n";
-		cout << " 7 - OpenMPI implementation\n\n";
+		cout << " 4 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
+		cout << " 5 - Single processor implementation (using block search with bitset with all numbers optimized for time)\n";
+		cout << " 6 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 30 wheel factorization)\n";
+		cout << " 7 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization)\n";
+		cout << " 8 - OpenMP implementation\n";
+		cout << " 9 - OpenMPI implementation\n\n";
 		cout << " 0 - Exit\n\n\n" << endl;
 		
 		option = ConsoleInput::getInstance()->getIntCin("  >>> Option [0,6]: ", "    -> Insert one of the listed options!\n", 0, 7);
@@ -43,7 +45,7 @@ int main() {
 		}
 		
 		size_t blockSize = 0;
-		if (option > 2 && option < 6) {
+		if (option > 2) {
 			blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
 		}
 
@@ -73,22 +75,22 @@ int main() {
 			}
 				
 			case 4: {
-				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache<vector<bool> >(blockSize);
-				break;
-			}
-				
-			case 5: {
 				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCache<vector<bool> >(blockSize);
 				break;
 			}
 				
-			case 6: {
+			case 5: {
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache<vector<bool> >(blockSize);
+				break;
+			}
 				
+			case 6: {
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel<vector<bool>, Modulo30Wheel>(blockSize);
 				break;
 			}
 				
 			case 7: {
-
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>(blockSize);
 				break;
 			}
 
