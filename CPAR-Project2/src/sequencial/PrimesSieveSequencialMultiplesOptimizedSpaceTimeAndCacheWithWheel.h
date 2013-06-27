@@ -46,7 +46,6 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel: public 
 
 		void calculatePrimesInBlock(size_t blockBeginNumber, size_t blockEndNumber, size_t maxRangeSquareRoot) {
 			size_t maxPrimeNumberSearch = min(maxRangeSquareRoot + 1, blockEndNumber);
-			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
 			size_t primeNumber = blockBeginNumber;
 			if (wheelSieve.getBitsetPositionToNumberWithCheck(primeNumber) == std::numeric_limits<std::size_t>::max()) {

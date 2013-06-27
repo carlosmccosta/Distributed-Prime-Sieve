@@ -97,4 +97,4 @@ class WheelFactorization {
 typedef WheelFactorization<vector<bool>, (size_t)30, (size_t)8, (size_t)7, (size_t)3, wheel30Elements> Modulo30Wheel;
 
 /// 4th wheel, skips multiples of 2, 3, 5 and 7
-typedef WheelFactorization<vector<bool>, (size_t)210, (size_t)48, (size_t)11, (size_t)4, wheel210Elements> Modulo210Wheel;
+typedef WheelFactorization<vector<bool>, (size_t)210, (size_t)43, (size_t)11, (size_t)4, wheel210Elements> Modulo210Wheel;
