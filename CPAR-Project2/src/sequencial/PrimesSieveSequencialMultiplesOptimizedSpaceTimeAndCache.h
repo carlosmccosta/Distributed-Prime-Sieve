@@ -57,6 +57,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache: public PrimesSie
 
 		virtual void initPrimesBitSetSize(size_t maxRange) {
 			this->template initPrimesBitset(maxRange);
+
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
 			_sievingPrimes.reserve(numberSievingPrimes);
 		}

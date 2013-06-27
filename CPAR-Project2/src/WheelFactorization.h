@@ -2,6 +2,9 @@
 
 #include <stddef.h>
 #include <limits>
+#include <vector>
+
+using std::vector;
 
 struct WheelElement {
 		unsigned char wheelPositionIndex;
@@ -12,12 +15,13 @@ struct WheelElement {
 extern const WheelElement wheel30Elements[30];
 extern const WheelElement wheel210Elements[210];
 
-template<size_t WheelSize, size_t NumberOfPossiblePrimesPerWheel, size_t FirstPrimeToSieve, const WheelElement* WheelElements>
+template<typename FlagsContainer, size_t WheelSize, size_t NumberOfPossiblePrimesPerWheel, size_t FirstPrimeToSieve, size_t NumberPrimesSievedByTheWheel, const WheelElement* WheelElements>
 class WheelFactorization {
 	protected:
 		size_t _wheelSize;
 		size_t _numberOfPossiblePrimesPerWheel;
 		size_t _firstPrimeToSieve;
+		size_t _numberPrimesSievedByTheWheel;
 		const WheelElement* _wheelElements;
 
 	public:
@@ -25,6 +29,7 @@ class WheelFactorization {
 				_wheelSize(WheelSize),
 				_numberOfPossiblePrimesPerWheel(NumberOfPossiblePrimesPerWheel),
 				_firstPrimeToSieve(FirstPrimeToSieve),
+				_numberPrimesSievedByTheWheel(NumberPrimesSievedByTheWheel),
 				_wheelElements(WheelElements) {
 		}
 
@@ -36,19 +41,27 @@ class WheelFactorization {
 		}
 
 		inline size_t getBitsetPositionToNumber(size_t number) {
-			size_t wheelElementPosition = number % _wheelSize;
-			size_t positionInsideWheel = _wheelElements[wheelElementPosition].wheelPositionIndex;
+			return ((number / _wheelSize) * _numberOfPossiblePrimesPerWheel) + _wheelElements[number % _wheelSize].wheelPositionIndex;
+		}
 
+		void setBitsetPositionToNumber(FlagsContainer& flagsContainer, size_t number, bool newValue) {
+			unsigned char positionInsideWheel = _wheelElements[number % _wheelSize].wheelPositionIndex;
+			if (positionInsideWheel != 0xFF) {
+				flagsContainer[((number / _wheelSize) * _numberOfPossiblePrimesPerWheel) + positionInsideWheel] = newValue;
+			}
+		}
+
+		size_t getBitsetPositionToNumberWithCheck(size_t number) {
+			unsigned char positionInsideWheel = _wheelElements[number % _wheelSize].wheelPositionIndex;
 			if (positionInsideWheel == 0xFF) {
 				return std::numeric_limits<std::size_t>::max();
 			}
 
-			size_t wheelIndex = ((number / _wheelSize) * _numberOfPossiblePrimesPerWheel);
-			return wheelIndex + positionInsideWheel;
+			return ((number / _wheelSize) * _numberOfPossiblePrimesPerWheel) + positionInsideWheel;
 		}
 
 		inline size_t getNumberBitsToStore(size_t maxRange) {
-			size_t numberBitsToStore = getBitsetPositionToNumber(maxRange);
+			size_t numberBitsToStore = getBitsetPositionToNumberWithCheck(maxRange);
 			if (numberBitsToStore == std::numeric_limits<std::size_t>::max()) {
 				size_t nextPossiblePrime = getNextPossiblePrime(maxRange);
 				numberBitsToStore = getBitsetPositionToNumber(nextPossiblePrime);
@@ -74,10 +87,14 @@ class WheelFactorization {
 		WheelElement* getWheelElements() const {
 			return _wheelElements;
 		}
+		
+		size_t getNumberPrimesSievedByTheWheel() const {
+			return _numberPrimesSievedByTheWheel;
+		}
 };
 
 /// 3rd wheel, skips multiples of 2, 3 and 5
-typedef WheelFactorization<(size_t)30, (size_t)8, (size_t)7, wheel30Elements> Modulo30Wheel;
+typedef WheelFactorization<vector<bool>, (size_t)30, (size_t)8, (size_t)7, (size_t)3, wheel30Elements> Modulo30Wheel;
 
 /// 4th wheel, skips multiples of 2, 3, 5 and 7
-typedef WheelFactorization<(size_t)210, (size_t)48, (size_t)11, wheel210Elements> Modulo210Wheel;
+typedef WheelFactorization<vector<bool>, (size_t)210, (size_t)48, (size_t)11, (size_t)4, wheel210Elements> Modulo210Wheel;
