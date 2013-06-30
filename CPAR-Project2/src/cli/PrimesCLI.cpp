@@ -40,10 +40,10 @@ int main() {
 		size_t inputMaxRange;
 		
 		if (inputRangeInBits) {
-			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [0, 32]", 0, 33);
+			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
 			inputMaxRange = (size_t) pow(2, inputMaxRange);
 		} else {
-			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be > 2", 3);
+			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be >= 11", 11);
 		}
 		
 		size_t blockSize = 0;

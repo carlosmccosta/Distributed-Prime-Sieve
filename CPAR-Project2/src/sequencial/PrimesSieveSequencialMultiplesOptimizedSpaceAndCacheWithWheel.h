@@ -25,10 +25,10 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 		PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel(size_t blockSizeInBytes = 64 * 1024) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes * 8) {
 		}
-		
+
 		virtual ~PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel() {
 		}
-		
+
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
 			size_t sievingPrimesSize = _sievingPrimes.size();
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
@@ -89,14 +89,20 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 			primesValues.push_back(2);
 			primesValues.push_back(3);
 			primesValues.push_back(5);
-			primesValues.push_back(7);
-			size_t iSize = primesBitset.size();
+
 			size_t possiblePrime = 7;
-			for (size_t i = 2; i < iSize; ++i) {   // position 2 has prime number 3
-				possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
+			if (wheelSieve.getNumberPrimesSievedByTheWheel() == 4) {
+				primesValues.push_back(7);
+				possiblePrime = 11;
+			}
+
+			size_t iSize = primesBitset.size();
+			for (size_t i = 1; i < iSize; ++i) {   // position 0 has number 1 of spoke 1
 				if (primesBitset[i]) {
 					primesValues.push_back(possiblePrime);
 				}
+
+				possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 			}
 
 			return primesValues;
@@ -110,15 +116,20 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 				outputStream << 2 << endl;
 				outputStream << 3 << endl;
 				outputStream << 5 << endl;
-				outputStream << 7 << endl;
+
+				size_t possiblePrime = 7;
+				if (wheelSieve.getNumberPrimesSievedByTheWheel() == 4) {
+					outputStream << 7 << endl;
+					possiblePrime = 11;
+				}
 
 				size_t iSize = primesBitset.size();
-				size_t possiblePrime = 7;
-				for (size_t i = 2; i < iSize; ++i) {   // position 2 has prime number 11
-					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
+				for (size_t i = 1; i < iSize; ++i) {   // position 2 has prime number 11
 					if (primesBitset[i]) {
 						outputStream << possiblePrime << endl;
 					}
+
+					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 			} else {
 				size_t iSize = primesValues.size();
@@ -137,7 +148,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			size_t primesFound = wheelSieve.getNumberPrimesSievedByTheWheel();
 			size_t iSize = primesBitset.size();
-			for (size_t i = 1; i < iSize; ++i) { // in position 0 is spoke 1 of wheel and 1 is not prime
+			for (size_t i = 1; i < iSize; ++i) { // in position 0 is spoke 1 of wheel and number 1 is not prime
 				if (primesBitset[i]) {
 					++primesFound;
 				}
