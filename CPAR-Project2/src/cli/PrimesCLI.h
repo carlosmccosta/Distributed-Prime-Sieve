@@ -7,6 +7,7 @@
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedTimeAndCache.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel.h"
+#include "../sequencial/PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel.h"
 
 

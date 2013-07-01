@@ -16,29 +16,30 @@ using std::pair;
 using std::endl;
 
 template<typename FlagsContainer, typename WheelType>
-class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public PrimesSieveSequencialMultiplesOptimized<FlagsContainer> {
+class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public PrimesSieveSequencialMultiplesOptimized<FlagsContainer> {
 	protected:
 		vector<pair<size_t, size_t> > _sievingPrimes;
 		WheelType wheelSieve;
 
 	public:
-		PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel(size_t blockSizeInBytes = 64 * 1024) :
+		PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel(size_t blockSizeInBytes = 64 * 1024) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes * 8) {
 		}
-
-		virtual ~PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel() {
+		
+		virtual ~PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel() {
 		}
-
+		
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
 			size_t sievingPrimesSize = _sievingPrimes.size();
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
 			for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
-				size_t primeMultiple = _sievingPrimes[sievingPrimesIndex].first;
-				size_t primeMultipleIncrement = _sievingPrimes[sievingPrimesIndex].second;
+				pair<size_t, size_t> primeCompositeInfo = _sievingPrimes[sievingPrimesIndex];
+				size_t primeMultiple = primeCompositeInfo.first;
+				size_t primeMultipleIncrement = primeCompositeInfo.second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					wheelSieve.setBitsetPositionToNumber(primesBitset, primeMultiple, false);
+					primesBitset[primeMultiple] = false;
 				}
 
 				_sievingPrimes[sievingPrimesIndex].first = primeMultiple;
@@ -56,13 +57,12 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
-				size_t positionOnBitset = wheelSieve.getBitsetPositionToNumber(primeNumber);
-				if (primesBitset[positionOnBitset]) {
+				if (primesBitset[primeNumber]) {
 					//use it to calculate his composites
 					size_t primeMultipleIncrement = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
-						wheelSieve.setBitsetPositionToNumber(primesBitset, compositeNumber, false);
+						primesBitset[compositeNumber] = false;
 					}
 
 					_sievingPrimes.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
@@ -72,7 +72,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 
 		virtual void initPrimesBitSetSize(size_t maxRange) {
 			this->template setMaxRange(maxRange);
-			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(wheelSieve.getNumberBitsToStore(maxRange));
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(maxRange + 1);
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
 			_sievingPrimes.reserve(numberSievingPrimes);
@@ -90,20 +90,13 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 			primesValues.push_back(2);
 			primesValues.push_back(3);
 			primesValues.push_back(5);
+			primesValues.push_back(7);
 
-			size_t possiblePrime = 7;
-			if (wheelSieve.getNumberPrimesSievedByTheWheel() == 4) {
-				primesValues.push_back(7);
-				possiblePrime = 11;
-			}
-
-			size_t iSize = primesBitset.size();
-			for (size_t i = 1; i < iSize; ++i) {   // position 0 has number 1 of spoke 1
-				if (primesBitset[i]) {
+			size_t maxRange = this->template getMaxRange();
+			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
+				if (primesBitset[possiblePrime]) {
 					primesValues.push_back(possiblePrime);
 				}
-
-				possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 			}
 
 			return primesValues;
@@ -117,20 +110,13 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 				outputStream << 2 << endl;
 				outputStream << 3 << endl;
 				outputStream << 5 << endl;
+				outputStream << 7 << endl;
 
-				size_t possiblePrime = 7;
-				if (wheelSieve.getNumberPrimesSievedByTheWheel() == 4) {
-					outputStream << 7 << endl;
-					possiblePrime = 11;
-				}
-
-				size_t iSize = primesBitset.size();
-				for (size_t i = 1; i < iSize; ++i) {   // position 2 has prime number 11
-					if (primesBitset[i]) {
+				size_t maxRange = this->template getMaxRange();
+				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
+					if (primesBitset[possiblePrime]) {
 						outputStream << possiblePrime << endl;
 					}
-
-					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 			} else {
 				size_t iSize = primesValues.size();
@@ -142,15 +128,15 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 
 		virtual size_t getNumberPrimesFound() {
 			vector<size_t>& primesValues = this->template getPrimesValues();
+			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
 			if (primesValues.size() >= 2)
 				return primesValues.size();
 
-			FlagsContainer& primesBitset = this->template getPrimesBitset();
-			size_t primesFound = wheelSieve.getNumberPrimesSievedByTheWheel();
-			size_t iSize = primesBitset.size();
-			for (size_t i = 1; i < iSize; ++i) { // in position 0 is spoke 1 of wheel and number 1 is not prime
-				if (primesBitset[i]) {
+			size_t primesFound = 4;
+			size_t maxRange = this->template getMaxRange();
+			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
+				if (primesBitset[possiblePrime]) {
 					++primesFound;
 				}
 			}

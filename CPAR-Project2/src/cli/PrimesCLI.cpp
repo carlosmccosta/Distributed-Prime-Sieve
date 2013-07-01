@@ -7,45 +7,47 @@ PrimesCLI::~PrimesCLI(void) {
 
 int main() {
 	ConsoleInput::getInstance()->clearConsoleScreen();
-	
+
 	int option = 1;
 	bool validOption = true;
-	
+
 	do {
 		ConsoleInput::getInstance()->clearConsoleScreen();
 		cout << "###############   Parallel computing - Project 2 - Carlos Costa   #####################\n";
 		cout << "  >>>               Primes generator - Sieve of Eratosthenes                      <<<  \n";
 		cout << "#######################################################################################\n\n\n";
-		
-		cout << " 1 - Single processor implementation (using division to check for primes)\n";
-		cout << " 2 - Single processor implementation (using multiples to check for primes)\n";
-		cout << " 3 - Single processor implementation (using block search with bitset with all numbers)\n";
-		cout << " 4 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
-		cout << " 5 - Single processor implementation (using block search with bitset with all numbers optimized for time)\n";
-		cout << " 6 - Single processor implementation (using block search with bitset with all numbers optimized for space and with modulo 30 wheel factorization)\n";
-		cout << " 7 - Single processor implementation (using block search with bitset with all numbers optimized for space and with modulo 210 wheel factorization)\n";
-		cout << " 8 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 30 wheel factorization)\n";
-		cout << " 9 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization)\n";
-		cout << " 10 - OpenMP implementation\n";
-		cout << " 11 - OpenMPI implementation\n\n";
-		cout << " 0 - Exit\n\n\n" << endl;
-		
-		option = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 11]: ", "    -> Insert one of the listed options!\n", 0, 12);
-		
+
+		cout << "  1 - Single processor implementation (using division to check for primes)\n";
+		cout << "  2 - Single processor implementation (using multiples to check for primes)\n";
+		cout << "  3 - Single processor implementation (using block search with bitset with all numbers)\n";
+		cout << "  4 - Single processor implementation (using block search with bitset only with numbers in the block)\n";
+		cout << "  5 - Single processor implementation (using block search with bitset with all numbers optimized for time)\n";
+		cout << "  6 - Single processor implementation (using block search with bitset with all numbers optimized for space and with modulo 30 wheel factorization)\n";
+		cout << "  7 - Single processor implementation (using block search with bitset with all numbers optimized for space and with modulo 210 wheel factorization)\n";
+		cout << "  8 - Single processor implementation (using block search with bitset with all numbers optimized for time and space and with modulo 30 wheel factorization)\n";
+		cout << "  9 - Single processor implementation (using block search with bitset with all numbers optimized for time and space and with modulo 210 wheel factorization)\n";
+		cout << " 10 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 30 wheel factorization)\n";
+		cout << " 11 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization)\n";
+		cout << " 12 - OpenMP implementation\n";
+		cout << " 13 - OpenMPI implementation\n\n";
+		cout << "  0 - Exit\n\n\n" << endl;
+
+		option = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 13]: ", "    -> Insert one of the listed options!\n", 0, 14);
+
 		if (option == 0) {
 			break;
 		}
-		
+
 		bool inputRangeInBits = ConsoleInput::getInstance()->getYesNoCin("\n   ## Max primes search range in bits (2^n)? (No for direct max search range specification) (Y/N): ");
 		size_t inputMaxRange;
-		
+
 		if (inputRangeInBits) {
 			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
 			inputMaxRange = (size_t) pow(2, inputMaxRange);
 		} else {
 			inputMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be >= 11", 11);
 		}
-		
+
 		size_t blockSize = 0;
 		if (option > 2) {
 			blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
@@ -53,10 +55,10 @@ int main() {
 
 		cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 		string resultFilename = ConsoleInput::getInstance()->getLineCin();
-		
+
 		cout << "   ## Confirm results from file (empty to skip confirmation): ";
 		string resultConfirmationFilename = ConsoleInput::getInstance()->getLineCin();
-		
+
 		validOption = true;
 		PrimesSieve<vector<bool> >* primesSieve;
 
@@ -65,32 +67,32 @@ int main() {
 				primesSieve = new PrimesSieveSequencialDivision<vector<bool> >();
 				break;
 			}
-				
+
 			case 2: {
 				primesSieve = new PrimesSieveSequencialMultiples<vector<bool> >();
 				break;
 			}
-				
+
 			case 3: {
 				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceAndCache<vector<bool> >(blockSize);
 				break;
 			}
-				
+
 			case 4: {
 				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCache<vector<bool> >(blockSize);
 				break;
 			}
-				
+
 			case 5: {
 				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache<vector<bool> >(blockSize);
 				break;
 			}
-				
+
 			case 6: {
 				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel<vector<bool>, Modulo30Wheel>(blockSize);
 				break;
 			}
-				
+
 			case 7: {
 				primesSieve = new PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel<vector<bool>, Modulo210Wheel>(blockSize);
 				break;
@@ -106,50 +108,59 @@ int main() {
 				break;
 			}
 
+			case 10: {
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel<vector<bool>, Modulo30Wheel>(blockSize);
+				break;
+			}
+
+			case 11: {
+				primesSieve = new PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>(blockSize);
+				break;
+			}
+
 			default: {
 				validOption = false;
 				break;
 			}
 		}
-		
+
 		if (validOption) {
 			cout << "\n    > Computing primes from 2 to " << inputMaxRange << "..." << endl;
 			primesSieve->computePrimes(inputMaxRange);
-//			primesSieve->extractPrimesFromBitset();
-			cout << "    --> Computed " << primesSieve->getNumberPrimesFound() << " primes in " << primesSieve->getPerformanceTimer().getElapsedTimeFormated() << "\n" << endl;
-			
-			if (!primesSieve->getNumberPrimesFound() != 1) {
-				bool validationResult;
-				
-				if (resultConfirmationFilename != "") {
-					cout << "    > Validating computed primes with result file supplied...\n";
-					validationResult = primesSieve->checkPrimesFromFile(resultConfirmationFilename);
-					
-					if (validationResult) {
-						cout << "    --> Computed primes are correct!\n\n";
-					} else {
-						cout << "    --> Computed primes are different from the ones in supplied file!\n\n";
-					}
-				}
-				
-				if (resultFilename == "stdout") {
-					cout << "\n=============================================  Computed primes  =============================================\n\n";
-					primesSieve->printPrimesToConsole();
-					cout << endl;
-				} else if (resultFilename != "") {
-					cout << "    > Exporting results to file " << resultFilename << "...";
-					primesSieve->savePrimesToFile(resultFilename);
-					cout << "\n    --> Export finished!\n";
+			cout << "    --> Finished in " << primesSieve->getPerformanceTimer().getElapsedTimeFormated() << "\n" << endl;
+
+			cout << "    > Counting number of primes found..." << endl;
+			size_t numberPrimesFound = primesSieve->getNumberPrimesFound();
+			cout << "    --> Computed " << numberPrimesFound << " primes" << endl;
+
+			if (resultConfirmationFilename != "") {
+				cout << "    > Validating computed primes with result file supplied...\n";
+				bool validationResult = primesSieve->checkPrimesFromFile(resultConfirmationFilename);
+
+				if (validationResult) {
+					cout << "    --> Computed primes are correct!\n\n";
+				} else {
+					cout << "    --> Computed primes are different from the ones in supplied file!\n\n";
 				}
 			}
-			
+
+			if (resultFilename == "stdout") {
+				cout << "\n=============================================  Computed primes  =============================================\n\n";
+				primesSieve->printPrimesToConsole();
+				cout << endl;
+			} else if (resultFilename != "") {
+				cout << "    > Exporting results to file " << resultFilename << "...";
+				primesSieve->savePrimesToFile(resultFilename);
+				cout << "\n    --> Export finished!\n";
+			}
+
 			delete primesSieve;
-			
+
 			cout << endl << endl;
 			ConsoleInput::getInstance()->getUserInput();
 		}
-		
+
 	} while (option != 0);
-	
+
 	return 0;
 }
