@@ -14,10 +14,10 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCache: public PrimesSieveSe
 		PrimesSieveSequencialMultiplesOptimizedSpaceAndCache(size_t blockSizeInBytes = 64 * 1024) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes * 8) {
 		}
-		
+
 		virtual ~PrimesSieveSequencialMultiplesOptimizedSpaceAndCache() {
 		}
-		
+
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
 			for (size_t primesIndex = 0; primesIndex < blockIndexBegin; ++primesIndex) {
 				if (this->template getPrimesBitset()[primesIndex]) {
@@ -36,7 +36,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCache: public PrimesSieveSe
 		}
 
 		void calculatePrimesInBlock(size_t primeNumber, size_t blockEndNumber, size_t maxRangeSquareRoot) {
-			size_t maxPrimeNumberSearch = min(maxRangeSquareRoot+1, blockEndNumber);
+			size_t maxPrimeNumberSearch = min(maxRangeSquareRoot + 1, blockEndNumber);
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber += 2) {
 				// for each number not marked as composite (prime number)

@@ -60,6 +60,13 @@ class WheelFactorization {
 			return ((number / _wheelSize) * _numberOfPossiblePrimesPerWheel) + positionInsideWheel;
 		}
 
+		bool isNumberPossiblePrime(size_t number) {
+			if (number > 0) {
+				return _wheelElements[(number - 1) % _wheelSize].wheelPositionIndex != _wheelElements[number % _wheelSize].wheelPositionIndex;
+			}
+			return false;
+		}
+
 		inline size_t getNumberBitsToStore(size_t maxRange) {
 			size_t numberBitsToStore = getBitsetPositionToNumberWithCheck(maxRange);
 			if (numberBitsToStore == std::numeric_limits<std::size_t>::max()) {

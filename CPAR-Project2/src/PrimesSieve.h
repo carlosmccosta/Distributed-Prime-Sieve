@@ -43,7 +43,7 @@ class PrimesSieve {
 		 * @param maxRange Maximum number to include in the primes search [3, maxRange]
 		 * @return number of bits that the bitset must contain
 		 */
-		static inline size_t getNumberBitsToStore(size_t maxRange) {
+		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
 			return ((maxRange - 3) >> 1) + 1;
 		}
 		
@@ -56,11 +56,11 @@ class PrimesSieve {
 			return ((30 * log(113) / 113) * range / log(range));   // 30*log(113)/113 = 1.2550587
 		}
 
-		static inline size_t getBitsetPositionToNumber(size_t number) {
+		virtual inline size_t getBitsetPositionToNumber(size_t number) {
 			return (number - 3) >> 1;
 		}
 		
-		static inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
+		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
 			return (position << 1) + 3;
 		}
 		

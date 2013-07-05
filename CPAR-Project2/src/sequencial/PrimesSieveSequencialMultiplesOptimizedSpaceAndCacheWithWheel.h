@@ -75,6 +75,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(wheelSieve.getNumberBitsToStore(maxRange));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
+			_sievingPrimes.clear();
 			_sievingPrimes.reserve(numberSievingPrimes);
 		}
 

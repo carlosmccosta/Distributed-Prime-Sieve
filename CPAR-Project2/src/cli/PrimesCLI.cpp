@@ -53,6 +53,11 @@ int main() {
 			blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
 		}
 
+		size_t numberThreads = 0;
+		if (option == 12) {
+			numberThreads = ConsoleInput::getInstance()->getIntCin("    # Number of threads (0 to use default): ", "Number of threads must be >= 0");
+		}
+
 		cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 		string resultFilename = ConsoleInput::getInstance()->getLineCin();
 
@@ -118,6 +123,11 @@ int main() {
 				break;
 			}
 
+			case 12: {
+				primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>(blockSize, numberThreads);
+				break;
+			}
+
 			default: {
 				validOption = false;
 				break;
@@ -127,7 +137,15 @@ int main() {
 		if (validOption) {
 			cout << "\n    > Computing primes from 2 to " << inputMaxRange << "..." << endl;
 			primesSieve->computePrimes(inputMaxRange);
-			cout << "    --> Finished in " << primesSieve->getPerformanceTimer().getElapsedTimeFormated() << "\n" << endl;
+			cout << "    --> Finished in " << primesSieve->getPerformanceTimer().getElapsedTimeFormated();
+			if (option == 12) {
+				if (numberThreads != 0) {
+					cout << " using " << ((PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>*) primesSieve)->getNumberOfThreads() << " threads";
+				} else {
+					cout << " using at most " << omp_get_num_procs() << " processors and " << omp_get_max_threads() << " threads";
+				}
+			}
+			cout << "\n" << endl;
 
 			cout << "    > Counting number of primes found..." << endl;
 			size_t numberPrimesFound = primesSieve->getNumberPrimesFound();

@@ -21,7 +21,7 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 		virtual ~PrimesSieveSequencialMultiplesOptimized() {
 		}
 
-		void computePrimes(size_t maxRange) {
+		virtual void computePrimes(size_t maxRange) {
 			this->template getPerformanceTimer().reset();
 			this->template getPerformanceTimer().start();
 
