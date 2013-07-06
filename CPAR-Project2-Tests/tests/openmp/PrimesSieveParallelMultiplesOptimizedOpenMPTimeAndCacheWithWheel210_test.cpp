@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE(PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWit
 	}
 
 	BOOST_AUTO_TEST_CASE(compute1000PrimesBlocks1byte) {
-		PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel> primesSieveParallelMultiples(1, 1);   // 8 elements block
+		PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel> primesSieveParallelMultiples(1);   // 8 elements block
 		primesSieveParallelMultiples.computePrimes(7926);
 		primesSieveParallelMultiples.savePrimesToFile("tests/testresults/openMPOptimizedTimeAndCacheWithModulo210WheelPrimes1000_Blocks1byte.txt");
 
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWit
 	}
 
 	BOOST_AUTO_TEST_CASE(compute100000PrimesBlocks128byte) {
-		PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel> primesSieveParallelMultiples(128, 1);   // 1024 elements block
+		PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel> primesSieveParallelMultiples(128);   // 1024 elements block
 		primesSieveParallelMultiples.computePrimes(1299828);
 		primesSieveParallelMultiples.savePrimesToFile("tests/testresults/openMPOptimizedTimeAndCacheWithModulo210WheelPrimes100000_Blocks128bytes.txt");
 

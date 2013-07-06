@@ -69,7 +69,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			}
 		}
 
-		void calculatePrimesInBlock(size_t blockBeginNumber, size_t blockEndNumber, size_t maxRangeSquareRoot) {
+		void calculatePrimesInBlock(size_t blockBeginNumber, size_t blockEndNumber, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxPrimeNumberSearch = blockEndNumber;
 			if (maxPrimeNumberSearch >= maxRangeSquareRoot) {
 				maxPrimeNumberSearch = maxRangeSquareRoot + 1;
@@ -92,6 +92,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
 						primesBitset[compositeNumber] = false;
 					}
+					sievingMultiples.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
 				}
 			}
 		}
@@ -100,13 +101,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			return (maxRange) + 1;
 		}
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
-			return number;
-		}
-
-		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
-			return position;
-		}
 
 		virtual void initPrimesBitSetSize(size_t maxRange) {
 			this->template setMaxRange(maxRange);
@@ -174,16 +168,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
-
-			/*for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (primesBitset[possiblePrime]) {
-					++primesFound;
-				}
-			}*/
-
 			int maxNumberThreads = omp_get_max_threads();
 			size_t numberPrimesToCheckInBlock = maxRange / maxNumberThreads;
-
 
 			#pragma omp parallel for \
 			default(shared) \
@@ -208,7 +194,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				} else {
 					nextPossiblePrimeNumberEndBlock = maxRange + 1;
 				}
-
 
 				primesFound = 0;
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {

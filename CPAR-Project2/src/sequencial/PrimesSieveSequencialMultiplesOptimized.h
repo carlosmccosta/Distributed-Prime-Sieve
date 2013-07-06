@@ -74,6 +74,10 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 			return this->template getNumberAssociatedWithBitsetPosition(0);
 		}
 
+		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
+			return this->PrimesSieve<FlagsContainer>::template getNumberAssociatedWithBitsetPosition(position);
+		}
+
 		inline size_t getBlockSizeInBytes() {
 			return _blockSizeInElements / 8;
 		}

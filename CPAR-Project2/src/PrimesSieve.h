@@ -56,11 +56,11 @@ class PrimesSieve {
 			return ((30 * log(113) / 113) * range / log(range));   // 30*log(113)/113 = 1.2550587
 		}
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
+		inline size_t getBitsetPositionToNumber(size_t number) {
 			return (number - 3) >> 1;
 		}
 		
-		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
+		inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
 			return (position << 1) + 3;
 		}
 		
