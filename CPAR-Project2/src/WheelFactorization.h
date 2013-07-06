@@ -62,7 +62,7 @@ class WheelFactorization {
 
 		bool isNumberPossiblePrime(size_t number) {
 			if (number > 0) {
-				return _wheelElements[(number - 1) % _wheelSize].wheelPositionIndex != _wheelElements[number % _wheelSize].wheelPositionIndex;
+				return (_wheelElements[(number - 1) % _wheelSize].nextPossiblePrimeIncrement != (_wheelElements[number % _wheelSize].nextPossiblePrimeIncrement + 1));
 			}
 			return false;
 		}

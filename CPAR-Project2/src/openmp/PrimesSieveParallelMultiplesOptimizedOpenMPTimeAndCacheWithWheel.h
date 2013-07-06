@@ -174,8 +174,16 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
+
+			/*for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
+				if (primesBitset[possiblePrime]) {
+					++primesFound;
+				}
+			}*/
+
 			int maxNumberThreads = omp_get_max_threads();
 			size_t numberPrimesToCheckInBlock = maxRange / maxNumberThreads;
+
 
 			#pragma omp parallel for \
 			default(shared) \
@@ -196,16 +204,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 
 				size_t nextPossiblePrimeNumberEndBlock;
 				if (threadBlockNumber != maxNumberThreads - 1) {
-					nextPossiblePrimeNumberEndBlock = threadBlockNumber * (numberPrimesToCheckInBlock << 1);
-					if (wheelSieve.isNumberPossiblePrime(possiblePrime)) {
-						nextPossiblePrimeNumberEndBlock = min(maxRange + 1, nextPossiblePrimeNumberEndBlock);
-					} else {
-						nextPossiblePrimeNumberEndBlock = min(maxRange + 1, wheelSieve.getNextPossiblePrime(nextPossiblePrimeNumberEndBlock));
-					}
+					nextPossiblePrimeNumberEndBlock = (threadBlockNumber + 1) * numberPrimesToCheckInBlock;
 				} else {
 					nextPossiblePrimeNumberEndBlock = maxRange + 1;
 				}
 
+
+				primesFound = 0;
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
 					if (primesBitset[possiblePrime]) {
 						++primesFound;

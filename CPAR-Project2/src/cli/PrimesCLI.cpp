@@ -148,8 +148,12 @@ int main() {
 			cout << "\n" << endl;
 
 			cout << "    > Counting number of primes found..." << endl;
+			PerformanceTimer countingPrimesTimer;
+			countingPrimesTimer.reset();
+			countingPrimesTimer.start();
 			size_t numberPrimesFound = primesSieve->getNumberPrimesFound();
-			cout << "    --> Computed " << numberPrimesFound << " primes" << endl;
+			countingPrimesTimer.stop();
+			cout << "    --> Computed " << numberPrimesFound << " primes in " << countingPrimesTimer.getElapsedTimeFormated() << endl;
 
 			if (resultConfirmationFilename != "") {
 				cout << "    > Validating computed primes with result file supplied...\n";
