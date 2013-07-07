@@ -165,33 +165,26 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
 			int maxNumberThreads = omp_get_max_threads();
-			size_t numberPrimesToCheckInBlock = maxRange / maxNumberThreads;
+			size_t minNumberPrimesPerThread = 100;
+			int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
+			size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
 
-#pragma omp parallel for \
+			#pragma omp parallel for \
 			default(shared) \
-			firstprivate(maxRange, maxNumberThreads, numberPrimesToCheckInBlock) \
+			firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock) \
 			schedule(guided) \
 			reduction(+: primesFound) \
-			num_threads(maxNumberThreads)
-			for (int threadBlockNumber = 0; threadBlockNumber < maxNumberThreads; ++threadBlockNumber) {
+			num_threads(numberThreads)
+			for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
 				size_t possiblePrime;
-				if (threadBlockNumber == 0) {
-					possiblePrime = 11;
-				} else {
-					possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock;
-					if (!wheelSieve.isNumberPossiblePrime(possiblePrime)) {
-						possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
-					}
+
+				possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock + 11;
+				if (!wheelSieve.isNumberPossiblePrime(possiblePrime)) {
+					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 
-				size_t nextPossiblePrimeNumberEndBlock;
-				if (threadBlockNumber != maxNumberThreads - 1) {
-					nextPossiblePrimeNumberEndBlock = (threadBlockNumber + 1) * numberPrimesToCheckInBlock;
-				} else {
-					nextPossiblePrimeNumberEndBlock = maxRange + 1;
-				}
+				size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + 11, maxRange + 1);
 
-				primesFound = 0;
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
 					if (this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValue(possiblePrime)) {
 						++primesFound;

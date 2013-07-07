@@ -38,6 +38,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
 
 			vector<pair<size_t, size_t> > sievingMultiples;
+
 			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
 			this->template removeComposites(maxRangeSquareRoot, maxRange, sievingMultiples);
 
@@ -47,13 +48,18 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumber(maxRangeSquareRoot);
 			size_t blockBeginNumber = getBlockBeginNumber();
+
+			if (maxRangeSquareRoot < blockBeginNumber) {
+				return;
+			}
+
 			size_t blockIndexBegin = this->template getBitsetPositionToNumber(blockBeginNumber);
 			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot);
 			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
 
-			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
-
 			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
+
+			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
 
 			for (size_t blockNumber = 1; blockNumber < numberBlocks; ++blockNumber) {
 				blockIndexBegin = blockIndexEnd;
@@ -118,7 +124,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		virtual void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void calculatePrimesInBlock(size_t primeNumber, size_t maxNumberInBlock, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void initPrimesBitSetSize(size_t maxRange) = 0;
-
 
 		virtual inline size_t getBitsetPositionToNumber(size_t number) {
 			return number;

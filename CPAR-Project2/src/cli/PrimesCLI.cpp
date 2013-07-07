@@ -179,7 +179,7 @@ bool PrimesCLI::computePrimes() {
 
 size_t PrimesCLI::countNumberOfPrimes() {
 	if (_countNumberOfPrimes) {
-		cout << "    > Counting number of primes found..." << endl;
+		cout << "\n    > Counting number of primes found..." << endl;
 		PerformanceTimer countingPrimesTimer;
 		countingPrimesTimer.reset();
 		countingPrimesTimer.start();
