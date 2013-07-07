@@ -33,11 +33,12 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << "  9 - Single processor implementation (using block search with bitset with all numbers optimized for time and space and with modulo 210 wheel factorization)\n";
 		cout << " 10 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 30 wheel factorization)\n";
 		cout << " 11 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization)\n";
-		cout << " 12 - OpenMP implementation\n";
-		cout << " 13 - OpenMPI implementation\n\n";
+		cout << " 12 - OpenMP implementation optimized for space and time and with modulo 210 wheel\n";
+		cout << " 13 - OpenMP implementation optimized for time and with modulo 210 wheel\n";
+		cout << " 14 - OpenMPI implementation\n\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
-		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Implementation to use [0, 13]: ", "    -> Insert one of the listed algorithms!\n", 0, 14);
+		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Implementation to use [0, 14]: ", "    -> Insert one of the listed algorithms!\n", 0, 15);
 
 		if (_algorithmToUse == 0) {
 			break;
@@ -56,7 +57,7 @@ void PrimesCLI::startInteractiveCLI() {
 			_blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
 		}
 
-		if (_algorithmToUse == 12) {
+		if (_algorithmToUse == 12 || _algorithmToUse == 13) {
 			_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
 		}
 
@@ -142,6 +143,11 @@ bool PrimesCLI::computePrimes() {
 		}
 
 		case 12: {
+			_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>(_blockSize, _numberOfThreadsToUseInSieving);
+			break;
+		}
+
+		case 13: {
 			_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>(_blockSize, _numberOfThreadsToUseInSieving);
 			break;
 		}
@@ -245,7 +251,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		if (argSelector == "--algorithm") {
 			stringstream sstream(argValue);
 			int algorithm;
-			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 13)) {
+			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 14)) {
 				showUsage(argv[0], "  >>> Invalid algorithm selector! Must be a number [1, 13]");
 				return false;
 			} else {

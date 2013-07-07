@@ -9,6 +9,7 @@
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel.h"
+#include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel.h"
 
 #include <cmath>
