@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithMod
 		primesSieveSequencialMultiples.computePrimes(1299828);
 		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedTimeAndCacheWithModulo210WheelPrimes100000_Blocks128bytes.txt");
 
-		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/1000.txt"));
+		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/100000.txt"));
 	}
 
 	BOOST_AUTO_TEST_CASE(compute100000PrimesBlocks512byte) {
@@ -47,6 +47,6 @@ BOOST_AUTO_TEST_SUITE(PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithMod
 		primesSieveSequencialMultiples.computePrimes(1299828);
 		primesSieveSequencialMultiples.savePrimesToFile("tests/testresults/optimizedTimeAndCacheWithModulo210WheelPrimes100000_Blocks512bytes.txt");
 
-		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/1000.txt"));
+		BOOST_CHECK(primesSieveSequencialMultiples.checkPrimesFromFile("./tests/testfiles/100000.txt"));
 	}
 	BOOST_AUTO_TEST_SUITE_END()

@@ -25,6 +25,7 @@ using std::ifstream;
 template<typename FlagsContainer>
 class PrimesSieve {
 	protected:
+		size_t _startSieveNumber;
 		size_t _maxRange;
 		FlagsContainer _primesBitset;
 		vector<size_t> _primesValues;
@@ -32,12 +33,12 @@ class PrimesSieve {
 
 	public:
 		PrimesSieve() :
-				_maxRange(0) {
+				_startSieveNumber(11), _maxRange(0) {
 		}
-		
+
 		virtual ~PrimesSieve() {
 		}
-		
+
 		/**
 		 * Compute the number of bits to store in the bitset according to max range
 		 * @param maxRange Maximum number to include in the primes search [3, maxRange]
@@ -46,7 +47,7 @@ class PrimesSieve {
 		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
 			return ((maxRange - 3) >> 1) + 1;
 		}
-		
+
 		/**
 		 * Prime counting function that gives an upper bound of the number of primes that are less or equal than range
 		 * @param maxNumber
@@ -59,11 +60,11 @@ class PrimesSieve {
 		inline size_t getBitsetPositionToNumber(size_t number) {
 			return (number - 3) >> 1;
 		}
-		
+
 		inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
 			return (position << 1) + 3;
 		}
-		
+
 		inline bool getPrimesBitsetValue(size_t number) {
 			return _primesBitset[getBitsetPositionToNumber(number)];
 		}
@@ -91,34 +92,34 @@ class PrimesSieve {
 					_primesValues.push_back(getNumberAssociatedWithBitsetPosition(i));
 				}
 			}
-			
+
 			return _primesValues;
 		}
-		
+
 		bool checkComputedPrimes(const vector<size_t>& expectedPrimes) {
 			if (_primesValues.size() != expectedPrimes.size() || expectedPrimes.empty())
 				return false;
-			
+
 			if (!_primesBitset.empty()) {
 				extractPrimesFromBitset();
 			}
-			
+
 			size_t iSize = _primesValues.size();
 			for (size_t i = 0; i < iSize; ++i) {
 				if (_primesValues[i] != expectedPrimes[i])
 					return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		bool checkPrimesFromFile(string filename) {
 			if (!_primesBitset.empty() && _primesValues.empty()) {
 				extractPrimesFromBitset();
 			}
-			
+
 			ifstream inputStream(filename.c_str());
-			
+
 			if (inputStream.is_open()) {
 				size_t numberRead;
 				size_t iSize = _primesValues.size();
@@ -129,15 +130,19 @@ class PrimesSieve {
 					}
 					++i;
 				}
-				
-				return true;
+
+				if (i != iSize) {
+					return false;
+				} else {
+					return true;
+				}
 			} else {
 				cerr << "    -> File " << filename << " is not available!" << endl;
 			}
-			
+
 			return false;
 		}
-		
+
 		virtual void savePrimes(ostream& outputStream) {
 			if (_primesValues.size() <= 2) {
 				outputStream << 2 << endl;
@@ -157,28 +162,28 @@ class PrimesSieve {
 
 		bool savePrimesToFile(string filename) {
 			ofstream outputStream(filename.c_str());
-			
+
 			if (outputStream.is_open()) {
 				savePrimes(outputStream);
 				return true;
 			}
-			
+
 			return false;
 		}
-		
+
 		void printPrimesToConsole() {
 			savePrimes(cout);
 		}
-		
+
 		virtual void initPrimesBitset(size_t maxRange) {
 			this->_maxRange = maxRange;
-			_primesBitset = FlagsContainer(getNumberBitsToStore(maxRange));
-			size_t iSize = _primesBitset.size();
-			for (size_t i = 0; i < iSize; ++i) {
-				_primesBitset[i] = true;
-			}
+			_primesBitset = FlagsContainer(this->template getNumberBitsToStore(maxRange), true);
+//			size_t iSize = _primesBitset.size();
+//			for (size_t i = 0; i < iSize; ++i) {
+//				_primesBitset[i] = true;
+//			}
 		}
-		
+
 		virtual void initPrimesBitSetSize(size_t newBitsetSize) {
 			_primesBitset = FlagsContainer(newBitsetSize, true);
 //			size_t iSize = primesBitset.size();
@@ -197,7 +202,7 @@ class PrimesSieve {
 		inline size_t getMaxRange() const {
 			return _maxRange;
 		}
-		
+
 		inline void setMaxRange(size_t maxRange) {
 			_maxRange = maxRange;
 		}
@@ -205,15 +210,15 @@ class PrimesSieve {
 		inline PerformanceTimer& getPerformanceTimer() {
 			return _performanceTimer;
 		}
-		
+
 		inline FlagsContainer& getPrimesBitset() {
 			return _primesBitset;
 		}
-		
+
 		inline vector<size_t>& getPrimesValues() {
 			return _primesValues;
 		}
-		
+
 		inline void resetPrimesValues(size_t newSize = 0) {
 			_primesValues = vector<size_t>(newSize);
 		}
@@ -231,6 +236,14 @@ class PrimesSieve {
 			}
 
 			return primesFound;
+		}
+
+		inline size_t getStartSieveNumber() const {
+			return _startSieveNumber;
+		}
+
+		inline void setStartSieveNumber(size_t startSieveNumber) {
+			_startSieveNumber = startSieveNumber;
 		}
 };
 

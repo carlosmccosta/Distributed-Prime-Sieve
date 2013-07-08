@@ -11,18 +11,19 @@
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel.h"
-//#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel.h"
 
 #include <cmath>
 #include <string>
 #include <omp.h>
-//#include <mpi.h>
+#include <mpi.h>
 
 using std::string;
 
 class PrimesCLI {
 	protected:
 		PrimesSieve<vector<bool> >* _primesSieve;
+		PrimesSieve<vector<unsigned char> >* _primesSieveMPI;
 
 		int _algorithmToUse;
 		size_t _primesMaxRange;
@@ -35,6 +36,7 @@ class PrimesCLI {
 	public:
 		PrimesCLI() :
 			_primesSieve(NULL),
+			_primesSieveMPI(NULL),
 			_algorithmToUse(13),
 			_primesMaxRange(pow(2, 32)),
 			_blockSize(16384),
@@ -45,6 +47,9 @@ class PrimesCLI {
 
 		virtual ~PrimesCLI() {
 			delete _primesSieve;
+			_primesSieve = NULL;
+			delete _primesSieveMPI;
+			_primesSieveMPI = NULL;
 		}
 
 		void startInteractiveCLI();
@@ -54,6 +59,7 @@ class PrimesCLI {
 		bool outputResults();
 
 		bool parseCLIParameters(int argc, char** argv);
+		void showCurrentConfiguration();
 		void showUsage(string programName, string message = "");
 		void showVersion();
 		void showProgramHeader();

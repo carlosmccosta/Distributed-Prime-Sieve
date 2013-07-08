@@ -9,6 +9,7 @@
 
 using std::sqrt;
 using std::min;
+using std::max;
 using std::pair;
 
 template<typename FlagsContainer>
@@ -19,63 +20,100 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		int _numberProcesses;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t blockSizeInElements = 128 * 1024) :
+		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 128 * 1024) :
 				_blockSizeInElements(blockSizeInElements) {
-			_processID = 0;
-			_numberProcesses = 1;
-//			MPI_Comm_rank(MPI_COMM_WORLD, &_processID);
-//			MPI_Comm_size(MPI_COMM_WORLD, &_numberProcesses);
-		}
-
-		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPI() {
-		}
-
-		void computePrimes(size_t maxRange) {
-			this->template getPerformanceTimer().reset();
-			this->template getPerformanceTimer().start();
-
-			this->template clearPrimesValues();
-			if (_processID == 0) {
-				this->template initPrimesBitSetSize(maxRange);
-			} else {
-				this->template initPrimesBitSetSize(this->template getProcessBlockSize(_processID, _numberProcesses, maxRange));
+			int flag;
+			MPI_Initialized(&flag);
+			if (!flag) {
+				MPI_Init(NULL, NULL);
 			}
 
-			// adjustment of maxRange in order to calculate the primes <= maxRange instead of < maxRange (since algorithm computes [begin, maxRange[
-			++maxRange;
+			MPI_Comm_rank(MPI_COMM_WORLD, &_processID);
+			MPI_Comm_size(MPI_COMM_WORLD, &_numberProcesses);
 
-			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
-			vector<pair<size_t, size_t> > sievingMultiples;
-			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
-
-			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
+			size_t processStartBlockNumber = max(this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange), this->template getBlockBeginNumber());
 			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
 
 			if (_processID == _numberProcesses - 1) {
 				processEndBlockNumber = maxRange + 1;
 			}
-			this->template removeComposites(processStartBlockNumber, processEndBlockNumber, sievingMultiples);
+
+			this->template setStartSieveNumber(processStartBlockNumber);
+			this->template setMaxRange(processEndBlockNumber - 1);
+		}
+
+		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPI() {
+//			int flag;
+//			MPI_Finalized(&flag);
+//			if (!flag) {
+//				MPI_Finalize();
+//			}
+		}
+
+		virtual void computePrimes(size_t maxRange) {
+			this->template getPerformanceTimer().reset();
+			this->template getPerformanceTimer().start();
+
+			this->template clearPrimesValues();
+
+			size_t processStartBlockNumber = max(this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange), this->template getBlockBeginNumber());
+			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
+
+			if (processStartBlockNumber % 2 == 0) {
+				++processStartBlockNumber;
+			}
+
+			if (_processID == _numberProcesses - 1) {
+				processEndBlockNumber = maxRange + 1;
+			}
+
+			this->template setStartSieveNumber(processStartBlockNumber);
+			this->template setMaxRange(processEndBlockNumber - 1); // processEndBlockNumber is max + 1 to use < operator instead of <=
+
+			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
+			vector<pair<size_t, size_t> > sievingMultiples;
+
+//			int flagFinalize;
+//			MPI_Finalized(&flagFinalize);
+//			if (!flagFinalize) {
+//				MPI_Finalize();
+//			}
+//			exit(EXIT_SUCCESS);
 
 			if (_processID == 0) {
-				this->template collectResultsFromProcessGroup(maxRange);
+				this->template initPrimesBitSetSizeForRoot(maxRange);
 			} else {
-				this->template sendResultsToRootProcess(maxRange);
+				this->template initPrimesBitSetSizeForComputingPrimes(maxRangeSquareRoot);
 			}
+			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
+
+			if (_processID != 0) {
+				this->template initPrimesBitSetSizeForSieving(processEndBlockNumber - processStartBlockNumber);
+				this->template setMaxRange(processEndBlockNumber - 1); // processEndBlockNumber is max + 1 to use < operator instead of <=
+			}
+
+			this->template removeComposites(processStartBlockNumber, processEndBlockNumber, sievingMultiples);
+
+//			if (_processID == 0) {
+//				this->template collectResultsFromProcessGroup(maxRange);
+//			} else {
+//				this->template sendResultsToRootProcess(maxRange);
+//			}
 
 			this->template getPerformanceTimer().stop();
 		}
 
 		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
-			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumber(maxRangeSquareRoot);
-			size_t blockBeginNumber = getBlockBeginNumber();
+			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumberMPI(maxRangeSquareRoot);
+			size_t blockBeginNumber = this->template getBlockBeginNumber();
 
 			if (maxRangeSquareRoot < blockBeginNumber) {
 				return;
 			}
 
-			size_t blockIndexBegin = this->template getBitsetPositionToNumber(blockBeginNumber);
+			size_t blockIndexBegin = this->template getBitsetPositionToNumberMPI(blockBeginNumber);
 			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot);
-			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
 
 			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
 
@@ -88,8 +126,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 					blockIndexEnd = maxIndexRangeSquareRoot;
 				}
 
-				blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
-				blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+				blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
+				blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
 
 				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
 				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
@@ -98,8 +136,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
 			const size_t blockSizeInElements = _blockSizeInElements;
-			const size_t processEndBlockNumberIndex = this->template getNumberBitsToStore(processEndBlockNumber) - 1;
-			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumber(processBeginBlockNumber);
+			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
+			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);
 
 			const size_t numberBlocks = ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
 
@@ -114,13 +152,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 					blockIndexEnd = processEndBlockNumberIndex;
 				}
 
-				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
-				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
+				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
 
-				if (blockNumber == 0) {
+				if (blockNumber == 0 && _processID == 0) {
 					sievingMultiples = sievingMultiplesFirstBlock;
 				} else if (sievingMultiples.empty() || blockNumber != priviousBlockNumber + 1) {
-					computeSievingMultiples(blockBeginNumber, blockEndNumber, sievingMultiples);
+					this->template 	computeSievingMultiples(blockBeginNumber, blockEndNumber, sievingMultiples);
 				}
 				priviousBlockNumber = blockNumber;
 				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
@@ -128,46 +166,49 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		void collectResultsFromProcessGroup(size_t maxRange) {
-//			FlagsContainer& primesBitset = this->template getPrimesBitset();
-//			MPI_Status status;
-//			for (int processID = 1; processID < _numberProcesses; ++processID) {
-//				size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
-//				size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
-//
-//				if (processID == _numberProcesses - 1) {
-//					processEndBlockNumber = maxRange + 1;
-//				}
-//				size_t blockSize = processEndBlockNumber - processStartBlockNumber;
-//				size_t positionToStoreResults = this->template getBitsetPositionToNumber(processStartBlockNumber);
-//				MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, processID, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-//			}
+			FlagsContainer& primesBitset = this->template getPrimesBitset();
+			MPI_Status status;
+			for (int processID = 1; processID < _numberProcesses; ++processID) {
+				size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
+				size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
+
+				if (processID == _numberProcesses - 1) {
+					processEndBlockNumber = maxRange + 1;
+				}
+				size_t blockSize = processEndBlockNumber - processStartBlockNumber;
+				size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
+				MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, processID, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			}
 		}
 
 		void sendResultsToRootProcess(size_t maxRange) {
-//			FlagsContainer& primesBitset = this->template getPrimesBitset();
-//			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
-//			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
-//
-//			if (_processID == _numberProcesses - 1) {
-//				processEndBlockNumber = maxRange + 1;
-//			}
-//			size_t blockSize = processEndBlockNumber - processStartBlockNumber;
-//
-//			MPI_Send(&primesBitset[0], blockSize, MPI_UNSIGNED_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD);
+			FlagsContainer& primesBitset = this->template getPrimesBitset();
+			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
+			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
+
+			if (_processID == _numberProcesses - 1) {
+				processEndBlockNumber = maxRange + 1;
+			}
+			size_t blockSize = processEndBlockNumber - processStartBlockNumber;
+
+			MPI_Send(&primesBitset[0], blockSize, MPI_UNSIGNED_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD);
 		}
 
 		virtual void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void calculatePrimesInBlock(size_t primeNumber, size_t maxNumberInBlock, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
-		virtual void initPrimesBitSetSize(size_t maxRange) = 0;
+
+		virtual void initPrimesBitSetSizeForRoot(size_t maxRange) = 0;
+		virtual void initPrimesBitSetSizeForComputingPrimes(size_t maxRange) = 0;
+		virtual void initPrimesBitSetSizeForSieving(size_t maxRange) = 0;
 
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
-			return number;
+		inline size_t getBitsetPositionToNumberMPI(size_t number) {
+			return (number - this->template getStartSieveNumber()) >> 1;
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
-			return position;
+		inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
+			return (position << 1) + this->template getStartSieveNumber();
 		}
 
 		inline size_t getProcessStartBlockNumber(size_t processID, size_t numberProcesses, size_t maxRange) {
@@ -175,7 +216,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		inline size_t getProcessEndBlockNumber(size_t processID, size_t numberProcesses, size_t maxRange) {
-			return ((processID + 1) * maxRange / numberProcesses) - 1;
+			return ((processID + 1) * maxRange / numberProcesses);
 		}
 
 		inline size_t getProcessBlockSize(size_t processID, size_t numberProcesses, size_t maxRange) {
@@ -186,8 +227,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			this->template getPrimesValues().clear();
 		}
 
-		virtual size_t getBlockBeginNumber() {
-			return this->template getNumberAssociatedWithBitsetPosition(0);
+		virtual inline size_t getBlockBeginNumber() {
+			return this->template getNumberAssociatedWithBitsetPositionMPI(0);
 		}
 
 		inline size_t getBlockSizeInBytes() {

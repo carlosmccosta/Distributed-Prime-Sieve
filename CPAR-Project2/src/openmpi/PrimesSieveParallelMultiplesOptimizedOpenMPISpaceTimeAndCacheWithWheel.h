@@ -24,8 +24,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 		WheelType wheelSieve;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel(size_t blockSizeInBytes = 16 * 1024) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer>(blockSizeInBytes * 8) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer>(maxRange, blockSizeInBytes * 8) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel() {
@@ -60,7 +60,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 				size_t primeMultipleIncrement = primeCompositeInfo.second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					this->PrimesSieve<FlagsContainer>::template setPrimesBitsetValue(primeMultiple, false);
+					this->template setPrimesBitsetValueMPI(primeMultiple, false);
 				}
 
 				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
@@ -80,21 +80,21 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
-				if (this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValue(primeNumber)) {
+				if (this->template getPrimesBitsetValueMPI(primeNumber)) {
 					_sievingPrimes.push_back(primeNumber);
 
 					//use it to calculate his composites
 					size_t primeMultipleIncrement = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
-						this->PrimesSieve<FlagsContainer>::template setPrimesBitsetValue(compositeNumber, false);
+						this->template setPrimesBitsetValueMPI(compositeNumber, false);
 					}
 					sievingMultiples.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
 				}
 			}
 		}
 
-		virtual void initPrimesBitSetSize(size_t maxRange) {
+		virtual void initPrimesBitSetSizeForRoot(size_t maxRange) {
 			this->template initPrimesBitset(maxRange);
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
@@ -102,24 +102,40 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			_sievingPrimes.reserve(numberSievingPrimes);
 		}
 
-		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
-			if (this->template getProcessId() == 0) {
-				return ((maxRange - 3) >> 1) + 1;
-			} else {
-				return (maxRange >> 1) + 1;
-			}
+		virtual void initPrimesBitSetSizeForComputingPrimes(size_t maxRangeSquareRoot) {
+			this->template initPrimesBitset(maxRangeSquareRoot);
+
+			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange(maxRangeSquareRoot);
+			_sievingPrimes.clear();
+			_sievingPrimes.reserve(numberSievingPrimes);
 		}
 
-		virtual size_t getBlockBeginNumber() {
+		virtual void initPrimesBitSetSizeForSieving(size_t blockSize) {
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize((blockSize >> 1) + 1);
+		}
+
+		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
+			return ((maxRange - this->template getStartSieveNumber()) >> 1) + 1;
+		}
+
+		virtual inline size_t getBlockBeginNumber() {
 			return wheelSieve.getFirstPrimeToSieve();
 		}
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
-			return this->PrimesSieve<FlagsContainer>::template getBitsetPositionToNumber(number);
+		inline size_t getBitsetPositionToNumberMPI(size_t number) {
+			return (number - this->template getStartSieveNumber()) >> 1;
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
-			return this->PrimesSieve<FlagsContainer>::template getNumberAssociatedWithBitsetPosition(position);
+		inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
+			return (position << 1) + this->template getStartSieveNumber();
+		}
+
+		inline bool getPrimesBitsetValueMPI(size_t number) {
+			return this->template getPrimesBitset()[this->template getBitsetPositionToNumberMPI(number)];
+		}
+
+		inline void setPrimesBitsetValueMPI(size_t number, bool newValue) {
+			this->template getPrimesBitset()[this->template getBitsetPositionToNumberMPI(number)] = newValue;
 		}
 
 		virtual vector<size_t>& extractPrimesFromBitset() {
@@ -133,7 +149,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 
 			size_t maxRange = this->template getMaxRange();
 			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValue(possiblePrime)) {
+				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
 					primesValues.push_back(possiblePrime);
 				}
 			}
@@ -152,7 +168,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 
 				size_t maxRange = this->template getMaxRange();
 				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-					if (this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValue(possiblePrime)) {
+					if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
 						outputStream << possiblePrime << endl;
 					}
 				}
@@ -173,7 +189,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
 			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (this->template getPrimesBitsetValue(possiblePrime)) {
+				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
 					++primesFound;
 				}
 			}
