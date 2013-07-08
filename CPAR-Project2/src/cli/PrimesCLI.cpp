@@ -3,6 +3,8 @@
 int main(int argc, char** argv) {
 	PrimesCLI primesCLI;
 
+//	MPI_Init(&argc, &argv);
+
 	if (argc == 1) {
 		primesCLI.startInteractiveCLI();
 	} else {
@@ -14,6 +16,8 @@ int main(int argc, char** argv) {
 			primesCLI.outputResults();
 		}
 	}
+
+//	MPI_Finalize();
 
 	return 0;
 }
@@ -149,6 +153,11 @@ bool PrimesCLI::computePrimes() {
 
 		case 13: {
 			_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>(_blockSize, _numberOfThreadsToUseInSieving);
+					break;
+				}
+
+		case 14: {
+//			_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<vector<bool>, Modulo210WheelByte>(_blockSize);
 			break;
 		}
 
@@ -192,6 +201,8 @@ size_t PrimesCLI::countNumberOfPrimes() {
 
 	return 0;
 }
+
+
 bool PrimesCLI::checkPrimesFromFile() {
 	if (_resultsConfirmationFile != "") {
 		cout << "    > Validating computed primes with result file supplied...\n";
