@@ -12,6 +12,7 @@
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel.h"
 #include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel.h"
 
 #include <cmath>
 #include <string>

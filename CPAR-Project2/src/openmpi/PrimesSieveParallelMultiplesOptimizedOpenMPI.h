@@ -164,7 +164,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			}
 		}
 
-		void collectResultsFromProcessGroup(size_t maxRange) {
+		virtual void collectResultsFromProcessGroup(size_t maxRange) {
 			cout << "\n    > Collecting results from other processes..." << endl;
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			MPI_Status status;
@@ -196,7 +196,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			cout << "    --> Finished collecting all results\n"<< endl;
 		}
 
-		void sendResultsToRootProcess(size_t maxRange) {
+		virtual void sendResultsToRootProcess(size_t maxRange) {
 			cout << "    > Sending results from process with rank " << _processID << " to root process..." << endl;
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);

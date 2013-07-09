@@ -65,9 +65,10 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 12 - OpenMP implementation optimized for space and time and with modulo 210 wheel\n";
 		cout << " 13 - OpenMP implementation optimized for time and with modulo 210 wheel\n";
 		cout << " 14 - OpenMPI implementation optimized for space and time and with modulo 210 wheel\n\n";
+		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP optimized for space and time and with modulo 210 wheel\n\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
-		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Implementation to use [0, 14]: ", "    -> Insert one of the listed algorithms!\n", 0, 15);
+		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Implementation to use [0, 14]: ", "    -> Insert one of the listed algorithms!\n", 0, 16);
 
 		if (_algorithmToUse == 0) {
 			break;
@@ -189,6 +190,11 @@ bool PrimesCLI::computePrimes() {
 			break;
 		}
 
+		case 15: {
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize);
+			break;
+		}
+
 		default: {
 			validAlgorithmToUse = false;
 			break;
@@ -238,7 +244,7 @@ size_t PrimesCLI::countNumberOfPrimes() {
 		countingPrimesTimer.start();
 		size_t numberPrimesFound = (_algorithmToUse > 13 ? _primesSieveMPI->getNumberPrimesFound() : _primesSieve->getNumberPrimesFound());
 		countingPrimesTimer.stop();
-		cout << "    --> Computed " << numberPrimesFound << " primes in " << countingPrimesTimer.getElapsedTimeFormated() << endl;
+		cout << "    --> Counted " << numberPrimesFound << " primes in " << countingPrimesTimer.getElapsedTimeFormated() << endl;
 
 		return numberPrimesFound;
 	}
@@ -309,8 +315,8 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		if (argSelector == "--algorithm") {
 			stringstream sstream(argValue);
 			int algorithm;
-			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 14)) {
-				showUsage(argv[0], "  >>> Invalid algorithm selector! Must be a number [1, 13]");
+			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 15)) {
+				showUsage(argv[0], "  >>> Invalid algorithm selector! Must be a number [1, 15]");
 				return false;
 			} else {
 				_algorithmToUse = algorithm;
