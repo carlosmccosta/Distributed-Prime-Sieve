@@ -99,7 +99,8 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 			this->template resetPrimesValues(numberPrimesInRange);
 			this->template getPrimesValues().push_back(2);
 
-			_primesMultiples = vector<size_t>(numberPrimesInRange);
+			_primesMultiples.clear();
+			_primesMultiples.reserve(numberPrimesInRange);
 			_primesMultiples.push_back(2);
 		}
 

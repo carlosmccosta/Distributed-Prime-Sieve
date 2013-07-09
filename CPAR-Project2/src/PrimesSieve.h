@@ -220,7 +220,8 @@ class PrimesSieve {
 		}
 
 		inline void resetPrimesValues(size_t newSize = 0) {
-			_primesValues = vector<size_t>(newSize);
+			_primesValues.clear();
+			_primesValues.reserve(newSize);
 		}
 
 		virtual size_t getNumberPrimesFound() {

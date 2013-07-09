@@ -16,6 +16,7 @@ using std::min;
 using std::max;
 using std::pair;
 using std::endl;
+using std::cout;
 
 template<typename FlagsContainer, typename WheelType>
 class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer> {
@@ -49,7 +50,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 
 				sievingMultiples.push_back(pair<size_t, size_t>(primeMultiple, primeMultipleIncrement));
 			}
-//			cout << "init sievingMultiples in block [" << blockBeginNumber << ", " << blockEndNumber << "]" << endl;
 		}
 
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
@@ -102,8 +102,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			_sievingPrimes.reserve(numberSievingPrimes);
 		}
 
-		virtual void initPrimesBitSetSizeForComputingPrimes(size_t maxRangeSquareRoot) {
-			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxRangeSquareRoot));
+		virtual void initPrimesBitSetSizeForSievingPrimes(size_t maxRangeSquareRoot) {
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStoreSievingPrimes(maxRangeSquareRoot));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange(maxRangeSquareRoot);
 			_sievingPrimes.clear();
@@ -116,6 +116,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 
 		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
 			return ((maxRange - this->template getStartSieveNumber()) >> 1) + 1;
+		}
+
+		virtual inline size_t getNumberBitsToStoreSievingPrimes(size_t maxRange) {
+			return ((maxRange - this->template getBlockBeginNumber()) >> 1) + 1;
 		}
 
 		virtual inline size_t getBlockBeginNumber() {
@@ -184,7 +188,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			vector<size_t>& primesValues = this->template getPrimesValues();
 
 			if (primesValues.size() >= 2)
-				return primesValues.size();
+			return primesValues.size();
 
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
@@ -196,5 +200,5 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 
 			return primesFound;
 		}
-};
+	};
 

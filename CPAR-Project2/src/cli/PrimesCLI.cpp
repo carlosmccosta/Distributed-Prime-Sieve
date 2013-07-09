@@ -12,7 +12,7 @@ void outOfMemmoryHandler() {
 }
 
 int main(int argc, char** argv) {
-//	std::set_new_handler(outOfMemmoryHandler);
+	std::set_new_handler(outOfMemmoryHandler);
 
 	PrimesCLI primesCLI;
 
@@ -208,7 +208,13 @@ bool PrimesCLI::computePrimes() {
 		}
 		cout << "\n    > Computing primes from " << processStartBlockNumber << " to " << processEndBlockNumber << "..." << endl;
 		(_algorithmToUse > 13 ? _primesSieveMPI->computePrimes(_primesMaxRange) : _primesSieve->computePrimes(_primesMaxRange));
-		cout << "    --> Finished in " << (_algorithmToUse > 13 ? _primesSieveMPI->getPerformanceTimer().getElapsedTimeFormated() : _primesSieve->getPerformanceTimer().getElapsedTimeFormated());
+
+		cout << "    --> Finished ";
+		if (_algorithmToUse > 13) {
+			int processRank = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<vector<unsigned char> >*) _primesSieveMPI)->getProcessId();
+			cout << "process with rank " << processRank << " ";
+		}
+		cout << "in " << (_algorithmToUse > 13 ? _primesSieveMPI->getPerformanceTimer().getElapsedTimeFormated() : _primesSieve->getPerformanceTimer().getElapsedTimeFormated());
 		if (_algorithmToUse == 12 || _algorithmToUse == 13) {
 			if (_numberOfThreadsToUseInSieving != 0) {
 				cout << " using " << ((PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>*) _primesSieve)->getNumberOfThreads() << " threads";
@@ -311,7 +317,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			}
 		} else if (argSelector == "--maxRange") {
 			stringstream sstream(argValue);
-			int range;
+			size_t range;
 			if (!(sstream >> range) || (range < 11)) {
 				showUsage(argv[0], "  >>> Invalid primes max range! Max range must be >= 11");
 				return false;
@@ -320,7 +326,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			}
 		} else if (argSelector == "--blockSize") {
 			stringstream sstream(argValue);
-			int blockSize;
+			size_t blockSize;
 			if (!(sstream >> blockSize) || (blockSize < 4)) {
 				showUsage(argv[0], "  >>> Invalid block size! Block size must be >= 4");
 				return false;
@@ -329,7 +335,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			}
 		} else if (argSelector == "--numberThreads") {
 			stringstream sstream(argValue);
-			int numThreads;
+			size_t numThreads;
 			if (!(sstream >> numThreads) || (numThreads < 0)) {
 				showUsage(argv[0], "  >>> Invalid number of threads! Number of threads must be >= 0 (0 to use default)");
 				return false;
