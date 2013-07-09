@@ -106,12 +106,16 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			return wheelSieve.getFirstPrimeToSieve();
 		}
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
-			return this->PrimesSieve<FlagsContainer>::template getBitsetPositionToNumber(number);
+		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
+			return ((maxRange - 3) >> 1) + 1;
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
-			return this->PrimesSieve<FlagsContainer>::template getNumberAssociatedWithBitsetPosition(position);
+		virtual inline size_t getBitsetPositionToNumberOpenMP(size_t number) {
+			return (number - 3) >> 1;
+		}
+
+		virtual inline size_t getNumberAssociatedWithBitsetPositionOpenMP(size_t position) {
+			return (position << 1) + 3;
 		}
 
 		virtual vector<size_t>& extractPrimesFromBitset() {
@@ -169,7 +173,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
 			size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
 
-			#pragma omp parallel for \
+#pragma omp parallel for \
 			default(shared) \
 			firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock) \
 			schedule(guided) \

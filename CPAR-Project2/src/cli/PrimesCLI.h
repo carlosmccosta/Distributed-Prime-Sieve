@@ -38,7 +38,7 @@ class PrimesCLI {
 			_primesSieve(NULL),
 			_primesSieveMPI(NULL),
 			_algorithmToUse(13),
-			_primesMaxRange(pow(2, 32)),
+			_primesMaxRange(7920),
 			_blockSize(16384),
 			_numberOfThreadsToUseInSieving(0),
 			_outputResultsFilename(""),

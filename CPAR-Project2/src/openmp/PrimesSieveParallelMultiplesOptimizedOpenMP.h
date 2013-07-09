@@ -46,16 +46,16 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		}
 
 		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
-			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumber(maxRangeSquareRoot);
+			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumberOpenMP(maxRangeSquareRoot);
 			size_t blockBeginNumber = getBlockBeginNumber();
 
 			if (maxRangeSquareRoot < blockBeginNumber) {
 				return;
 			}
 
-			size_t blockIndexBegin = this->template getBitsetPositionToNumber(blockBeginNumber);
+			size_t blockIndexBegin = this->template getBitsetPositionToNumberOpenMP(blockBeginNumber);
 			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot);
-			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
 
 			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
 
@@ -68,8 +68,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 					blockIndexEnd = maxIndexRangeSquareRoot;
 				}
 
-				blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
-				blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+				blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexBegin);
+				blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
 
 				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
 				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
@@ -79,7 +79,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		virtual void removeComposites(size_t maxRangeSquareRoot, size_t maxRange, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
 			const size_t blockSizeInElements = _blockSizeInElements;
 			const size_t maxIndexRange = this->template getNumberBitsToStore(maxRange) - 1;
-			const size_t blockIndexSquareRoot = this->template getBitsetPositionToNumber(maxRangeSquareRoot);
+			const size_t blockIndexSquareRoot = this->template getBitsetPositionToNumberOpenMP(maxRangeSquareRoot);
 
 			const size_t numberBlocks = ceil((double) (maxIndexRange - blockIndexSquareRoot) / (double) blockSizeInElements);
 			size_t numberThreadsToUse = omp_get_max_threads();
@@ -107,8 +107,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 					blockIndexEnd = maxIndexRange;
 				}
 
-				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);
-				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexEnd);
+				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexBegin);
+				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
 
 				if (blockNumber == 0) {
 					sievingMultiples = sievingMultiplesFirstBlock;
@@ -125,11 +125,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		virtual void calculatePrimesInBlock(size_t primeNumber, size_t maxNumberInBlock, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void initPrimesBitSetSize(size_t maxRange) = 0;
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
+		virtual inline size_t getBitsetPositionToNumberOpenMP(size_t number) {
 			return number;
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPosition(size_t position) {
+		virtual inline size_t getNumberAssociatedWithBitsetPositionOpenMP(size_t position) {
 			return position;
 		}
 
@@ -138,7 +138,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		}
 
 		virtual size_t getBlockBeginNumber() {
-			return this->template getNumberAssociatedWithBitsetPosition(0);
+			return this->template getNumberAssociatedWithBitsetPositionOpenMP(0);
 		}
 
 		inline size_t getBlockSizeInBytes() {

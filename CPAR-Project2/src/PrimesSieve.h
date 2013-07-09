@@ -33,7 +33,7 @@ class PrimesSieve {
 
 	public:
 		PrimesSieve() :
-				_startSieveNumber(11), _maxRange(0) {
+				_startSieveNumber(11), _maxRange(7920) {
 		}
 
 		virtual ~PrimesSieve() {

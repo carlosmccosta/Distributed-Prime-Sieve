@@ -95,7 +95,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 		}
 
 		virtual void initPrimesBitSetSizeForRoot(size_t maxRange) {
-			this->template initPrimesBitset(maxRange);
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxRange));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
 			_sievingPrimes.clear();
@@ -103,7 +103,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 		}
 
 		virtual void initPrimesBitSetSizeForComputingPrimes(size_t maxRangeSquareRoot) {
-			this->template initPrimesBitset(maxRangeSquareRoot);
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxRangeSquareRoot));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange(maxRangeSquareRoot);
 			_sievingPrimes.clear();

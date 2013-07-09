@@ -1,6 +1,19 @@
 #include "PrimesCLI.h"
 
+void outOfMemmoryHandler() {
+	cerr << "\n\n##### Unable to allocate memory!!! #####\n\n" << endl;
+
+	int flagFinalize;
+	MPI_Finalized(&flagFinalize);
+	if (!flagFinalize) {
+		MPI_Finalize();
+	}
+	exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char** argv) {
+//	std::set_new_handler(outOfMemmoryHandler);
+
 	PrimesCLI primesCLI;
 
 	int flagInit;
@@ -51,7 +64,7 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 11 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization)\n";
 		cout << " 12 - OpenMP implementation optimized for space and time and with modulo 210 wheel\n";
 		cout << " 13 - OpenMP implementation optimized for time and with modulo 210 wheel\n";
-		cout << " 14 - OpenMPI implementation\n\n";
+		cout << " 14 - OpenMPI implementation optimized for space and time and with modulo 210 wheel\n\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
 		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Implementation to use [0, 14]: ", "    -> Insert one of the listed algorithms!\n", 0, 15);
