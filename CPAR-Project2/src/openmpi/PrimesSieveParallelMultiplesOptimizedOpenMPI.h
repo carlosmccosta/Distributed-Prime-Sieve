@@ -183,13 +183,15 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				size_t blockSize = ((processEndBlockNumber - processStartBlockNumber) >> 1) + 1;
 				size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
 
+				cout << "    --> Collecting results from process with rank " << processID << endl;
 				MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, processID, 7, MPI_COMM_WORLD, &status);
+				cout << "    --> Finished collecting results from process with rank " << processID << endl;
 			}
-			cout << "    --> Finished\n" << endl;
+			cout << "    --> Finished collecting all results\n"<< endl;
 		}
 
 		void sendResultsToRootProcess(size_t maxRange) {
-			cout << "\n    > Sending results to root process..." << endl;
+			cout << "\n    > Sending results from process with rank " << _processID << " to root process..." << endl;
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
 			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
@@ -204,7 +206,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			size_t blockSize = ((processEndBlockNumber - processStartBlockNumber) >> 1) + 1;
 
 			MPI_Send(&primesBitset[0], blockSize, MPI_UNSIGNED_CHAR, 0, 7, MPI_COMM_WORLD);
-			cout << "    --> Finished\n" << endl;
+			cout << "    --> Finished sending results from process with rank " << _processID << " to root process\n" << endl;
 		}
 
 		virtual void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
