@@ -22,6 +22,8 @@ int main(int argc, char** argv) {
 		MPI_Init(&argc, &argv);
 	}
 
+	primesCLI.setProgramName(argv[0]);
+
 	if (argc == 1) {
 		primesCLI.startInteractiveCLI();
 	} else {
@@ -64,46 +66,57 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 11 - Single processor implementation (using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization)\n";
 		cout << " 12 - OpenMP implementation optimized for space and time and with modulo 210 wheel\n";
 		cout << " 13 - OpenMP implementation optimized for time and with modulo 210 wheel\n";
-		cout << " 14 - OpenMPI implementation optimized for space and time and with modulo 210 wheel\n\n";
+		cout << " 14 - OpenMPI implementation optimized for space and time and with modulo 210 wheel\n";
 		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP optimized for space and time and with modulo 210 wheel\n\n";
+		cout << " 16 - Command line help\n";
+		cout << " 17 - About\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
-		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Implementation to use [0, 14]: ", "    -> Insert one of the listed algorithms!\n", 0, 16);
+		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 17]: ", "    -> Insert one of the listed algorithms!\n", 0, 18);
 
 		if (_algorithmToUse == 0) {
 			break;
-		}
+		} else if (_algorithmToUse == 16) {
+			ConsoleInput::getInstance()->clearConsoleScreen();
+			showProgramHeader();
+			showUsage();
 
-		bool inputRangeInBits = ConsoleInput::getInstance()->getYesNoCin("\n   ## Max primes search range in bits (2^n)? (No for direct max search range specification) (Y/N): ");
-
-		if (inputRangeInBits) {
-			_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
-			_primesMaxRange = (size_t) pow(2, _primesMaxRange);
+		} else if (_algorithmToUse == 17) {
+			ConsoleInput::getInstance()->clearConsoleScreen();
+			showProgramHeader();
+			showVersion();
 		} else {
-			_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be >= 11", 11);
+			bool inputRangeInBits = ConsoleInput::getInstance()->getYesNoCin("\n   ## Max primes search range in bits (2^n)? (No for direct max search range specification) (Y/N): ");
+
+			if (inputRangeInBits) {
+				_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
+				_primesMaxRange = (size_t) pow(2, _primesMaxRange);
+			} else {
+				_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # Max search range: ", "Range must be >= 11", 11);
+			}
+
+			if (_algorithmToUse > 2) {
+				_blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
+			}
+
+			if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15) {
+				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
+			}
+
+			cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
+			_outputResultsFilename = ConsoleInput::getInstance()->getLineCin();
+
+			cout << "   ## Confirm results from file (empty to skip confirmation): ";
+			_resultsConfirmationFile = ConsoleInput::getInstance()->getLineCin();
+
+			computePrimes();
+
+			_countNumberOfPrimes = ConsoleInput::getInstance()->getYesNoCin("\n   ## Count primes found? (Y/N): ");
+			countNumberOfPrimes();
+
+			checkPrimesFromFile();
+			outputResults();
 		}
-
-		if (_algorithmToUse > 2) {
-			_blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
-		}
-
-		if (_algorithmToUse == 12 || _algorithmToUse == 13) {
-			_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
-		}
-
-		cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
-		_outputResultsFilename = ConsoleInput::getInstance()->getLineCin();
-
-		cout << "   ## Confirm results from file (empty to skip confirmation): ";
-		_resultsConfirmationFile = ConsoleInput::getInstance()->getLineCin();
-
-		computePrimes();
-
-		_countNumberOfPrimes = ConsoleInput::getInstance()->getYesNoCin("\n   ## Count primes found? (Y/N): ");
-		countNumberOfPrimes();
-
-		checkPrimesFromFile();
-		outputResults();
 
 		cout << endl << endl;
 
@@ -191,7 +204,7 @@ bool PrimesCLI::computePrimes() {
 		}
 
 		case 15: {
-			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize);
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _numberOfThreadsToUseInSieving);
 			break;
 		}
 
@@ -221,9 +234,15 @@ bool PrimesCLI::computePrimes() {
 			cout << "process with rank " << processRank << " ";
 		}
 		cout << "in " << (_algorithmToUse > 13 ? _primesSieveMPI->getPerformanceTimer().getElapsedTimeFormated() : _primesSieve->getPerformanceTimer().getElapsedTimeFormated());
-		if (_algorithmToUse == 12 || _algorithmToUse == 13) {
+		if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15) {
 			if (_numberOfThreadsToUseInSieving != 0) {
-				cout << " using " << ((PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>*) _primesSieve)->getNumberOfThreads() << " threads";
+				cout << " using ";
+				if (_algorithmToUse == 15) {
+					((PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>*) _primesSieveMPI)->getNumberOfThreads();
+				} else {
+					((PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>*) _primesSieve)->getNumberOfThreads();
+				}
+				cout << " threads";
 			} else {
 				cout << " using at most " << omp_get_num_procs() << " processors and " << omp_get_max_threads() << " threads";
 			}
@@ -298,7 +317,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		string argSelector(argv[argNumber]);
 
 		if (argSelector == "--help") {
-			showUsage(argv[0]);
+			showUsage();
 			return false;
 		} else if (argSelector == "--version") {
 			showVersion();
@@ -306,7 +325,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		}
 
 		if (++argNumber >= argc) {
-			showUsage(argv[0], "  >>> Missing argument for --<argSelector>");
+			showUsage("  >>> Missing argument for --<argSelector>");
 			return false;
 		}
 
@@ -316,7 +335,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			stringstream sstream(argValue);
 			int algorithm;
 			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 15)) {
-				showUsage(argv[0], "  >>> Invalid algorithm selector! Must be a number [1, 15]");
+				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 15]");
 				return false;
 			} else {
 				_algorithmToUse = algorithm;
@@ -325,7 +344,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			stringstream sstream(argValue);
 			size_t range;
 			if (!(sstream >> range) || (range < 11)) {
-				showUsage(argv[0], "  >>> Invalid primes max range! Max range must be >= 11");
+				showUsage("  >>> Invalid primes max range! Max range must be >= 11");
 				return false;
 			} else {
 				_primesMaxRange = range;
@@ -334,7 +353,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			stringstream sstream(argValue);
 			size_t blockSize;
 			if (!(sstream >> blockSize) || (blockSize < 4)) {
-				showUsage(argv[0], "  >>> Invalid block size! Block size must be >= 4");
+				showUsage("  >>> Invalid block size! Block size must be >= 4");
 				return false;
 			} else {
 				_blockSize = blockSize;
@@ -343,7 +362,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			stringstream sstream(argValue);
 			size_t numThreads;
 			if (!(sstream >> numThreads) || (numThreads < 0)) {
-				showUsage(argv[0], "  >>> Invalid number of threads! Number of threads must be >= 0 (0 to use default)");
+				showUsage("  >>> Invalid number of threads! Number of threads must be >= 0 (0 to use default)");
 				return false;
 			} else {
 				_numberOfThreadsToUseInSieving = numThreads;
@@ -358,7 +377,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			} else if (argValue == "N" || argValue == "n") {
 				_countNumberOfPrimes = false;
 			} else {
-				showUsage(argv[0], "  >>> Invalid primes count flag! Flag must be Y or N");
+				showUsage("  >>> Invalid primes count flag! Flag must be Y or N");
 				return false;
 			}
 		} else {
@@ -380,13 +399,13 @@ void PrimesCLI::showCurrentConfiguration() {
 	cout << "\t --countPrimes    -> " << (_countNumberOfPrimes ? "Y" : "N") << "\n" << endl;
 }
 
-void PrimesCLI::showUsage(string programName, string message) {
+void PrimesCLI::showUsage(string message) {
 	if (message != "") {
 		cout << message << "\n" << endl;
 	}
 
 	cout << " >>> Usage:" << endl;
-	cout << programName << " [--algorithm <number>] [--maxRange <number>] [--blockSize <number>] [--numberThreads <number>] [--outputResult <filename>] [--checkResult <filename>] [--countPrimes <Y/N>] [--help] [--version]" << endl;
+	cout << _programName << " [--algorithm <number>] [--maxRange <number>] [--blockSize <number>] [--numberThreads <number>] [--outputResult <filename>] [--checkResult <filename>] [--countPrimes <Y/N>] [--help] [--version]" << endl;
 	cout << "\t --algorithm      -> number in [1, 13]" << endl;
 	cout << "\t --maxRange       -> number >= 11 (default 2^32)" << endl;
 	cout << "\t --blockSize      -> block size in bytes >= 4 (default 16384)" << endl;
@@ -401,9 +420,8 @@ void PrimesCLI::showUsage(string programName, string message) {
 }
 
 void PrimesCLI::showVersion() {
-	cout << "Version 1.0 developed for Parallel computing (4th year, 2nd semester, MIEIC, FEUP)" << endl;
-	cout << "Author: Carlos Miguel Correia da Costa (carlos.costa@fe.up.pt / carloscosta.cmcc@gmail.com)" << endl;
-	cout << "Released 08/07/2013\n\n" << endl;
+	cout << "Version 1.0 developed for Parallel Computing (4th year, 2nd semester, MIEIC, FEUP)" << endl;
+	cout << "Author: Carlos Miguel Correia da Costa (carlos.costa@fe.up.pt / carloscosta.cmcc@gmail.com)\n\n" << endl;
 }
 
 void PrimesCLI::showProgramHeader() {

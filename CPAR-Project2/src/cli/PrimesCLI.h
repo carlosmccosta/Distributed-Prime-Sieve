@@ -34,6 +34,8 @@ class PrimesCLI {
 		string _resultsConfirmationFile;
 		bool _countNumberOfPrimes;
 
+		string _programName;
+
 	public:
 		PrimesCLI() :
 			_primesSieve(NULL),
@@ -44,7 +46,8 @@ class PrimesCLI {
 			_numberOfThreadsToUseInSieving(0),
 			_outputResultsFilename(""),
 			_resultsConfirmationFile(""),
-			_countNumberOfPrimes(false) {}
+			_countNumberOfPrimes(false),
+			_programName("PrimeSieve") {}
 
 		virtual ~PrimesCLI() {
 			delete _primesSieve;
@@ -61,7 +64,7 @@ class PrimesCLI {
 
 		bool parseCLIParameters(int argc, char** argv);
 		void showCurrentConfiguration();
-		void showUsage(string programName, string message = "");
+		void showUsage(string message = "");
 		void showVersion();
 		void showProgramHeader();
 
@@ -120,5 +123,13 @@ class PrimesCLI {
 
 		void setResultsConfirmationFile(const string& resultsConfirmationFile) {
 			_resultsConfirmationFile = resultsConfirmationFile;
+		}
+
+		const string& getProgramName() const {
+			return _programName;
+		}
+
+		void setProgramName(const string& programName) {
+			_programName = programName;
 		}
 };

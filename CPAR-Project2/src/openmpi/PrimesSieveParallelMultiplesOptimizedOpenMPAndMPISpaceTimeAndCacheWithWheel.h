@@ -6,9 +6,12 @@
 
 template<typename FlagsContainer, typename WheelType>
 class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType> {
+	protected:
+		size_t _numberOfThreads;
+
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInElements = 16 * 1024) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements), _numberOfThreads(numberOfThreads) {
 		}
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel() {
 		}
@@ -19,10 +22,23 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);
 
 			const size_t numberBlocks = ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
+			size_t numberThreadsToUse = omp_get_max_threads();
+			if (_numberOfThreads != 0) {
+				if (numberBlocks < _numberOfThreads) {
+					numberThreadsToUse = numberBlocks;
+				} else {
+					numberThreadsToUse = _numberOfThreads;
+				}
+			}
 
 			vector<pair<size_t, size_t> > sievingMultiples;
 			size_t priviousBlockNumber = -1;
 
+#pragma omp parallel for \
+			default(shared) \
+			firstprivate(processBeginBlockNumberIndex, processEndBlockNumberIndex, blockSizeInElements, sievingMultiples, priviousBlockNumber) \
+			schedule(guided, 64) \
+			num_threads(numberThreadsToUse)
 			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
 				size_t blockIndexBegin = blockNumber * blockSizeInElements + processBeginBlockNumberIndex;
 				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
@@ -138,6 +154,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			}
 
 			return primesFound;
+		}
+
+		size_t getNumberOfThreads() const {
+			return _numberOfThreads;
+		}
+
+		void setNumberOfThreads(size_t numberOfThreads) {
+			_numberOfThreads = numberOfThreads;
 		}
 };
 
