@@ -32,7 +32,7 @@ class PrimesCLI {
 		size_t _numberOfThreadsToUseInSieving;
 		string _outputResultsFilename;
 		string _resultsConfirmationFile;
-		bool _countNumberOfPrimes;
+		bool _countNumberOfPrimesOnNode;
 		bool _sendPrimesCountToRoot;
 		bool _sendResultsToRoot;
 
@@ -48,7 +48,7 @@ class PrimesCLI {
 			_numberOfThreadsToUseInSieving(0),
 			_outputResultsFilename(""),
 			_resultsConfirmationFile(""),
-			_countNumberOfPrimes(false),
+			_countNumberOfPrimesOnNode(false),
 			_sendPrimesCountToRoot(false),
 			_sendResultsToRoot(true),
 			_programName("PrimeSieve") {}
@@ -90,11 +90,11 @@ class PrimesCLI {
 		}
 
 		bool isCountNumberOfPrimes() const {
-			return _countNumberOfPrimes;
+			return _countNumberOfPrimesOnNode;
 		}
 
 		void setCountNumberOfPrimes(bool countNumberOfPrimes) {
-			_countNumberOfPrimes = countNumberOfPrimes;
+			_countNumberOfPrimesOnNode = countNumberOfPrimes;
 		}
 
 		size_t getNumberOfThreadsToUseInSieving() const {

@@ -18,14 +18,14 @@ using std::pair;
 using std::endl;
 
 template<typename FlagsContainer, typename WheelType>
-class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMP<FlagsContainer> {
+class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMP<FlagsContainer, WheelType> {
 	protected:
 		vector<size_t> _sievingPrimes;
-		WheelType wheelSieve;
+		WheelType _wheelSieve;
 
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel(size_t blockSizeInBytes = 16 * 1024, size_t numberOfThreads = 0) :
-				PrimesSieveParallelMultiplesOptimizedOpenMP<FlagsContainer>(blockSizeInBytes * 8, numberOfThreads) {
+				PrimesSieveParallelMultiplesOptimizedOpenMP<FlagsContainer, WheelType>(blockSizeInBytes * 8, numberOfThreads) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel() {
@@ -77,11 +77,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
 			size_t primeNumber = blockBeginNumber;
-			if (wheelSieve.getBitsetPositionToNumberWithCheck(primeNumber) == std::numeric_limits<std::size_t>::max()) {
-				primeNumber = wheelSieve.getNextPossiblePrime(primeNumber);
+			if (_wheelSieve.getBitsetPositionToNumberWithCheck(primeNumber) == std::numeric_limits<std::size_t>::max()) {
+				primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber);
 			}
 
-			for (; primeNumber < maxPrimeNumberSearch; primeNumber = wheelSieve.getNextPossiblePrime(primeNumber)) {
+			for (; primeNumber < maxPrimeNumberSearch; primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
 				if (primesBitset[primeNumber]) {
 					_sievingPrimes.push_back(primeNumber);
@@ -111,7 +111,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 		}
 
 		virtual size_t getBlockBeginNumber() {
-			return wheelSieve.getFirstPrimeToSieve();
+			return _wheelSieve.getFirstPrimeToSieve();
 		}
 
 		virtual vector<size_t>& extractPrimesFromBitset() {
@@ -125,7 +125,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			primesValues.push_back(7);
 
 			size_t maxRange = this->template getMaxRange();
-			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
+			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 				if (primesBitset[possiblePrime]) {
 					primesValues.push_back(possiblePrime);
 				}
@@ -145,7 +145,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				outputStream << 7 << endl;
 
 				size_t maxRange = this->template getMaxRange();
-				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
+				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 					if (primesBitset[possiblePrime]) {
 						outputStream << possiblePrime << endl;
 					}
@@ -182,8 +182,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				size_t possiblePrime;
 
 				possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock + 11;
-				if (!wheelSieve.isNumberPossiblePrime(possiblePrime)) {
-					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
+				if (!_wheelSieve.isNumberPossiblePrime(possiblePrime)) {
+					possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 
 				size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + 11, maxRange + 1);
@@ -192,11 +192,15 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 					if (primesBitset[possiblePrime]) {
 						++primesFound;
 					}
-					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
+					possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 			}
 
 			return primesFound;
+		}
+
+		inline WheelType& getWheelSieve() {
+			return _wheelSieve;
 		}
 };
 

@@ -114,7 +114,7 @@ class PrimesSieve {
 			return true;
 		}
 
-		bool checkPrimesFromFile(string filename) {
+		virtual bool checkPrimesFromFile(string filename) {
 			if (!_primesBitset.empty() && _primesValues.empty()) {
 				extractPrimesFromBitset();
 			}
@@ -161,7 +161,7 @@ class PrimesSieve {
 			}
 		}
 
-		bool savePrimesToFile(string filename) {
+		virtual bool savePrimesToFile(string filename) {
 			ofstream outputStream(filename.c_str());
 
 			if (outputStream.is_open()) {
@@ -172,7 +172,7 @@ class PrimesSieve {
 			return false;
 		}
 
-		void printPrimesToConsole() {
+		virtual void printPrimesToConsole() {
 			savePrimes(cout);
 		}
 

@@ -11,7 +11,7 @@ using std::sqrt;
 using std::min;
 using std::pair;
 
-template<typename FlagsContainer>
+template<typename FlagsContainer, typename WheelType>
 class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsContainer> {
 	protected:
 		size_t _blockSizeInElements;
@@ -124,6 +124,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		virtual void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void calculatePrimesInBlock(size_t primeNumber, size_t maxNumberInBlock, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void initPrimesBitSetSize(size_t maxRange) = 0;
+		virtual WheelType& getWheelSieve() = 0;
 
 		virtual inline size_t getBitsetPositionToNumberOpenMP(size_t number) {
 			return number;

@@ -98,26 +98,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			cout << "    --> Finished collecting all results\n" << endl;
 		}
 
-		virtual void sendResultsToRootProcess(size_t maxRange) {
-			int processID = this->template getProcessId();
-			int numberProcesses = this->template getNumberProcesses();
-			cout << "    > Sending results from process with rank " << processID << " to root process..." << endl;
-			FlagsContainer& primesBitset = this->template getPrimesBitset();
-			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, numberProcesses, maxRange);
-			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(processID, numberProcesses, maxRange);
-
-			if (processStartBlockNumber % 2 == 0) {
-				++processStartBlockNumber;
-			}
-
-			if (processID == numberProcesses - 1) {
-				processEndBlockNumber = maxRange + 1;
-			}
-			size_t blockSize = ((processEndBlockNumber - processStartBlockNumber) >> 1) + 1;
-
-			MPI_Send(&primesBitset[0], blockSize, MPI_UNSIGNED_CHAR, 0, 1337, MPI_COMM_WORLD);
-			cout << "    --> Finished sending results from process with rank " << processID << " to root process" << endl;
-		}
 
 		virtual size_t getNumberPrimesFound() {
 			size_t primesFound = this->template getPrimesCount();

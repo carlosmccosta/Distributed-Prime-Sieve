@@ -3,8 +3,15 @@
 #include <stddef.h>
 #include <limits>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 using std::vector;
+using std::string;
+using std::cerr;
+using std::endl;
+using std::ifstream;
 
 struct WheelElement {
 		unsigned char wheelPositionIndex;
@@ -26,11 +33,7 @@ class WheelFactorization {
 
 	public:
 		WheelFactorization() :
-				_wheelSize(WheelSize),
-				_numberOfPossiblePrimesPerWheel(NumberOfPossiblePrimesPerWheel),
-				_firstPrimeToSieve(FirstPrimeToSieve),
-				_numberPrimesSievedByTheWheel(NumberPrimesSievedByTheWheel),
-				_wheelElements(WheelElements) {
+				_wheelSize(WheelSize), _numberOfPossiblePrimesPerWheel(NumberOfPossiblePrimesPerWheel), _firstPrimeToSieve(FirstPrimeToSieve), _numberPrimesSievedByTheWheel(NumberPrimesSievedByTheWheel), _wheelElements(WheelElements) {
 		}
 
 		virtual ~WheelFactorization() {
@@ -78,31 +81,77 @@ class WheelFactorization {
 
 			return numberBitsToStore;
 		}
-		
+
+		virtual bool checkPrimesFromFileMPI(FlagsContainer& primesBitset, size_t startSieveNumber, string filename) {
+			ifstream inputStream(filename.c_str());
+
+			if (inputStream.is_open()) {
+				size_t numberRead;
+
+				size_t primesBitsetSize = primesBitset.size();
+
+				size_t possiblePrime = startSieveNumber;
+				size_t possiblePrimePosition = getBitsetPositionToNumberMPI(possiblePrime, startSieveNumber);
+
+				if (!(isNumberPossiblePrime(possiblePrime))) {
+					possiblePrime = getNextPossiblePrime(possiblePrime);
+				}
+
+				size_t numberPrimesFromFile = 0;
+				while (inputStream >> numberRead) {
+					++numberPrimesFromFile;
+
+					if (numberRead < getFirstPrimeToSieve()) {
+						continue;
+					}
+
+					if (possiblePrimePosition >= primesBitsetSize || primesBitset[possiblePrimePosition] == false) {
+						return false;
+					}
+					possiblePrime = getNextPossiblePrime(possiblePrime);
+					possiblePrimePosition = getBitsetPositionToNumberMPI(possiblePrime, startSieveNumber);
+				}
+
+//				if (possiblePrimePosition < primesBitsetSize && primesBitset[possiblePrimePosition]) {
+//					return false;
+//				} else {
+//					return true;
+//				}
+			} else {
+				cerr << "    -> File " << filename << " is not available!" << endl;
+			}
+
+			return false;
+		}
+
+		inline size_t getBitsetPositionToNumberMPI(size_t number, size_t startSieveNumber) {
+			return (number - startSieveNumber) >> 1;
+		}
+
 		inline size_t getWheelSize() const {
 			return _wheelSize;
 		}
-		
+
 		size_t getFirstPrimeToSieve() const {
 			return _firstPrimeToSieve;
 		}
-		
+
 		size_t getNumberOfPossiblePrimesPerWheel() const {
 			return _numberOfPossiblePrimesPerWheel;
 		}
-		
+
 		WheelElement* getWheelElements() const {
 			return _wheelElements;
 		}
-		
+
 		size_t getNumberPrimesSievedByTheWheel() const {
 			return _numberPrimesSievedByTheWheel;
 		}
 };
 
 /// 3rd wheel, skips multiples of 2, 3 and 5
-typedef WheelFactorization<vector<bool>, (size_t)30, (size_t)8, (size_t)7, (size_t)3, wheel30Elements> Modulo30Wheel;
+typedef WheelFactorization<vector<bool>, (size_t) 30, (size_t) 8, (size_t) 7, (size_t) 3, wheel30Elements> Modulo30Wheel;
 
 /// 4th wheel, skips multiples of 2, 3, 5 and 7
-typedef WheelFactorization<vector<bool>, (size_t)210, (size_t)48, (size_t)11, (size_t)4, wheel210Elements> Modulo210Wheel;
-typedef WheelFactorization<vector<unsigned char>, (size_t)210, (size_t)48, (size_t)11, (size_t)4, wheel210Elements> Modulo210WheelByte;
+typedef WheelFactorization<vector<bool>, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210Wheel;
+typedef WheelFactorization<vector<unsigned char>, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210WheelByte;

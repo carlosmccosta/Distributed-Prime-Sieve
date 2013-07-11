@@ -19,14 +19,14 @@ using std::endl;
 using std::cout;
 
 template<typename FlagsContainer, typename WheelType>
-class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer> {
+class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer, WheelType> {
 	protected:
 		vector<size_t> _sievingPrimes;
 		WheelType _wheelSieve;
 
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, bool sendResultsToRoot = true, bool sendPrimesCountToRoot = true) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer>(maxRange, blockSizeInBytes * 8, sendResultsToRoot, sendPrimesCountToRoot) {
+				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer, WheelType>(maxRange, blockSizeInBytes * 8, sendResultsToRoot, sendPrimesCountToRoot) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel() {
@@ -159,8 +159,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			primesValues.push_back(5);
 			primesValues.push_back(7);
 
+			size_t possiblePrime = this->template getStartSieveNumber();
 			size_t maxRange = this->template getMaxRange();
-			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
+			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
 					primesValues.push_back(possiblePrime);
 				}
@@ -173,13 +174,21 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			vector<size_t>& primesValues = this->template getPrimesValues();
 
 			if (primesValues.size() <= 2) {
-				outputStream << 2 << endl;
-				outputStream << 3 << endl;
-				outputStream << 5 << endl;
-				outputStream << 7 << endl;
+
+				if (this->template getProcessId() == 0) {
+					outputStream << 2 << endl;
+					outputStream << 3 << endl;
+					outputStream << 5 << endl;
+					outputStream << 7 << endl;
+				}
+
+				size_t possiblePrime = this->template getStartSieveNumber();
+				if (!(_wheelSieve.isNumberPossiblePrime(possiblePrime))) {
+					possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
+				}
 
 				size_t maxRange = this->template getMaxRange();
-				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
+				for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 					if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
 						outputStream << possiblePrime << endl;
 					}
@@ -212,6 +221,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 				primesFound = 0;
 			}
 
+			if (!(_wheelSieve.isNumberPossiblePrime(possiblePrime))) {
+				possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
+			}
 			size_t maxRange = this->template getMaxRange();
 			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
