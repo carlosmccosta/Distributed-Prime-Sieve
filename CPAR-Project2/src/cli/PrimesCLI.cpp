@@ -218,8 +218,8 @@ bool PrimesCLI::computePrimes() {
 		}
 
 		case 16: {
-			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _numberOfThreadsToUseInSieving, _sendResultsToRoot,
-					_sendPrimesCountToRoot);
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _numberOfThreadsToUseInSieving,
+					_sendResultsToRoot, _sendPrimesCountToRoot);
 			break;
 		}
 
@@ -324,6 +324,10 @@ bool PrimesCLI::checkPrimesFromFile() {
 }
 
 bool PrimesCLI::outputResults() {
+	if (_algorithmToUse == 16) {
+		return ((PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling<vector<unsigned char>, Modulo210WheelByte>*) _primesSieveMPI)->outputResults();
+	}
+
 	if (_algorithmToUse > 13 ? (((PrimesSieveParallelMultiplesOptimizedOpenMPI<vector<unsigned char>, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId() == 0 || !_sendResultsToRoot) : true) {
 		if (_outputResultsFilename == "stdout") {
 			cout << "\n\n=============================================  Computed primes  =============================================\n\n";
