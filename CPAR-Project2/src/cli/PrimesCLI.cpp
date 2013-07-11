@@ -67,21 +67,22 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 12 - OpenMP implementation optimized for space and time and with modulo 210 wheel\n";
 		cout << " 13 - OpenMP implementation optimized for time and with modulo 210 wheel\n";
 		cout << " 14 - OpenMPI implementation optimized for space and time and with modulo 210 wheel\n";
-		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP optimized for space and time and with modulo 210 wheel\n\n";
-		cout << " 16 - Command line help\n";
-		cout << " 17 - About\n";
+		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP optimized for space and time and with modulo 210 wheel\n";
+		cout << " 16 - Hybrid implementation with OpenMPI and OpenMP optimized for space and time, with modulo 210 wheel and with dynamic scheduling\n\n";
+		cout << " 17 - Command line help\n";
+		cout << " 18 - About\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
-		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 17]: ", "    -> Insert one of the listed algorithms!\n", 0, 18);
+		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 17]: ", "    -> Insert one of the listed algorithms!\n", 0, 19);
 
 		if (_algorithmToUse == 0) {
 			break;
-		} else if (_algorithmToUse == 16) {
+		} else if (_algorithmToUse == 17) {
 			ConsoleInput::getInstance()->clearConsoleScreen();
 			showProgramHeader();
 			showUsage();
 
-		} else if (_algorithmToUse == 17) {
+		} else if (_algorithmToUse == 18) {
 			ConsoleInput::getInstance()->clearConsoleScreen();
 			showProgramHeader();
 			showVersion();
@@ -99,14 +100,14 @@ void PrimesCLI::startInteractiveCLI() {
 				_blockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in bytes: ", "Block size must be > 4", 5);
 			}
 
-			if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15) {
+			if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15 || _algorithmToUse == 16) {
 				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
 			}
 
-			if (_algorithmToUse > 13) {
-				_sendPrimesCountToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Perform primes computation on all processes and send it back to root node? (Y/N): ");
-				_sendResultsToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Send primes results to root node? (Y/N): ");
-			}
+//			if (_algorithmToUse > 13) {
+//				_sendPrimesCountToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Perform primes computation on all processes and send it back to root node? (Y/N): ");
+//				_sendResultsToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Send primes results to root node? (Y/N): ");
+//			}
 
 			cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 			_outputResultsFilename = ConsoleInput::getInstance()->getLineCin();
@@ -216,6 +217,12 @@ bool PrimesCLI::computePrimes() {
 			break;
 		}
 
+		case 16: {
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _numberOfThreadsToUseInSieving, _sendResultsToRoot,
+					_sendPrimesCountToRoot);
+			break;
+		}
+
 		default: {
 			validAlgorithmToUse = false;
 			break;
@@ -244,10 +251,10 @@ bool PrimesCLI::computePrimes() {
 			cout << "process with rank " << processRank << " in ";
 		}
 		cout << (_algorithmToUse > 13 ? _primesSieveMPI->getPerformanceTimer().getElapsedTimeFormated() : _primesSieve->getPerformanceTimer().getElapsedTimeFormated());
-		if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15) {
+		if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15 || _algorithmToUse == 16) {
 			if (_numberOfThreadsToUseInSieving != 0) {
 				cout << " using ";
-				if (_algorithmToUse == 15) {
+				if (_algorithmToUse == 15 || _algorithmToUse == 16) {
 					cout << ((PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>*) _primesSieveMPI)->getNumberOfThreads();
 				} else {
 					cout << ((PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel<vector<bool>, Modulo210Wheel>*) _primesSieve)->getNumberOfThreads();
@@ -368,8 +375,8 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		if (argSelector == "--algorithm") {
 			stringstream sstream(argValue);
 			int algorithm;
-			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 15)) {
-				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 15]");
+			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 16)) {
+				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 16]");
 				return false;
 			} else {
 				_algorithmToUse = algorithm;
@@ -411,7 +418,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			} else if (argValue == "N" || argValue == "n") {
 				_countNumberOfPrimesOnNode = false;
 			} else {
-				showUsage("  >>> Invalid --countPrimes flag! Flag must be Y or N");
+				showUsage("  >>> Invalid --countPrimesInNode flag! Flag must be Y or N");
 				return false;
 			}
 		} else if (argSelector == "--sendResultsToRoot") {
@@ -461,7 +468,7 @@ void PrimesCLI::showUsage(string message) {
 
 	cout << " >>> Usage:" << endl;
 	cout << _programName << " [--algorithm <number>] [--maxRange <number>] [--blockSize <number>] [--numberThreads <number>] [--outputResult <filename>] [--checkResult <filename>] [--countPrimes <Y/N>] [--help] [--version]" << endl;
-	cout << "\t --algorithm              -> number in [1, 13]" << endl;
+	cout << "\t --algorithm              -> number in [1, 16]" << endl;
 	cout << "\t --maxRange               -> number >= 11 (default 2^32)" << endl;
 	cout << "\t --blockSize              -> block size in bytes >= 4 (default 16384)" << endl;
 	cout << "\t --numberThreads          -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads)" << endl;

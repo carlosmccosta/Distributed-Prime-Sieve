@@ -409,5 +409,25 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		inline int getProcessId() const {
 			return _processID;
 		}
+
+		bool isSendPrimesCountToRoot() const
+		{
+			return _sendPrimesCountToRoot;
+		}
+
+		void setSendPrimesCountToRoot(bool sendPrimesCountToRoot)
+		{
+			_sendPrimesCountToRoot = sendPrimesCountToRoot;
+		}
+
+		bool isSendResultsToRoot() const
+		{
+			return _sendResultsToRoot;
+		}
+
+		void setSendResultsToRoot(bool sendResultsToRoot)
+		{
+			_sendResultsToRoot = sendResultsToRoot;
+		}
 	};
 
