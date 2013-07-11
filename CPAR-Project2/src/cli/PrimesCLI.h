@@ -33,6 +33,8 @@ class PrimesCLI {
 		string _outputResultsFilename;
 		string _resultsConfirmationFile;
 		bool _countNumberOfPrimes;
+		bool _sendPrimesCountToRoot;
+		bool _sendResultsToRoot;
 
 		string _programName;
 
@@ -47,6 +49,8 @@ class PrimesCLI {
 			_outputResultsFilename(""),
 			_resultsConfirmationFile(""),
 			_countNumberOfPrimes(false),
+			_sendPrimesCountToRoot(false),
+			_sendResultsToRoot(true),
 			_programName("PrimeSieve") {}
 
 		virtual ~PrimesCLI() {

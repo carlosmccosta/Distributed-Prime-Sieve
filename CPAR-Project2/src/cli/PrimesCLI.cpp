@@ -103,6 +103,11 @@ void PrimesCLI::startInteractiveCLI() {
 				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
 			}
 
+			if (_algorithmToUse > 13) {
+				_sendPrimesCountToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Perform primes computation on all processes and send it back to root node? (Y/N): ");
+				_sendResultsToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Send primes results to root node? (Y/N): ");
+			}
+
 			cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 			_outputResultsFilename = ConsoleInput::getInstance()->getLineCin();
 
@@ -111,7 +116,9 @@ void PrimesCLI::startInteractiveCLI() {
 
 			computePrimes();
 
-			_countNumberOfPrimes = ConsoleInput::getInstance()->getYesNoCin("\n   ## Count primes found? (Y/N): ");
+			if (!_sendPrimesCountToRoot) {
+				_countNumberOfPrimes = ConsoleInput::getInstance()->getYesNoCin("\n   ## Count primes found? (Y/N): ");
+			}
 			countNumberOfPrimes();
 
 			checkPrimesFromFile();
@@ -199,12 +206,12 @@ bool PrimesCLI::computePrimes() {
 		}
 
 		case 14: {
-			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize);
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _sendResultsToRoot, _sendPrimesCountToRoot);
 			break;
 		}
 
 		case 15: {
-			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _numberOfThreadsToUseInSieving);
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _blockSize, _numberOfThreadsToUseInSieving, _sendResultsToRoot, _sendPrimesCountToRoot);
 			break;
 		}
 
@@ -228,12 +235,12 @@ bool PrimesCLI::computePrimes() {
 		cout << "\n    > Computing primes from " << processStartBlockNumber << " to " << processEndBlockNumber << "..." << endl;
 		(_algorithmToUse > 13 ? _primesSieveMPI->computePrimes(_primesMaxRange) : _primesSieve->computePrimes(_primesMaxRange));
 
-		cout << "    --> Finished ";
+		cout << "    --> Finished all computations in ";
 		if (_algorithmToUse > 13) {
 			int processRank = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<vector<unsigned char> >*) _primesSieveMPI)->getProcessId();
 			cout << "process with rank " << processRank << " ";
 		}
-		cout << "in " << (_algorithmToUse > 13 ? _primesSieveMPI->getPerformanceTimer().getElapsedTimeFormated() : _primesSieve->getPerformanceTimer().getElapsedTimeFormated());
+		cout << (_algorithmToUse > 13 ? _primesSieveMPI->getPerformanceTimer().getElapsedTimeFormated() : _primesSieve->getPerformanceTimer().getElapsedTimeFormated());
 		if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15) {
 			if (_numberOfThreadsToUseInSieving != 0) {
 				cout << " using ";
@@ -256,7 +263,7 @@ bool PrimesCLI::computePrimes() {
 }
 
 size_t PrimesCLI::countNumberOfPrimes() {
-	if (_countNumberOfPrimes && (_algorithmToUse > 13 ? (((PrimesSieveParallelMultiplesOptimizedOpenMPI<vector<unsigned char> >*) _primesSieveMPI)->getProcessId() == 0) : true)) {
+	if (_countNumberOfPrimes && (_algorithmToUse > 13 ? !_sendPrimesCountToRoot : true) && (_algorithmToUse > 13 ? (((PrimesSieveParallelMultiplesOptimizedOpenMPI<vector<unsigned char> >*) _primesSieveMPI)->getProcessId() == 0) : true)) {
 		cout << "    > Counting number of primes found..." << endl;
 		PerformanceTimer countingPrimesTimer;
 		countingPrimesTimer.reset();
@@ -377,7 +384,25 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			} else if (argValue == "N" || argValue == "n") {
 				_countNumberOfPrimes = false;
 			} else {
-				showUsage("  >>> Invalid primes count flag! Flag must be Y or N");
+				showUsage("  >>> Invalid --countPrimes flag! Flag must be Y or N");
+				return false;
+			}
+		} else if (argSelector == "--sendResultsToRoot") {
+			if (argValue == "Y" || argValue == "y") {
+				_sendResultsToRoot = true;
+			} else if (argValue == "N" || argValue == "n") {
+				_sendResultsToRoot = false;
+			} else {
+				showUsage("  >>> Invalid --sendResultsToRoot flag! Flag must be Y or N");
+				return false;
+			}
+		} else if (argSelector == "--sendPrimesCountToRoot") {
+			if (argValue == "Y" || argValue == "y") {
+				_sendPrimesCountToRoot = true;
+			} else if (argValue == "N" || argValue == "n") {
+				_sendPrimesCountToRoot = false;
+			} else {
+				showUsage("  >>> Invalid --sendPrimesCountToRoot flag! Flag must be Y or N");
 				return false;
 			}
 		} else {
@@ -390,13 +415,16 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 
 void PrimesCLI::showCurrentConfiguration() {
 	cout << " >>> Current configuration:\n";
-	cout << "\t --algorithm      -> " << _algorithmToUse << "\n";
-	cout << "\t --maxRange       -> " << _primesMaxRange << "\n";
-	cout << "\t --blockSize      -> " << _blockSize << "\n";
-	cout << "\t --numberThreads  -> " << _numberOfThreadsToUseInSieving << "\n";
-	cout << "\t --outputResult   -> " << _outputResultsFilename << "\n";
-	cout << "\t --checkResult    -> " << _resultsConfirmationFile << "\n";
-	cout << "\t --countPrimes    -> " << (_countNumberOfPrimes ? "Y" : "N") << "\n" << endl;
+	cout << "\t --algorithm              -> " << _algorithmToUse << "\n";
+	cout << "\t --maxRange               -> " << _primesMaxRange << "\n";
+	cout << "\t --blockSize              -> " << _blockSize << "\n";
+	cout << "\t --numberThreads          -> " << _numberOfThreadsToUseInSieving << "\n";
+	cout << "\t --outputResult           -> " << _outputResultsFilename << "\n";
+	cout << "\t --checkResult            -> " << _resultsConfirmationFile << "\n";
+	cout << "\t --countPrimes            -> " << (_countNumberOfPrimes ? "Y" : "N") << "\n";
+	cout << "\t --sendPrimesCountToRoot  -> " << (_sendPrimesCountToRoot ? "Y" : "N") << "\n";
+	cout << "\t --sendResultsToRoot      -> " << (_sendResultsToRoot ? "Y" : "N") << "\n";
+	cout << endl;
 }
 
 void PrimesCLI::showUsage(string message) {
@@ -406,15 +434,17 @@ void PrimesCLI::showUsage(string message) {
 
 	cout << " >>> Usage:" << endl;
 	cout << _programName << " [--algorithm <number>] [--maxRange <number>] [--blockSize <number>] [--numberThreads <number>] [--outputResult <filename>] [--checkResult <filename>] [--countPrimes <Y/N>] [--help] [--version]" << endl;
-	cout << "\t --algorithm      -> number in [1, 13]" << endl;
-	cout << "\t --maxRange       -> number >= 11 (default 2^32)" << endl;
-	cout << "\t --blockSize      -> block size in bytes >= 4 (default 16384)" << endl;
-	cout << "\t --numberThreads  -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads)" << endl;
-	cout << "\t --outputResult   -> filename of file to output results (default doesn't output results)" << endl;
-	cout << "\t --checkResult    -> filename of file with primes to check the algorithm result (default doesn't check algorithm result)" << endl;
-	cout << "\t --countPrimes    -> Y or N to count the primes computed (default N)" << endl;
-	cout << "\t --help           -> show program usage" << endl;
-	cout << "\t --version        -> show program version" << endl;
+	cout << "\t --algorithm              -> number in [1, 13]" << endl;
+	cout << "\t --maxRange               -> number >= 11 (default 2^32)" << endl;
+	cout << "\t --blockSize              -> block size in bytes >= 4 (default 16384)" << endl;
+	cout << "\t --numberThreads          -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads)" << endl;
+	cout << "\t --outputResult           -> filename of file to output results (default doesn't output results)" << endl;
+	cout << "\t --checkResult            -> filename of file with primes to check the algorithm result (default doesn't check algorithm result)" << endl;
+	cout << "\t --countPrimes            -> Y/N to count the primes computed (default N)" << endl;
+	cout << "\t --sendPrimesCountToRoot  -> Y/N to to count the number of primes found in each mpi process and send the result to the root node (default Y and overrides the --countPrimes flag if set to N)" << endl;
+	cout << "\t --sendResultsToRoot      -> Y/N to send the computation results to the root node (default Y)" << endl;
+	cout << "\t --help                   -> show program usage" << endl;
+	cout << "\t --version                -> show program version" << endl;
 	cout << "\n\tWith no arguments starts interactive command line interface\n\n" << endl;
 
 }

@@ -172,7 +172,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
 			size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
 
-			#pragma omp parallel for \
+#pragma omp parallel for \
 			default(shared) \
 			firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock) \
 			schedule(guided) \

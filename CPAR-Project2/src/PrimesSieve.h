@@ -30,10 +30,11 @@ class PrimesSieve {
 		FlagsContainer _primesBitset;
 		vector<size_t> _primesValues;
 		PerformanceTimer _performanceTimer;
+		size_t _primesCount;
 
 	public:
 		PrimesSieve() :
-				_startSieveNumber(11), _maxRange(7920) {
+				_startSieveNumber(11), _maxRange(7920), _primesCount(0) {
 		}
 
 		virtual ~PrimesSieve() {
@@ -245,6 +246,18 @@ class PrimesSieve {
 
 		inline void setStartSieveNumber(size_t startSieveNumber) {
 			_startSieveNumber = startSieveNumber;
+		}
+
+		inline size_t getPrimesCount() const {
+			return _primesCount;
+		}
+
+		inline void setPrimesCount(size_t primesCount) {
+			_primesCount = primesCount;
+		}
+
+		inline void incrementPrimesCount(size_t count) {
+			_primesCount += count;
 		}
 };
 

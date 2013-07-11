@@ -25,8 +25,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 		WheelType _wheelSieve;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer>(maxRange, blockSizeInBytes * 8) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, bool sendResultsToRoot = true, bool sendPrimesCountToRoot = true) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer>(maxRange, blockSizeInBytes * 8, sendResultsToRoot, sendPrimesCountToRoot) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel() {
@@ -94,7 +94,15 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 			}
 		}
 
-		virtual void initPrimesBitSetSizeForRoot(size_t maxRange) {
+		virtual void initPrimesBitSetSizeForRoot(size_t maxRange, size_t blockEndNumber) {
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(blockEndNumber));
+
+			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
+			_sievingPrimes.clear();
+			_sievingPrimes.reserve(numberSievingPrimes);
+		}
+
+		virtual void initPrimesBitSetSizeForRootWithAllValues(size_t maxRange) {
 			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxRange));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
@@ -185,19 +193,33 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel: pu
 		}
 
 		virtual size_t getNumberPrimesFound() {
+			size_t primesFound = this->template getPrimesCount();
+			// avoid recomputation
+			if (primesFound != 0) {
+				return primesFound;
+			}
+
 			vector<size_t>& primesValues = this->template getPrimesValues();
+			if (primesValues.size() >= 2) {
+				return primesValues.size();
+			}
 
-			if (primesValues.size() >= 2)
-			return primesValues.size();
+			size_t possiblePrime = this->template getStartSieveNumber();
 
-			size_t primesFound = 4;
+			if (possiblePrime == this->template getBlockBeginNumber()) {
+				primesFound = _wheelSieve.getNumberPrimesSievedByTheWheel();
+			} else {
+				primesFound = 0;
+			}
+
 			size_t maxRange = this->template getMaxRange();
-			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
+			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
 					++primesFound;
 				}
 			}
 
+			this->template setPrimesCount(primesFound);
 			return primesFound;
 		}
 
