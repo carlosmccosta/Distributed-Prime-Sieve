@@ -36,13 +36,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 
 			vector<pair<size_t, size_t> > sievingMultiples;
 
-			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
+			this->template computeSievingPrimes(maxRangeSquareRoot, maxRange, sievingMultiples);
 			this->template removeComposites(maxRangeSquareRoot, maxRange, sievingMultiples);
 
 			this->template getPerformanceTimer().stop();
 		}
 
-		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
+		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, size_t maxRange, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumberOpenMP(maxRangeSquareRoot);
 			size_t blockBeginNumber = getBlockBeginNumber();
 
@@ -61,12 +61,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			for (size_t blockNumber = 1; blockNumber < numberBlocks; ++blockNumber) {
 				blockIndexBegin = blockIndexEnd;
 				blockIndexEnd += _blockSizeInElements;
-				if (blockIndexEnd > maxIndexRangeSquareRoot) {
-					blockIndexEnd = maxIndexRangeSquareRoot + 1;
-				}
 
 				blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexBegin);
 				blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
+
+				if (blockEndNumber >= maxRange) {
+					blockEndNumber = maxRange + 1;
+				}
 
 				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
 				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
@@ -100,12 +101,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 				size_t blockIndexBegin = blockNumber * blockSizeInElements + blockIndexSquareRoot;
 				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
 
-				if (blockIndexEnd > maxIndexRange) {
-					blockIndexEnd = maxIndexRange + 1;
-				}
-
 				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexBegin);
 				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
+
+				if (blockEndNumber > maxRange) {
+					blockEndNumber = maxRange + 1;
+				}
 
 				if (blockNumber == 0) {
 					sievingMultiples = sievingMultiplesFirstBlock;
