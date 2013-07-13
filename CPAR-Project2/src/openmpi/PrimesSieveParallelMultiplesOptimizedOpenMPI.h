@@ -225,7 +225,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			size_t startPossiblePrime = this->template getStartSieveNumber();
 			size_t maxRange = this->template getMaxRange();
 			cout << "    --> Process with rank " << _processID << " counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
+
+			PerformanceTimer performanceTimer;
+			performanceTimer.reset();
+			performanceTimer.start();
 			unsigned long long primesFound = (unsigned long long)this->template getNumberPrimesFound();
+			performanceTimer.stop();
+			cout << "    --> Process " << _processID << " counted " << primesFound << " primes in " << performanceTimer.getElapsedTimeFormated() << endl;
+
 			MPI_Send(&primesFound, 1, MPI_LONG_LONG, 0, 2, MPI_COMM_WORLD);
 		}
 
@@ -239,8 +246,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			cout << "    --> Process with rank " << _processID << " counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
 
 			// compute primes in this process
+			PerformanceTimer performanceTimer;
+			performanceTimer.reset();
+			performanceTimer.start();
 			size_t numberPrimesFound = this->template getNumberPrimesFound();
-			cout << "    --> Process " << 0 << " counted " << numberPrimesFound << " primes" << endl;
+			performanceTimer.stop();
+			cout << "    --> Process " << 0 << " counted " << numberPrimesFound << " primes in " << performanceTimer.getElapsedTimeFormated() << endl;
 
 			// update primes count with the partial count from the remaining processes
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < _numberProcesses; ++numberProcessesResultsCollected) {
@@ -250,7 +261,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					this->template incrementPrimesCount((size_t) primesCount);
-					cout << "    --> Process " << status.MPI_SOURCE << " counted " << primesCount << " primes" << endl;
 				} else {
 					cout << "    --> MPI_Recv detected the following error code: " << status.MPI_ERROR << endl;
 				}
@@ -356,7 +366,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		virtual void initPrimesBitSetSizeForSievingPrimes(size_t maxRangeSquareRoot) = 0;
 		virtual void initPrimesBitSetSizeForSieving(size_t maxRange) = 0;
 		virtual WheelType& getWheelSieve() = 0;
-
 
 		inline size_t getBitsetPositionToNumberMPI(size_t number) {
 			return (number - this->template getStartSieveNumber()) >> 1;

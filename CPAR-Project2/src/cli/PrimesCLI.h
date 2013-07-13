@@ -29,7 +29,8 @@ class PrimesCLI {
 
 		int _algorithmToUse;
 		size_t _primesMaxRange;
-		size_t _blockSize;
+		size_t _cacheBlockSize;
+		size_t _dynamicSchedulingBlockSizeInElements;
 		size_t _numberOfThreadsToUseInSieving;
 		string _outputResultsFilename;
 		string _resultsConfirmationFile;
@@ -38,6 +39,7 @@ class PrimesCLI {
 		bool _sendResultsToRoot;
 
 		string _programName;
+		PerformanceTimer performanceTimer;
 
 	public:
 		PrimesCLI() :
@@ -45,7 +47,8 @@ class PrimesCLI {
 			_primesSieveMPI(NULL),
 			_algorithmToUse(13),
 			_primesMaxRange(7920),
-			_blockSize(16384),
+			_cacheBlockSize(16384),
+			_dynamicSchedulingBlockSizeInElements(1048576),
 			_numberOfThreadsToUseInSieving(0),
 			_outputResultsFilename(""),
 			_resultsConfirmationFile(""),
@@ -66,6 +69,7 @@ class PrimesCLI {
 		size_t countNumberOfPrimes();
 		bool checkPrimesFromFile();
 		bool outputResults();
+		void showTotalComputationTimte();
 
 		bool parseCLIParameters(int argc, char** argv);
 		void showCurrentConfiguration();
@@ -73,6 +77,18 @@ class PrimesCLI {
 		void showVersion();
 		void showProgramHeader();
 
+		void startTimer() {
+			performanceTimer.reset();
+			performanceTimer.start();
+		}
+
+		void stopTimer() {
+			performanceTimer.stop();
+		}
+
+		string getElapsedTimeFormated() {
+			return performanceTimer.getElapsedTimeFormated();
+		}
 
 		int getAlgorithmToUse() const {
 			return _algorithmToUse;
@@ -83,11 +99,11 @@ class PrimesCLI {
 		}
 
 		size_t getBlockSize() const {
-			return _blockSize;
+			return _cacheBlockSize;
 		}
 
 		void setBlockSize(size_t blockSize) {
-			_blockSize = blockSize;
+			_cacheBlockSize = blockSize;
 		}
 
 		bool isCountNumberOfPrimes() const {

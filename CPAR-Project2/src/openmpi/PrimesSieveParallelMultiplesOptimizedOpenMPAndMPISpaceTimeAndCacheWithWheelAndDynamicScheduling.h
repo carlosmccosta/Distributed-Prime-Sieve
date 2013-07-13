@@ -14,7 +14,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 		size_t _processStartBlockNumber;
 		size_t _processEndBlockNumber;
 		string _outputResultsFilename;
-		string _resultsConfirmationFile;
 		size_t _dynamicSchedulingBlockSizeInElements;
 
 		size_t _numerBlocksSieved;
@@ -123,13 +122,20 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 				bool sendResultsToRoot = this->template isSendResultsToRoot();
 
 				if (sendResultsToRoot || numberProcesses == 1) {
-					cout << "\n    > Exporting results to file " << _outputResultsFilename << "...";
+					cout << "\n    > Exporting results to file " << _outputResultsFilename << "..." << endl;
 				}
-				this->template savePrimesToFile(_outputResultsFilename);
-				if (sendResultsToRoot || numberProcesses == 1) {
-					cout << "\n    --> Export to file " << _outputResultsFilename << " finished!" << endl;
+
+				PerformanceTimer performanceTimer;
+				performanceTimer.reset();
+				performanceTimer.start();
+				if (this->template savePrimesToFile(_outputResultsFilename)) {
+					performanceTimer.stop();
+					cout << "    --> Export to file " << _outputResultsFilename << " finished in " << performanceTimer.getElapsedTimeFormated() << endl;
+				} else {
+					cerr << "    --> Export to file failed!" << endl;
 				}
 			} else {
+				cerr << "\n    --> Export failed!" << endl;
 				return false;
 			}
 
