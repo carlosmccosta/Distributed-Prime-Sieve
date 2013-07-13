@@ -32,9 +32,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			this->template clearPrimesValues();
 			this->template initPrimesBitSetSize(maxRange);
 
-			// adjustment of maxRange in order to calculate the primes <= maxRange instead of < maxRange (since algoritmh computes [begin, maxRange[
-			++maxRange;
-
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
 
 			vector<pair<size_t, size_t> > sievingMultiples;
@@ -65,7 +62,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 				blockIndexBegin = blockIndexEnd;
 				blockIndexEnd += _blockSizeInElements;
 				if (blockIndexEnd > maxIndexRangeSquareRoot) {
-					blockIndexEnd = maxIndexRangeSquareRoot;
+					blockIndexEnd = maxIndexRangeSquareRoot + 1;
 				}
 
 				blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexBegin);
@@ -104,7 +101,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
 
 				if (blockIndexEnd > maxIndexRange) {
-					blockIndexEnd = maxIndexRange;
+					blockIndexEnd = maxIndexRange + 1;
 				}
 
 				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexBegin);

@@ -273,8 +273,7 @@ bool PrimesCLI::computePrimes() {
 }
 
 size_t PrimesCLI::countNumberOfPrimes() {
-	if (_countNumberOfPrimesOnNode && (_algorithmToUse > 13 ? !_sendPrimesCountToRoot : true)
-			&& (_algorithmToUse > 13 ? (((PrimesSieveParallelMultiplesOptimizedOpenMPI<vector<unsigned char>, Modulo210Wheel>*) _primesSieveMPI)->getProcessId() == 0) : true)) {
+	if (_countNumberOfPrimesOnNode && _algorithmToUse < 14) {
 		size_t startPossiblePrime;
 		size_t maxRange;
 		int _processID = -1;

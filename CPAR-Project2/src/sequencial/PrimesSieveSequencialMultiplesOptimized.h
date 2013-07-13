@@ -28,13 +28,6 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 			this->template clearPrimesValues();
 			this->template initPrimesBitSetSize(maxRange);
 
-			// adjustment of maxRange in order to calculate the primes <= maxRange instead of < maxRange
-			if (maxRange % 2 == 0) {
-				++maxRange;
-			} else {
-				maxRange += 2;
-			}
-
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
 			size_t maxIndexRange = this->template getNumberBitsToStore(maxRange) - 1;
 			size_t numberBlocks = ceil((double) maxIndexRange / (double) _blockSizeInElements);
@@ -49,7 +42,7 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 				blockIndexBegin = blockIndexEnd;
 				blockIndexEnd += _blockSizeInElements;
 				if (blockIndexEnd > maxIndexRange) {
-					blockIndexEnd = maxIndexRange;
+					blockIndexEnd = maxIndexRange + 1;
 				}
 
 				blockBeginNumber = this->template getNumberAssociatedWithBitsetPosition(blockIndexBegin);

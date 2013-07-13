@@ -122,7 +122,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			int maxNumberThreads = omp_get_max_threads();
 			size_t minNumberPrimesPerThread = 100;
 			int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
-			size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
+			size_t numberPrimesToCheckInBlock = (maxRange - startSieveNumber) / numberThreads;
 
 			WheelType& wheelSieve = this->template getWheelSieve();
 

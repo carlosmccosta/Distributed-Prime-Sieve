@@ -16,14 +16,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 		string _outputResultsFilename;
 		size_t _dynamicSchedulingBlockSizeInElements;
 
-		size_t _numerBlocksSieved;
+		unsigned long long _numberSegmentsSieved;
 		vector<vector<pair<size_t, size_t> > > _blockDistribution;
 
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true, bool sendPrimesCountToRoot =
 				true) :
 				PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements, numberOfThreads, sendResultsToRoot, sendPrimesCountToRoot), _processStartBlockNumber(0), _processEndBlockNumber(
-						0), _dynamicSchedulingBlockSizeInElements(1048576), _numerBlocksSieved(0) {
+						0), _dynamicSchedulingBlockSizeInElements(1048576), _numberSegmentsSieved(0) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling() {
@@ -68,7 +68,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			}
 
 			performanceTimer.stop();
-			cout << "    > Finish sieving " << _numerBlocksSieved << " blocks in process with rank " << processID << " in " << performanceTimer.getElapsedTimeFormated() << endl;
+			cout << "    > Finish sieving " << _numberSegmentsSieved << " blocks in process with rank " << processID << " in " << performanceTimer.getElapsedTimeFormated() << endl;
 
 			if (processID == 0) {
 				cout << "\n    >>>>> Finish sieving in all processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
@@ -76,32 +76,72 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 		}
 
 		virtual void initBlockDistribution(size_t maxRange) {
-			int numberProcesses = this->template getNumberProcesses();
+			size_t numberProcesses = (size_t) this->template getNumberProcesses();
 			_blockDistribution = vector<vector<pair<size_t, size_t> > >(numberProcesses, vector<pair<size_t, size_t> >());
 
+			size_t dynamicSchedulingBlockSizeInElements = _dynamicSchedulingBlockSizeInElements;
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
-			const size_t numberBlocks = ceil((double) (maxRange - maxRangeSquareRoot) / (double) _dynamicSchedulingBlockSizeInElements);
+			size_t numberBlocks = ceil((double) (maxRange - maxRangeSquareRoot) / (double) _dynamicSchedulingBlockSizeInElements);
+			size_t numberBlocksPerProcess = numberBlocks / numberProcesses;
 
-			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
-				size_t blockBegin = blockNumber * _dynamicSchedulingBlockSizeInElements + maxRangeSquareRoot;
-				size_t blockEnd = blockBegin + _dynamicSchedulingBlockSizeInElements;
+			size_t numberBlocksAdded = 0;
+
+			size_t blockNumber = 0;
+#pragma omp parallel for \
+				default(shared) \
+				firstprivate(numberProcesses, numberBlocksPerProcess, dynamicSchedulingBlockSizeInElements, maxRangeSquareRoot) \
+				reduction(+: numberBlocksAdded)
+			for (size_t processNumber = 0; processNumber < numberProcesses; ++processNumber) {
+				for (size_t processBlockNumber = 0; processBlockNumber < numberBlocksPerProcess; ++processBlockNumber) {
+					size_t blockBeginNumber = (processNumber * numberBlocksPerProcess + blockNumber) * dynamicSchedulingBlockSizeInElements + maxRangeSquareRoot;
+					size_t blockEndNumber = blockBeginNumber + dynamicSchedulingBlockSizeInElements;
+
+					if (blockBeginNumber % 2 == 0) {
+						++blockBeginNumber;
+					}
+
+					if (blockEndNumber > maxRange) {
+						blockEndNumber = maxRange;
+					}
+					_blockDistribution[processNumber].push_back(pair<size_t, size_t>(blockBeginNumber, blockEndNumber));
+					++numberBlocksAdded;
+				}
+			}
+
+			// add any missing blocks to last process because of division rounding
+			size_t lastProcessNumberIndex = numberProcesses - 1;
+			for (; numberBlocksAdded < numberBlocks; ++numberBlocksAdded) {
+				size_t blockBegin = numberBlocksAdded * dynamicSchedulingBlockSizeInElements + maxRangeSquareRoot;
+				size_t blockEnd = blockBegin + dynamicSchedulingBlockSizeInElements;
 
 				if (blockEnd > maxRange) {
 					blockEnd = maxRange;
 				}
-
-//				_blockDistribution.push_back(pair<size_t, size_t>(blockBegin, blockEnd));
-
+				_blockDistribution[lastProcessNumberIndex].push_back(pair<size_t, size_t>(blockBegin, blockEnd));
 			}
 		}
 
 		virtual bool getNewBlockFromRoot() {
+			++_numberSegmentsSieved;
+			unsigned long long segmentRange[2];
 
-			this->template setMaxRange(_processEndBlockNumber - 1); // processEndBlockNumber is max + 1 to use < operator instead of <=
-			++_processEndBlockNumber; // force check of block limit
-			this->template setStartSieveNumber(_processStartBlockNumber);
+			MPI_Status status;
 
-			return false;
+			MPI_Send(&_numberSegmentsSieved, 1, MPI_UNSIGNED_LONG_LONG, 0, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD);
+			MPI_Recv(&segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, 0, MSG_ASSIGN_NEW_SEGMET, MPI_COMM_WORLD, &status);
+
+			if (status.MPI_ERROR == MPI_SUCCESS) {
+				_processStartBlockNumber = segmentRange[0];
+				_processEndBlockNumber = segmentRange[1];
+
+				this->template setMaxRange(_processEndBlockNumber - 1); // processEndBlockNumber is max + 1 to use < operator instead of <=
+				++_processEndBlockNumber; // force check of block limit
+				this->template setStartSieveNumber(_processStartBlockNumber);
+
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		virtual void blocksAvailableServer() {
