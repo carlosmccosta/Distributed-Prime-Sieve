@@ -24,11 +24,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		int _processID;
 		int _numberProcesses;
 		bool _sendResultsToRoot;
+		bool _countNumberOfPrimesOnNode;
 		bool _sendPrimesCountToRoot;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 16 * 1024, bool sendResultsToRoot = true, bool sendPrimesCountToRoot = true) :
-				_blockSizeInElements(blockSizeInElements), _sendResultsToRoot(sendResultsToRoot), _sendPrimesCountToRoot(sendPrimesCountToRoot) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 16 * 1024, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
+				_blockSizeInElements(blockSizeInElements), _sendResultsToRoot(sendResultsToRoot), _countNumberOfPrimesOnNode(countNumberOfPrimesOnNode), _sendPrimesCountToRoot(sendPrimesCountToRoot) {
 			int flag;
 			MPI_Initialized(&flag);
 			if (!flag) {
@@ -91,8 +92,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			// compute sieving primes
 			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
 
-//			++processEndBlockNumber; // force check of block limit
-
 			// remove composites
 			if (_processID == 0) {
 				this->template removeComposites(maxRangeSquareRoot, processEndBlockNumber, sievingMultiples);
@@ -130,12 +129,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			for (size_t blockNumber = 1; blockNumber < numberBlocks; ++blockNumber) {
 				blockIndexBegin = blockIndexEnd;
 				blockIndexEnd += _blockSizeInElements;
-				if (blockIndexEnd > maxIndexRangeSquareRoot) {
-					blockIndexEnd = maxIndexRangeSquareRoot + 1;
-				}
 
 				blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
 				blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
+
+				if (blockEndNumber >= maxRangeSquareRoot) {
+					blockEndNumber = maxRangeSquareRoot + 1;
+				}
 
 				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
 				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
@@ -156,12 +156,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				size_t blockIndexBegin = blockNumber * blockSizeInElements + processBeginBlockNumberIndex;
 				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
 
-				if (blockIndexEnd > processEndBlockNumberIndex) {
-					blockIndexEnd = processEndBlockNumberIndex + 1;
-				}
-
 				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
 				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
+
+				if (blockEndNumber > processEndBlockNumber) {
+					blockEndNumber = processEndBlockNumber;
+				}
 
 				if (blockNumber == 0 && _processID == 0) {
 					sievingMultiples = sievingMultiplesFirstBlock;
@@ -184,6 +184,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 					if (_sendPrimesCountToRoot) {
 						this->template collectPrimesCountFromProcessGroup();
+					} else if (_countNumberOfPrimesOnNode) {
+						this->template countPrimesInNode();
 					}
 
 					if (_sendResultsToRoot) {
@@ -192,13 +194,17 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 					}
 				} else {
 					performanceTimer.stop();
-					this->template countPrimesInNode();
+					if (_countNumberOfPrimesOnNode) {
+						this->template countPrimesInNode();
+					}
 				}
 			} else {
 				this->template sendFinishSievingMessageToRoot();
 
 				if (_sendPrimesCountToRoot) {
 					this->template sendPrimesCountToRoot();
+				} else if (_countNumberOfPrimesOnNode) {
+					this->template countPrimesInNode();
 				}
 
 				if (_sendResultsToRoot) {
@@ -439,6 +445,21 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		void setSendResultsToRoot(bool sendResultsToRoot)
 		{
 			_sendResultsToRoot = sendResultsToRoot;
+		}
+
+		bool isCountNumberOfPrimesOnNode() const
+		{
+			return _countNumberOfPrimesOnNode;
+		}
+
+		void setCountNumberOfPrimesOnNode(bool countNumberOfPrimesOnNode)
+		{
+			_countNumberOfPrimesOnNode = countNumberOfPrimesOnNode;
+		}
+
+		void setNumberProcesses(int numberProcesses)
+		{
+			_numberProcesses = numberProcesses;
 		}
 	};
 

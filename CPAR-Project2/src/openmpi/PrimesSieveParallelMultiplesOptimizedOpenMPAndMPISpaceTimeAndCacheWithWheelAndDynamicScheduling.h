@@ -20,10 +20,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 		vector<vector<pair<size_t, size_t> > > _blockDistribution;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true, bool sendPrimesCountToRoot =
-				true) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements, numberOfThreads, sendResultsToRoot, sendPrimesCountToRoot), _processStartBlockNumber(0), _processEndBlockNumber(
-						0), _dynamicSchedulingBlockSizeInElements(1048576), _numberSegmentsSieved(0) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true,
+				bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements, numberOfThreads, sendResultsToRoot, countNumberOfPrimesOnNode,
+						sendPrimesCountToRoot), _processStartBlockNumber(0), _processEndBlockNumber(0), _dynamicSchedulingBlockSizeInElements(1048576), _numberSegmentsSieved(0) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling() {

@@ -10,8 +10,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 		size_t _numberOfThreads;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true, bool sendPrimesCountToRoot = true) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements, sendResultsToRoot, sendPrimesCountToRoot), _numberOfThreads(numberOfThreads) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements, sendResultsToRoot, countNumberOfPrimesOnNode, sendPrimesCountToRoot), _numberOfThreads(numberOfThreads) {
 		}
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel() {
 		}
@@ -43,12 +43,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 				size_t blockIndexBegin = blockNumber * blockSizeInElements + processBeginBlockNumberIndex;
 				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
 
-				if (blockIndexEnd > processEndBlockNumberIndex) {
-					blockIndexEnd = processEndBlockNumberIndex;
-				}
-
 				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
 				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
+
+				if (blockEndNumber > processEndBlockNumber) {
+					blockEndNumber = processEndBlockNumber;
+				}
 
 				if (blockNumber == 0 && this->template getProcessId() == 0) {
 					sievingMultiples = sievingMultiplesFirstBlock;
@@ -72,7 +72,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < numberProcesses; ++numberProcessesResultsCollected) {
 				cout << "    > Probing for results..." << endl;
 				MPI_Status status;
-				MPI_Probe(MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
+				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					int processID = status.MPI_SOURCE;
 					size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, numberProcesses, maxRange);
@@ -89,7 +89,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
 
 					cout << "    --> Collecting results from process with rank " << processID << endl;
-					MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
+					MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
 					cout << "    --> Finished collecting results from process with rank " << processID << endl;
 				} else {
 					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
@@ -97,7 +97,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			}
 			cout << "    --> Finished collecting all results\n" << endl;
 		}
-
 
 		virtual size_t getNumberPrimesFound() {
 			size_t primesFound = this->template getPrimesCount();
@@ -129,7 +128,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 #pragma omp parallel for \
 			default(shared) \
 			firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, startSieveNumber) \
-			schedule(guided) \
+			schedule(static) \
 			reduction(+: primesFound) \
 			num_threads(numberThreads)
 			for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
@@ -140,7 +139,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 
-				size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + startSieveNumber, maxRange + 1);
+				size_t nextPossiblePrimeNumberEndBlock;
+				if (threadBlockNumber == numberThreads - 1) {
+					nextPossiblePrimeNumberEndBlock = maxRange + 1;
+				} else {
+					nextPossiblePrimeNumberEndBlock = (threadBlockNumber + 1) * numberPrimesToCheckInBlock + startSieveNumber;
+				}
 
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
 					if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
