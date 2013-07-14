@@ -81,21 +81,24 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 13 - Fastest OpenMP implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 14 - OpenMPI implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
-		cout << " 16 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n\n";
-		cout << " 17 - Command line help\n";
-		cout << " 18 - About\n";
+		cout << " 16 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
+		cout << " 17 - OpenMPI implementation using block search with bitset with all even numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 18 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 19 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for time with modulo 210 wheel and with dynamic scheduling\n\n";
+		cout << " 20 - Command line help\n";
+		cout << " 21 - About\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
-		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 18]: ", "    -> Insert one of the listed algorithms!\n", 0, 19);
+		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 21]: ", "    -> Insert one of the listed algorithms!\n", 0, 22);
 
 		if (_algorithmToUse == 0) {
 			break;
-		} else if (_algorithmToUse == 17) {
+		} else if (_algorithmToUse == 20) {
 			ConsoleInput::getInstance()->clearConsoleScreen();
 			showProgramHeader();
 			showUsage();
 
-		} else if (_algorithmToUse == 18) {
+		} else if (_algorithmToUse == 21) {
 			ConsoleInput::getInstance()->clearConsoleScreen();
 			showProgramHeader();
 			showVersion();
@@ -117,7 +120,7 @@ void PrimesCLI::startInteractiveCLI() {
 				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in elements to split primes domain for mpi dynamic scheduling: ", "Block size must be >= 100", 100);
 			}
 
-			if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15 || _algorithmToUse == 16) {
+			if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15 || _algorithmToUse == 16 || _algorithmToUse == 18) {
 				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
 			}
 
@@ -238,6 +241,18 @@ bool PrimesCLI::computePrimes() {
 		case 16: {
 			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize,
 					_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
+			break;
+		}
+
+		case 17: {
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize, _sendResultsToRoot,
+					_countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
+			break;
+		}
+
+		case 18: {
+			_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPAndMPITimeAndCacheWithWheel<vector<unsigned char>, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize, _numberOfThreadsToUseInSieving,
+					_sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
 			break;
 		}
 
@@ -410,8 +425,8 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		if (argSelector == "--algorithm") {
 			stringstream sstream(argValue);
 			int algorithm;
-			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 16)) {
-				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 16]");
+			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 19)) {
+				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 19]");
 				return false;
 			} else {
 				_algorithmToUse = algorithm;
@@ -523,7 +538,7 @@ void PrimesCLI::showUsage(string message) {
 	cout << "\n  [--countPrimes <Y/N>]";
 	cout << "\n  [--help]";
 	cout << "\n  [--version]" << endl;
-	cout << "\t --algorithm                   -> number in [1, 16]" << endl;
+	cout << "\t --algorithm                   -> number in [1, 19]" << endl;
 	cout << "\t --maxRange                    -> number >= 11 (default 2^32)" << endl;
 	cout << "\t --cacheBlockSize              -> block size in bytes >= 512 to optimize cache hit rate (default 16384)" << endl;
 	cout << "\t --dynamicSchedulingBlockSize  -> block size in elements >= 100 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576)" << endl;
