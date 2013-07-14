@@ -57,10 +57,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual void computePrimes(size_t maxRange) {
-			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
+			PerformanceTimer& totalPerformanceTimer = this->template getPerformanceTimer();
 
-			performanceTimer.reset();
-			performanceTimer.start();
+			totalPerformanceTimer.reset();
+			totalPerformanceTimer.start();
 
 			this->template setPrimesCount(0);
 			this->template clearPrimesValues();
@@ -93,7 +93,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			}
 
 			// compute sieving primes
+			PerformanceTimer computeSievingPrimesTimer;
+			computeSievingPrimesTimer.reset();
+			computeSievingPrimesTimer.start();
 			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
+			computeSievingPrimesTimer.stop();
+			cout << "    --> Computed sieving primes in process with rank " << _processID << " in " << computeSievingPrimesTimer.getElapsedTimeFormated() << endl;
 
 			// remove composites
 			if (_processID == 0) {
@@ -105,10 +110,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			}
 
 			if (_processID != 0) {
-				performanceTimer.stop();
+				totalPerformanceTimer.stop();
 			}
 
-			cout << "    > Finish sieving in process with rank " << _processID << " in " << performanceTimer.getElapsedTimeFormated() << endl;
+			cout << "    > Finish sieving in process with rank " << _processID << " in " << totalPerformanceTimer.getElapsedTimeFormated() << endl;
 
 			this->template syncProcesses(maxRange);
 		}
@@ -146,6 +151,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
+			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1)<< "]" << endl;
+
 			const size_t blockSizeInElements = _blockSizeInElements;
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
 			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);

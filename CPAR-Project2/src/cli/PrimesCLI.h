@@ -24,10 +24,14 @@
 
 using std::string;
 
+
+typedef vector<bool> FlagsContainer;
+typedef vector<char> FlagsContainerMPI;
+
 class PrimesCLI {
 	protected:
-		PrimesSieve<vector<bool> >* _primesSieve;
-		PrimesSieve<vector<unsigned char> >* _primesSieveMPI;
+		PrimesSieve<FlagsContainer>* _primesSieve;
+		PrimesSieve<FlagsContainerMPI>* _primesSieveMPI;
 
 		int _algorithmToUse;
 		size_t _primesMaxRange;

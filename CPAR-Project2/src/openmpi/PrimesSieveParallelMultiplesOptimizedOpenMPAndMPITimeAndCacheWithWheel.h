@@ -17,8 +17,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPITimeAndCacheWithWheel: pu
 		}
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
-			const size_t blockSizeInElements = this->template getBlockSizeInElements();
+			int _processID = this->template getProcessId();
+			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
 
+			const size_t blockSizeInElements = this->template getBlockSizeInElements();
 			const size_t numberBlocks = ceil((double) (processEndBlockNumber - processBeginBlockNumber) / (double) blockSizeInElements);
 			size_t numberThreadsToUse = omp_get_max_threads();
 			if (_numberOfThreads != 0) {
@@ -35,7 +37,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPITimeAndCacheWithWheel: pu
 #pragma omp parallel for \
 			default(shared) \
 			firstprivate(processBeginBlockNumber, processEndBlockNumber, blockSizeInElements, sievingMultiples, priviousBlockNumber) \
-			schedule(guided, 64) \
+			schedule(guided, 128) \
 			num_threads(numberThreadsToUse)
 			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
 				size_t blockBeginNumber = blockNumber * blockSizeInElements + processBeginBlockNumber;
