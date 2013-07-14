@@ -132,11 +132,11 @@ void PrimesCLI::startInteractiveCLI() {
 			cout << "   ## Confirm results from file (empty to skip confirmation): ";
 			_resultsConfirmationFile = ConsoleInput::getInstance()->getLineCin();
 
-			computePrimes();
-
 			if (!_sendPrimesCountToRoot) {
 				_countNumberOfPrimesOnNode = ConsoleInput::getInstance()->getYesNoCin("\n   ## Count primes found? (Y/N): ");
 			}
+
+			computePrimes();
 			countNumberOfPrimes();
 
 			checkPrimesFromFile();
