@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PrimesSieveParallelMultiplesOptimizedOpenMP.h"
-#include "../lib/PrimesUtils.h"
 #include "../WheelFactorization.h"
 
 #include <cmath>
@@ -20,7 +19,6 @@ using std::endl;
 template<typename FlagsContainer, typename WheelType>
 class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMP<FlagsContainer, WheelType> {
 	protected:
-		vector<size_t> _sievingPrimes;
 		WheelType _wheelSieve;
 
 	public:
@@ -29,27 +27,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel() {
-		}
-
-		virtual void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
-			sievingMultiples.clear();
-			size_t sievingPrimesSize = _sievingPrimes.size();
-			for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
-				size_t primeNumber = _sievingPrimes[sievingPrimesIndex];
-				size_t primeMultiple = PrimesUtils::closestPrimeMultiple(primeNumber, blockBeginNumber);
-				size_t primeMultipleIncrement = primeNumber << 1;
-
-				if (primeMultiple < blockBeginNumber || primeMultiple == primeNumber) {
-					primeMultiple += primeNumber;
-				}
-
-				if (primeMultiple % 2 == 0) {
-					primeMultiple += primeNumber;
-				}
-
-				sievingMultiples.push_back(pair<size_t, size_t>(primeMultiple, primeMultipleIncrement));
-			}
-//			cout << "init sievingMultiples in block [" << blockBeginNumber << ", " << blockEndNumber << "]" << endl;
 		}
 
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
@@ -78,6 +55,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 				primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber);
 			}
 
+			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
+
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
 				if (this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValue(primeNumber)) {
@@ -98,6 +77,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			this->template initPrimesBitset(maxRange);
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
+			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
 			_sievingPrimes.clear();
 			_sievingPrimes.reserve(numberSievingPrimes);
 		}

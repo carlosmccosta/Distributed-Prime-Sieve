@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../PrimesSieve.h"
+#include "../lib/PrimesUtils.h"
 
 #include <cmath>
 #include <algorithm>
@@ -17,6 +18,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		size_t _blockSizeInElements;
 		size_t _numberOfThreads;
 
+		vector<size_t> _sievingPrimes;
+
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMP(size_t blockSizeInElements = 128 * 1024, size_t numberOfThreads = 0) :
 				_blockSizeInElements(blockSizeInElements), _numberOfThreads(numberOfThreads) {
@@ -25,7 +28,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMP() {
 		}
 
-		void computePrimes(size_t maxRange) {
+		virtual void computePrimes(size_t maxRange) {
 			this->template getPerformanceTimer().reset();
 			this->template getPerformanceTimer().start();
 
@@ -118,7 +121,27 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			}
 		}
 
-		virtual void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
+		void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+			sievingMultiples.clear();
+			size_t sievingPrimesSize = _sievingPrimes.size();
+			for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
+				size_t primeNumber = _sievingPrimes[sievingPrimesIndex];
+				size_t primeMultiple = PrimesUtils::closestPrimeMultiple(primeNumber, blockBeginNumber);
+				size_t primeMultipleIncrement = primeNumber << 1;
+
+				if (primeMultiple < blockBeginNumber || primeMultiple == primeNumber) {
+					primeMultiple += primeNumber;
+				}
+
+				if (primeMultiple % 2 == 0) {
+					primeMultiple += primeNumber;
+				}
+
+				sievingMultiples.push_back(pair<size_t, size_t>(primeMultiple, primeMultipleIncrement));
+			}
+//			cout << "init sievingMultiples in block [" << blockBeginNumber << ", " << blockEndNumber << "]" << endl;
+		}
+
 		virtual void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void calculatePrimesInBlock(size_t primeNumber, size_t maxNumberInBlock, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void initPrimesBitSetSize(size_t maxRange) = 0;
@@ -156,14 +179,20 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			_blockSizeInElements = blockSizeInElements;
 		}
 
-		size_t getNumberOfThreads() const
-		{
+		inline size_t getNumberOfThreads() const {
 			return _numberOfThreads;
 		}
 
-		void setNumberOfThreads(size_t numberOfThreads)
-		{
+		inline void setNumberOfThreads(size_t numberOfThreads) {
 			_numberOfThreads = numberOfThreads;
+		}
+
+		inline vector<size_t>& getSievingPrimes() {
+			return _sievingPrimes;
+		}
+
+		inline void setSievingPrimes(const vector<size_t>& sievingPrimes) {
+			_sievingPrimes = sievingPrimes;
 		}
 	};
 
