@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../lib/ConsoleInput.h"
+#include "../WheelFactorization.h"
 #include "../sequencial/PrimesSieveSequencialDivision.h"
 #include "../sequencial/PrimesSieveSequencialMultiples.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceAndCache.h"
@@ -22,16 +23,14 @@
 #include <omp.h>
 #include <mpi.h>
 
+
 using std::string;
 
 
-typedef vector<bool> FlagsContainer;
-typedef vector<char> FlagsContainerMPI;
-
 class PrimesCLI {
 	protected:
-		PrimesSieve<FlagsContainer>* _primesSieve;
-		PrimesSieve<FlagsContainerMPI>* _primesSieveMPI;
+		PrimesSieve<PrimesFlagsContainer>* _primesSieve;
+		PrimesSieve<PrimesFlagsContainerMPI>* _primesSieveMPI;
 
 		int _algorithmToUse;
 		size_t _primesMaxRange;
@@ -60,7 +59,7 @@ class PrimesCLI {
 			_resultsConfirmationFile(""),
 			_countNumberOfPrimesOnNode(false),
 			_sendPrimesCountToRoot(false),
-			_sendResultsToRoot(true),
+			_sendResultsToRoot(false),
 			_programName("PrimeSieve") {}
 
 		virtual ~PrimesCLI() {

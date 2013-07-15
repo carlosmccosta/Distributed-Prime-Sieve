@@ -31,6 +31,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 
 		virtual void computePrimes(size_t maxRange) {
 			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
+			bool _sendResultsToRoot = this->template isSendResultsToRoot();
 
 			performanceTimer.reset();
 			performanceTimer.start();
@@ -49,7 +50,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
 			vector<pair<size_t, size_t> > sievingMultiples;
 			if (processID == 0) {
-				this->template initPrimesBitSetSizeForRootWithAllValues(maxRange);
+				if (_sendResultsToRoot) {
+					this->template initPrimesBitSetSizeForRootWithAllValues(maxRange);
+				}
 			} else {
 				this->template initPrimesBitSetSizeForSievingPrimes(maxRangeSquareRoot);
 			}
@@ -57,7 +60,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 
 			// sieve all assigned blocks
 			while (this->template getNewBlockFromRoot()) {
-				if (processID != 0) {
+				if (processID != 0 || (processID == 0 && !_sendResultsToRoot)) {
 					this->template initPrimesBitSetSizeForSieving(_processEndBlockNumber - _processStartBlockNumber);
 				}
 				this->template removeComposites(_processStartBlockNumber, _processEndBlockNumber, sievingMultiples);
@@ -134,10 +137,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 				_processStartBlockNumber = segmentRange[0];
 				_processEndBlockNumber = segmentRange[1];
 
-				this->template setMaxRange(_processEndBlockNumber - 1); // processEndBlockNumber is max + 1 to use < operator instead of <=
-				++_processEndBlockNumber; // force check of block limit
-				this->template setStartSieveNumber(_processStartBlockNumber);
+				if (_processStartBlockNumber == 0 && _processEndBlockNumber == 0) {
+					return false;
+				}
 
+				this->template setStartSieveNumber(_processStartBlockNumber);
+				this->template setMaxRange(_processEndBlockNumber - 1); // processEndBlockNumber is max + 1 to use < operator instead of <=
 				return true;
 			} else {
 				return false;

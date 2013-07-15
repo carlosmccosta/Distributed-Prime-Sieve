@@ -13,10 +13,17 @@ using std::cerr;
 using std::endl;
 using std::ifstream;
 
+#include <boost/dynamic_bitset.hpp>
+
+//typedef boost::dynamic_bitset<> PrimesFlagsContainer;
+typedef vector<bool> PrimesFlagsContainer;
+//typedef vector<unsigned char> PrimesFlagsContainer;
+typedef vector<unsigned char> PrimesFlagsContainerMPI;
+
+
 struct WheelElement {
 		unsigned char wheelPositionIndex;
 		unsigned char nextPossiblePrimeIncrement;
-
 };
 
 extern const WheelElement wheel30Elements[30];
@@ -149,9 +156,12 @@ class WheelFactorization {
 		}
 };
 
+
 /// 3rd wheel, skips multiples of 2, 3 and 5
-typedef WheelFactorization<vector<bool>, (size_t) 30, (size_t) 8, (size_t) 7, (size_t) 3, wheel30Elements> Modulo30Wheel;
+typedef WheelFactorization<PrimesFlagsContainer, (size_t) 30, (size_t) 8, (size_t) 7, (size_t) 3, wheel30Elements> Modulo30Wheel;
+//typedef WheelFactorization<FlagsContainerMPI, (size_t) 30, (size_t) 8, (size_t) 7, (size_t) 3, wheel30Elements> Modulo30Wheel;
 
 /// 4th wheel, skips multiples of 2, 3, 5 and 7
-typedef WheelFactorization<vector<bool>, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210Wheel;
-typedef WheelFactorization<vector<unsigned char>, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210WheelByte;
+typedef WheelFactorization<PrimesFlagsContainer, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210Wheel;
+//typedef WheelFactorization<FlagsContainerMPI, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210Wheel;
+typedef WheelFactorization<PrimesFlagsContainerMPI, (size_t) 210, (size_t) 48, (size_t) 11, (size_t) 4, wheel210Elements> Modulo210WheelByte;

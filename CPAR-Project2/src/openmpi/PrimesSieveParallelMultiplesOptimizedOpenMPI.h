@@ -151,7 +151,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
-			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1)<< "]" << endl;
+			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
 
 			const size_t blockSizeInElements = _blockSizeInElements;
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
@@ -296,35 +296,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual void sendResultsToRootProcess(size_t maxRange) {
-			cout << "    > Sending results from process with rank " << _processID << " to root process..." << endl;
-			FlagsContainer& primesBitset = this->template getPrimesBitset();
-			size_t blockSize = this->template getProcessBitsetSize(_processID, _numberProcesses, maxRange);
-
-			MPI_Send(&primesBitset[0], blockSize, MPI_UNSIGNED_CHAR, 0, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD);
-			cout << "    --> Finished sending results from process with rank " << _processID << " to root process" << endl;
 		}
 
 		virtual void collectResultsFromProcessGroup(size_t maxRange) {
-			cout << "\n    > Collecting results from other processes..." << endl;
-			FlagsContainer& primesBitset = this->template getPrimesBitset();
-			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < _numberProcesses; ++numberProcessesResultsCollected) {
-				cout << "    > Probing for results..." << endl;
-				MPI_Status status;
-				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
-				if (status.MPI_ERROR == MPI_SUCCESS) {
-					int processID = status.MPI_SOURCE;
-					size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, _numberProcesses, maxRange);
-					size_t blockSize = this->template getProcessBitsetSize(_processID, _numberProcesses, maxRange);
-					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
-
-					cout << "    --> Collecting results from process with rank " << processID << endl;
-					MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
-					cout << "    --> Finished collecting results from process with rank " << processID << endl;
-				} else {
-					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
-				}
-			}
-			cout << "    --> Finished collecting all results\n" << endl;
 		}
 
 		virtual bool savePrimesToFile(string filename) {
