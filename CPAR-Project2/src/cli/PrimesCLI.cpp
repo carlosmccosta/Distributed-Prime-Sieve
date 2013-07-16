@@ -6,7 +6,7 @@ void outOfMemmoryHandler() {
 	if (flag) {
 		int processID;
 		MPI_Comm_rank(MPI_COMM_WORLD, &processID);
-		cerr << "\n\n##### Unable to allocate memory in process with rank " << processID << " !!! #####\n\n" << endl;
+		cerr << "\n\n!!!!! Unable to allocate memory in process with rank " << processID << " !!!!!\n\n" << endl;
 
 		int flagFinalize;
 		MPI_Finalized(&flagFinalize);
@@ -15,7 +15,7 @@ void outOfMemmoryHandler() {
 			MPI_Finalize();
 		}
 	} else {
-		cerr << "\n\n##### Unable to allocate memory!!! #####\n\n" << endl;
+		cerr << "\n\n!!!!! Unable to allocate memory !!!!!\n\n" << endl;
 	}
 
 	exit(EXIT_FAILURE);
@@ -444,7 +444,7 @@ bool PrimesCLI::outputResults() {
 			performanceTimer.stop();
 			cout << "    --> Export to file " << _outputResultsFilename << " finished in " << performanceTimer.getElapsedTimeFormated() << endl;
 		} else {
-			cerr << "    --> Export to file failed!" << endl;
+			cerr << "    !!!!! Export to file failed !!!!!" << endl;
 		}
 	} else {
 		return false;
@@ -643,7 +643,7 @@ void PrimesCLI::showUsage(string message) {
 }
 
 void PrimesCLI::showVersion() {
-	cout << "Version 1.0 developed for Parallel Computing (4th year, 2nd semester, MIEIC, FEUP)" << endl;
+	cout << "Version 1.0 developed in 2013 for Parallel Computing (4th year, 2nd semester, MIEIC, FEUP)" << endl;
 	cout << "Author: Carlos Miguel Correia da Costa (carlos.costa@fe.up.pt / carloscosta.cmcc@gmail.com)\n\n" << endl;
 }
 

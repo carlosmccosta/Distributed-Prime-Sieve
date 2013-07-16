@@ -93,7 +93,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 					size_t blockSize = ((processEndBlockNumber - processStartBlockNumber) >> 1) + 1;
 					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
 
-					this->template receiveDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
+					this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
 				} else {
 					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
 				}

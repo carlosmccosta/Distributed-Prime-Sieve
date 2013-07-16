@@ -1,7 +1,7 @@
 #include "PrimesSieveParallelMultiplesOptimizedOpenMPI.h"
 
 template<>
-MPI_Status PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>::receiveDataMPI(PrimesFlagsContainerMPI& primesBitset, size_t positionToStoreResults, size_t blockSize, int source,
+MPI_Status PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>::receiveSievingDataMPI(PrimesFlagsContainerMPI& primesBitset, size_t positionToStoreResults, size_t blockSize, int source,
 		int tag) {
 	MPI_Status status;
 	cout << "    --> Collecting " << blockSize << " bytes of results from process with rank " << source << ", in process with rank " << _processID << endl;
@@ -14,7 +14,7 @@ MPI_Status PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI,
 }
 
 template<>
-void PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>::sendDataMPI(PrimesFlagsContainerMPI& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination,
+void PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>::sendSievingDataMPI(PrimesFlagsContainerMPI& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination,
 		int tag) {
 	cout << "    --> Sending " << blockSize << " bytes of results from process with rank " << _processID << " to process with rank " << destination << endl;
 	MPI_Send(&primesBitset[startPositionOfResults], blockSize, MPI_UNSIGNED_CHAR, destination, tag, MPI_COMM_WORLD);
