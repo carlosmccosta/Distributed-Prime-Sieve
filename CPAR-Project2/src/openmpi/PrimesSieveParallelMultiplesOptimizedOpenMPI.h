@@ -204,9 +204,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 						this->template setMaxRange(maxRange);
 						this->template collectResultsFromProcessGroup(maxRange);
 
-						if (_countNumberOfPrimesOnNode) {
+						if (_countNumberOfPrimesOnNode && !_sendPrimesCountToRoot) {
 							//force recount with results from other processes
-							this->template setPrimesCount(0);
 							this->template countPrimesInNode();
 						}
 					}
@@ -273,6 +272,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			PerformanceTimer performanceTimer;
 			performanceTimer.reset();
 			performanceTimer.start();
+
+			this->template setPrimesCount(0);
 			size_t numberPrimesFound = this->template getNumberPrimesFound();
 			performanceTimer.stop();
 			cout << "    --> Process " << _processID << " counted " << numberPrimesFound << " primes in [" << startPossiblePrime << ", " << maxRange << "] in " << performanceTimer.getElapsedTimeFormated() << endl;
@@ -329,7 +330,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 					size_t blockSize = this->template getProcessBitsetSize(_processID, _numberProcesses, maxRange);
 					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
 
-					this->template receiveDataMPI(primesBitset, positionToStoreResults, blockSize, MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
+					this->template receiveDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
 				} else {
 					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
 				}

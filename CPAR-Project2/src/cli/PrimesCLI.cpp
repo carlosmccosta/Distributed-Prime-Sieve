@@ -82,9 +82,9 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 14 - OpenMPI implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 16 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
-		cout << " 17 - OpenMPI implementation using block search with bitset with all even numbers optimized for time and with modulo 210 wheel\n";
-		cout << " 18 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for time and with modulo 210 wheel\n";
-		cout << " 19 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for time with modulo 210 wheel and with dynamic scheduling\n\n";
+		cout << " 17 - OpenMPI implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 18 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 19 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time with modulo 210 wheel and with dynamic scheduling\n\n";
 		cout << " 20 - Command line help\n";
 		cout << " 21 - About\n";
 		cout << "  0 - Exit\n\n\n" << endl;
