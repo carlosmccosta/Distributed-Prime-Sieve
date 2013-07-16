@@ -39,11 +39,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 			vector<pair<size_t, size_t> > sievingMultiples;
 			size_t priviousBlockNumber = -1;
 
-#pragma omp parallel for \
-			default(shared) \
-			firstprivate(processBeginBlockNumberIndex, processEndBlockNumberIndex, blockSizeInElements, sievingMultiples, priviousBlockNumber) \
-			schedule(guided, 64) \
-			num_threads(numberThreadsToUse)
+			#pragma omp parallel for \
+				default(shared) \
+				firstprivate(processBeginBlockNumberIndex, processEndBlockNumberIndex, blockSizeInElements, sievingMultiples, priviousBlockNumber) \
+				schedule(guided, 64) \
+				num_threads(numberThreadsToUse)
 			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
 				size_t blockIndexBegin = blockNumber * blockSizeInElements + processBeginBlockNumberIndex;
 				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
@@ -70,33 +70,31 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			int numberProcesses = this->template getNumberProcesses();
 
-#pragma omp parallel for \
-							default(shared) \
-							firstprivate(numberProcesses, maxRange) \
-							schedule(static)
+			#pragma omp parallel for \
+				default(shared) \
+				firstprivate(numberProcesses, maxRange) \
+				schedule(static)
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < numberProcesses; ++numberProcessesResultsCollected) {
 				cout << "    > Probing for results..." << endl;
 				MPI_Status status;
-				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
+				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
+
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					int processID = status.MPI_SOURCE;
-					size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, numberProcesses, maxRange);
-					size_t processEndBlockNumber = this->template getProcessEndBlockNumber(processID, numberProcesses, maxRange);
-
+					int _numberProcesses = this->template getNumberProcesses();
+					size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, _numberProcesses, maxRange);
 					if (processStartBlockNumber % 2 == 0) {
 						++processStartBlockNumber;
 					}
 
-					if (processID == numberProcesses - 1) {
-						processEndBlockNumber = maxRange + 1;
-					}
-					size_t blockSize = ((processEndBlockNumber - processStartBlockNumber) >> 1) + 1;
+					size_t blockSize = this->template getProcessBitsetSize(processID, _numberProcesses, maxRange);
 					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
 
-					this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
+					this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
 				} else {
 					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
 				}
+
 			}
 			cout << "    --> Finished collecting all results\n" << endl;
 		}
@@ -128,12 +126,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 
 			WheelType& wheelSieve = this->template getWheelSieve();
 
-#pragma omp parallel for \
-			default(shared) \
-			firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, startSieveNumber) \
-			schedule(static) \
-			reduction(+: primesFound) \
-			num_threads(numberThreads)
+			#pragma omp parallel for \
+				default(shared) \
+				firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, startSieveNumber) \
+				schedule(static) \
+				reduction(+: primesFound) \
+				num_threads(numberThreads)
 			for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
 				size_t possiblePrime;
 

@@ -16,7 +16,12 @@ using std::max;
 using std::pair;
 
 enum MessageTags {
-	MSG_NODE_SIEVING_FINISHED = 0, MSG_NODE_PRIMES_FOUND_COUNT, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MSG_NODE_COMPUTATION_RESULTS_BLOCK_RANGE, MSG_REQUEST_NEW_SEGMET, MSG_ASSIGN_NEW_SEGMET
+	MSG_NODE_SIEVING_FINISHED = 0,
+	MSG_NODE_PRIMES_FOUND_COUNT,
+	MSG_NODE_COMPUTATION_RESULTS_SEGMENT,
+	MSG_NODE_COMPUTATION_RESULTS_BLOCK_RANGE,
+	MSG_REQUEST_NEW_SEGMET,
+	MSG_ASSIGN_NEW_SEGMET
 };
 
 template<typename FlagsContainer, typename WheelType>
@@ -192,7 +197,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				if (_numberProcesses > 1) {
 					this->template waitForAllProcessesInGroupToFinishSieving();
 					performanceTimer.stop();
-					cout << "\n    >>>>> Finish sieving in all processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
+					cout << "\n    >>>>> Finish sieving in all " << _numberProcesses << " processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
 
 					if (_sendPrimesCountToRoot) {
 						this->template collectPrimesCountFromProcessGroup();
@@ -314,7 +319,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			size_t blockSize = this->template getProcessBitsetSize(_processID, _numberProcesses, maxRange);
 
-			this->template sendSievingDataMPI(primesBitset, 0, blockSize, 0, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
+			this->template sendSievingDataMPI(primesBitset, 0, blockSize, 0, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
 		}
 
 		virtual void collectResultsFromProcessGroup(size_t maxRange) {
@@ -323,14 +328,18 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < _numberProcesses; ++numberProcessesResultsCollected) {
 				cout << "    > Probing for results..." << endl;
 				MPI_Status status;
-				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
+				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					int processID = status.MPI_SOURCE;
 					size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, _numberProcesses, maxRange);
-					size_t blockSize = this->template getProcessBitsetSize(_processID, _numberProcesses, maxRange);
+					if (processStartBlockNumber % 2 == 0) {
+						++processStartBlockNumber;
+					}
+
+					size_t blockSize = this->template getProcessBitsetSize(processID, _numberProcesses, maxRange);
 					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
 
-					this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
+					this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
 				} else {
 					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
 				}
@@ -557,21 +566,17 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual inline size_t getProcessBitsetSize(size_t processID, size_t numberProcesses, size_t maxRange) {
-			int _processID = this->template getProcessId();
-			int _numberProcesses = this->template getNumberProcesses();
-
-			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(_processID, _numberProcesses, maxRange);
-			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(_processID, _numberProcesses, maxRange);
+			size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, numberProcesses, maxRange);
+			size_t processEndBlockNumber = this->template getProcessEndBlockNumber(processID, numberProcesses, maxRange);
 
 			if (processStartBlockNumber % 2 == 0) {
 				++processStartBlockNumber;
 			}
 
-			if (_processID == _numberProcesses - 1) {
+			if (processID == numberProcesses - 1) {
 				processEndBlockNumber = maxRange + 1;
 			}
-			size_t blockSize = this->template getNumberBitsToStoreBlock(processEndBlockNumber - processStartBlockNumber);
-			return blockSize;
+			return this->template getNumberBitsToStoreBlock(processEndBlockNumber - processStartBlockNumber);
 		}
 
 		// bitset specific memory management
