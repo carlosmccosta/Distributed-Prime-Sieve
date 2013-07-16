@@ -12,20 +12,22 @@
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPI.h"
 #include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel.h"
-#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel.h"
-#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheelAndDynamicScheduling.h"
 #include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel.h"
-#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPAndMPITimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPTimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel.h"
+#include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel.h"
 
 #include <cmath>
 #include <string>
 #include <omp.h>
 #include <mpi.h>
 
-
 using std::string;
-
 
 class PrimesCLI {
 	protected:
@@ -48,19 +50,9 @@ class PrimesCLI {
 
 	public:
 		PrimesCLI() :
-			_primesSieve(NULL),
-			_primesSieveMPI(NULL),
-			_algorithmToUse(13),
-			_primesMaxRange(7920),
-			_cacheBlockSize(16384),
-			_dynamicSchedulingBlockSizeInElements(1048576),
-			_numberOfThreadsToUseInSieving(0),
-			_outputResultsFilename(""),
-			_resultsConfirmationFile(""),
-			_countNumberOfPrimesOnNode(false),
-			_sendPrimesCountToRoot(false),
-			_sendResultsToRoot(false),
-			_programName("PrimeSieve") {}
+				_primesSieve(NULL), _primesSieveMPI(NULL), _algorithmToUse(13), _primesMaxRange(7920), _cacheBlockSize(16384), _dynamicSchedulingBlockSizeInElements(1048576), _numberOfThreadsToUseInSieving(0), _outputResultsFilename(
+						""), _resultsConfirmationFile(""), _countNumberOfPrimesOnNode(false), _sendPrimesCountToRoot(false), _sendResultsToRoot(false), _programName("PrimeSieve") {
+		}
 
 		virtual ~PrimesCLI() {
 			delete _primesSieve;

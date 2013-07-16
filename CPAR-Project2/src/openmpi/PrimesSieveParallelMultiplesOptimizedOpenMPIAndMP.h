@@ -1,26 +1,27 @@
 #pragma once
 
-#include "PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel.h"
-
-using std::cout;
-using std::endl;
-
+#include "PrimesSieveParallelMultiplesOptimizedOpenMPI.h"
 #include <omp.h>
-#include <mpi.h>
 
 template<typename FlagsContainer, typename WheelType>
-class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType> {
+class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer, WheelType> {
 	protected:
 		size_t _numberOfThreads;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel<FlagsContainer, WheelType>(maxRange, blockSizeInElements, sendResultsToRoot, countNumberOfPrimesOnNode, sendPrimesCountToRoot), _numberOfThreads(numberOfThreads) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true,
+				bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPI<FlagsContainer, WheelType>(maxRange, blockSizeInElements, sendResultsToRoot, countNumberOfPrimesOnNode, sendPrimesCountToRoot), _numberOfThreads(
+						numberOfThreads) {
 		}
-		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWheel() {
+
+		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP() {
 		}
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
+			int _processID = this->template getProcessId();
+			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
+
 			const size_t blockSizeInElements = this->template getBlockSizeInElements();
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
 			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);
@@ -65,7 +66,39 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPAndMPISpaceTimeAndCacheWithWhee
 		}
 
 		virtual void collectResultsFromProcessGroup(size_t maxRange) {
+			cout << "\n    > Collecting results from other processes..." << endl;
+			FlagsContainer& primesBitset = this->template getPrimesBitset();
+			int numberProcesses = this->template getNumberProcesses();
 
+#pragma omp parallel for \
+							default(shared) \
+							firstprivate(numberProcesses, maxRange) \
+							schedule(static)
+			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < numberProcesses; ++numberProcessesResultsCollected) {
+				cout << "    > Probing for results..." << endl;
+				MPI_Status status;
+				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK, MPI_COMM_WORLD, &status);
+				if (status.MPI_ERROR == MPI_SUCCESS) {
+					int processID = status.MPI_SOURCE;
+					size_t processStartBlockNumber = this->template getProcessStartBlockNumber(processID, numberProcesses, maxRange);
+					size_t processEndBlockNumber = this->template getProcessEndBlockNumber(processID, numberProcesses, maxRange);
+
+					if (processStartBlockNumber % 2 == 0) {
+						++processStartBlockNumber;
+					}
+
+					if (processID == numberProcesses - 1) {
+						processEndBlockNumber = maxRange + 1;
+					}
+					size_t blockSize = ((processEndBlockNumber - processStartBlockNumber) >> 1) + 1;
+					size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processStartBlockNumber);
+
+					this->template receiveDataMPI(primesBitset, positionToStoreResults, blockSize, MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK);
+				} else {
+					cout << "    --> MPI_Probe detected the following error code: " << status.MPI_ERROR << endl;
+				}
+			}
+			cout << "    --> Finished collecting all results\n" << endl;
 		}
 
 		virtual size_t getNumberPrimesFound() {
