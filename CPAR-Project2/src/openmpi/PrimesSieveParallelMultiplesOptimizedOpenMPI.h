@@ -17,7 +17,7 @@ using std::pair;
 
 enum MessageTags {
 	MSG_NODE_SIEVING_FINISHED = 0,
-	MSG_NODE_PRIMES_FOUND_COUNT,
+	MSG_NODE_PRIMES_COUNT_FOUND,
 	MSG_NODE_COMPUTATION_RESULTS_SEGMENT,
 	MSG_NODE_COMPUTATION_RESULTS_BLOCK_RANGE,
 	MSG_REQUEST_NEW_SEGMET,
@@ -287,7 +287,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 		virtual void sendPrimesCountToRoot() {
 			unsigned long long numberPrimesFound = (unsigned long long)this->template countPrimesInNode();
-			MPI_Send(&numberPrimesFound, 1, MPI_LONG_LONG, 0, MSG_NODE_PRIMES_FOUND_COUNT, MPI_COMM_WORLD);
+			MPI_Send(&numberPrimesFound, 1, MPI_LONG_LONG, 0, MSG_NODE_PRIMES_COUNT_FOUND, MPI_COMM_WORLD);
 		}
 
 		virtual void collectPrimesCountFromProcessGroup() {
@@ -301,7 +301,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < _numberProcesses; ++numberProcessesResultsCollected) {
 				unsigned long long primesCount;
 				MPI_Status status;
-				MPI_Recv(&primesCount, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_NODE_PRIMES_FOUND_COUNT, MPI_COMM_WORLD, &status);
+				MPI_Recv(&primesCount, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_NODE_PRIMES_COUNT_FOUND, MPI_COMM_WORLD, &status);
 
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					this->template incrementPrimesCount((size_t) primesCount);
@@ -383,8 +383,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 //		}
 
 		void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
-			sievingMultiples.clear();
 			size_t sievingPrimesSize = _sievingPrimes.size();
+			sievingMultiples.clear();
+			sievingMultiples.reserve(sievingPrimesSize);
 			for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
 				size_t primeNumber = _sievingPrimes[sievingPrimesIndex];
 				size_t primeMultiple = PrimesUtils::closestPrimeMultiple(primeNumber, blockBeginNumber);
@@ -427,8 +428,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			if (_wheelSieve.getBitsetPositionToNumberWithCheck(primeNumber) == std::numeric_limits<std::size_t>::max()) {
 				primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber);
 			}
-
-			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
@@ -535,7 +534,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxNumberToStore));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
-			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
 
 			_sievingPrimes.clear();
 			_sievingPrimes.reserve(numberSievingPrimes);
@@ -545,7 +543,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxRange));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange((size_t) sqrt(maxRange));
-			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
 
 			_sievingPrimes.clear();
 			_sievingPrimes.reserve(numberSievingPrimes);
@@ -555,7 +552,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStoreSievingPrimes(maxRangeSquareRoot));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange(maxRangeSquareRoot);
-			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
 
 			_sievingPrimes.clear();
 			_sievingPrimes.reserve(numberSievingPrimes);

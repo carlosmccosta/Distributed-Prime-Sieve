@@ -64,15 +64,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				} else {
 					this->template initPrimesBitSetSizeForRoot(maxRangeSquareRoot, maxRangeSquareRoot);
 				}
+
+				this->template setupSegmentDistribution(maxRange);
+				this->template setupRootSegmentManagementTasks(maxRangeSquareRoot);
+//				this->template setupRootSegmentManagementSections(maxRangeSquareRoot);
 			} else {
 				this->template initPrimesBitSetSizeForSievingPrimes(maxRangeSquareRoot);
-			}
 
-			if (_processID == 0) {
-				this->template setupSegmentDistribution(maxRange);
-//				this->template setupRootSegmentManagementTasks(maxRangeSquareRoot);
-				this->template setupRootSegmentManagementSections(maxRangeSquareRoot);
-			} else {
 				vector<pair<size_t, size_t> > sievingMultiples;
 				this->template calculateSievingMultiples(maxRangeSquareRoot, sievingMultiples);
 
@@ -204,6 +202,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 						this->template startCollectorOfSievingDataResultsTask();
 					}
 				}
+
+				#pragma omp taskwait
 			}
 		}
 
@@ -211,18 +211,24 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			#pragma omp parallel sections default(shared)
 			{
 				#pragma omp section
-				this->template startServerOfSegmentsAvailable();
-
-				#pragma omp section
-				if (this->template isSendPrimesCountToRoot()) {
-					vector<pair<size_t, size_t> > sievingMultiples;
-					this->template calculateSievingMultiples(maxRangeSquareRoot, sievingMultiples);
-					this->template startCollectorOfNodesPrimesCount();
+				{
+					this->template startServerOfSegmentsAvailable();
 				}
 
 				#pragma omp section
-				if (this->template isSendResultsToRoot()) {
-					this->template startCollectorOfSievingDataResults();
+				{
+					if (this->template isSendPrimesCountToRoot()) {
+						vector<pair<size_t, size_t> > sievingMultiples;
+						this->template calculateSievingMultiples(maxRangeSquareRoot, sievingMultiples);
+						this->template startCollectorOfNodesPrimesCount();
+					}
+				}
+
+				#pragma omp section
+				{
+					if (this->template isSendResultsToRoot()) {
+						this->template startCollectorOfSievingDataResults();
+					}
 				}
 			}
 		}
@@ -261,23 +267,23 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				unsigned long long numberSegmentsSievedByNode;
 				MPI_Recv(&numberSegmentsSievedByNode, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD, &status);
 
-				unsigned long long segmentRange[2];
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					pair<size_t, size_t> newSegmentRange;
 					size_t processPositionToTakeSegment = status.MPI_SOURCE - 1; // process 0 isn't present in segment distribution because only acts as manager
 
-					if (_segmentsDistribution[processPositionToTakeSegment].empty()) {
+					if (_segmentsDistribution[processPositionToTakeSegment].empty() || processPositionToTakeSegment >= _segmentsDistribution.size()) {
 						processPositionToTakeSegment = this->template getProcessPositionWithMoreSegmentsRemaining();
 					}
 
 					newSegmentRange = _segmentsDistribution[processPositionToTakeSegment].back();
 					_segmentsDistribution[processPositionToTakeSegment].pop_back();
 
+					unsigned long long segmentRange[2];
 					segmentRange[0] = newSegmentRange.first;
 					segmentRange[1] = newSegmentRange.second;
 
 #ifdef DEBUG_OUTPUT
-					cout << "    --> Assigning segment [" << segmentRange[0] << ", " << segmentRange[1] << "] to process " << status.MPI_SOURCE << endl;
+					cout << "    --> Assigning segment [" << segmentRange[0] << ", " << (segmentRange[1] - 1) << "] to process " << status.MPI_SOURCE << endl;
 #endif
 					MPI_Send(&segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, status.MPI_SOURCE, MSG_ASSIGN_NEW_SEGMET, MPI_COMM_WORLD);
 					--numberSegmentsRemaining;
@@ -381,16 +387,16 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 
 		virtual void startCollectorOfSievingDataResultsTask() {
 			cout << "    --> Root collector for nodes segments results started..." << endl;
+
+			#pragma omp for \
+				schedule(dynamic)
 			for (size_t numberSegmentsPrimesCountReceived = 0; numberSegmentsPrimesCountReceived < _numberSegmentsCreated; ++numberSegmentsPrimesCountReceived) {
-				#pragma omp task default(shared)
-				{
-					MPI_Status status;
-					MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
-					if (status.MPI_ERROR == MPI_SUCCESS) {
-						this->template receiveSievedBlockFromNode(status.MPI_SOURCE);
-					} else {
-						cout << "    --> MPI_Probe detected the following error code when probing for segment sieving data results from node " << status.MPI_SOURCE << ": " << status.MPI_ERROR << endl;
-					}
+				MPI_Status status;
+				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
+				if (status.MPI_ERROR == MPI_SUCCESS) {
+					this->template receiveSievedBlockFromNode(status.MPI_SOURCE);
+				} else {
+					cout << "    --> MPI_Probe detected the following error code when probing for segment sieving data results from node " << status.MPI_SOURCE << ": " << status.MPI_ERROR << endl;
 				}
 			}
 		}
@@ -417,9 +423,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		virtual size_t receivePrimesCountFromNode(int nodeID) {
 			unsigned long long primesCount;
 			MPI_Status status;
-			MPI_Recv(&primesCount, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_NODE_PRIMES_FOUND_COUNT, MPI_COMM_WORLD, &status);
+			MPI_Recv(&primesCount, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_NODE_PRIMES_COUNT_FOUND, MPI_COMM_WORLD, &status);
 
 			if (status.MPI_ERROR == MPI_SUCCESS) {
+				#pragma omp critical
 				this->template incrementPrimesCount((size_t) primesCount);
 			} else {
 				cout << "    --> MPI_Recv detected the following error code when receiving segment primes count from " << status.MPI_SOURCE << ": " << status.MPI_ERROR << endl;

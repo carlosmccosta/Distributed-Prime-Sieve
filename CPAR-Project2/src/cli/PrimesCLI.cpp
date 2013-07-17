@@ -536,7 +536,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		} else if (argSelector == "--cacheBlockSize") {
 			stringstream sstream(argValue);
 			size_t blockSize;
-			if (!(sstream >> blockSize) || (blockSize < 512)) {
+			if (!(sstream >> blockSize) || (blockSize < 128)) {
 				showUsage("  >>> Invalid cache block size! Block size must be >= 512");
 				return false;
 			} else {
@@ -545,7 +545,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		} else if (argSelector == "--dynamicSchedulingSegmentSize") {
 			stringstream sstream(argValue);
 			size_t scheduleBlockSize;
-			if (!(sstream >> scheduleBlockSize) || (scheduleBlockSize < 100)) {
+			if (!(sstream >> scheduleBlockSize) || (scheduleBlockSize < 256)) {
 				showUsage("  >>> Invalid dynamic scheduling segment size! Block size must be >= 100");
 				return false;
 			} else {
@@ -634,8 +634,8 @@ void PrimesCLI::showUsage(string message) {
 	cout << "\n    [--version]" << endl;
 	cout << "\t --algorithm                     -> number in [1, 19]" << endl;
 	cout << "\t --maxRange                      -> number >= 11 (default 2^32)" << endl;
-	cout << "\t --cacheBlockSize                -> block size in bytes >= 512 to optimize cache hit rate (default 16384)" << endl;
-	cout << "\t --dynamicSchedulingSegmentSize  -> block size in elements >= 100 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576)" << endl;
+	cout << "\t --cacheBlockSize                -> block size in bytes >= 128 to optimize cache hit rate (default 16384)" << endl;
+	cout << "\t --dynamicSchedulingSegmentSize  -> block size in elements >= 256 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576)" << endl;
 	cout << "\t --numberThreads                 -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads)" << endl;
 	cout << "\t --outputResult                  -> filename of file to output results (default doesn't output results)" << endl;
 	cout << "\t --checkResult                   -> filename of file with primes to check the algorithm result in root node (default doesn't check algorithm result)" << endl;
