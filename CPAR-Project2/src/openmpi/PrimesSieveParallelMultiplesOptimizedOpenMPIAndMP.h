@@ -19,8 +19,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 		}
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
+#ifdef DEBUG_OUTPUT
 			int _processID = this->template getProcessId();
 			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
+#endif
 
 			const size_t blockSizeInElements = this->template getBlockSizeInElements();
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
@@ -75,7 +77,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 				firstprivate(numberProcesses, maxRange) \
 				schedule(static)
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < numberProcesses; ++numberProcessesResultsCollected) {
+#ifdef DEBUG_OUTPUT
 				cout << "    > Probing for results..." << endl;
+#endif
 				MPI_Status status;
 				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
 
