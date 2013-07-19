@@ -19,10 +19,10 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache: public PrimesSie
 		PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache(size_t blockSizeInBytes = 64 * 1024) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes * 8) {
 		}
-		
+
 		virtual ~PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache() {
 		}
-		
+
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
 			size_t sievingPrimesSize = _sievingPrimes.size();
 			for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
@@ -30,7 +30,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache: public PrimesSie
 				size_t primeMultiple = _sievingPrimes[sievingPrimesIndex].second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeDoubled) {
-					this->template setPrimesBitsetValue(primeMultiple, false);
+					this->template setPrimesBitsetValue(primeMultiple, true);
 				}
 
 				_sievingPrimes[sievingPrimesIndex].second = primeMultiple;
@@ -42,12 +42,12 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCache: public PrimesSie
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber += 2) {
 				// for each number not marked as composite (prime number)
-				if (this->template getPrimesBitsetValue(primeNumber)) {
+				if (!this->template getPrimesBitsetValue(primeNumber)) {
 					//use it to calculate his composites
 					size_t primeDoubled = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeDoubled) {
-						this->template setPrimesBitsetValue(compositeNumber, false);
+						this->template setPrimesBitsetValue(compositeNumber, true);
 					}
 
 					_sievingPrimes.push_back(pair<size_t, size_t>(primeDoubled, compositeNumber));

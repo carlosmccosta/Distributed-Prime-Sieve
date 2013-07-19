@@ -152,7 +152,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 				}
 
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
-					if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
+					if (!this->template getPrimesBitsetValueMPI(possiblePrime)) {
 						++primesFound;
 					}
 					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);

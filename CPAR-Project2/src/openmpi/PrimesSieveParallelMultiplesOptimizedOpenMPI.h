@@ -427,7 +427,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				size_t primeMultipleIncrement = primeCompositeInfo.second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					this->template setPrimesBitsetValueMPI(primeMultiple, false);
+					this->template setPrimesBitsetValueMPI(primeMultiple, true);
 				}
 
 				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
@@ -447,14 +447,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
-				if (this->template getPrimesBitsetValueMPI(primeNumber)) {
+				if (!this->template getPrimesBitsetValueMPI(primeNumber)) {
 					_sievingPrimes.push_back(primeNumber);
 
 					//use it to calculate his composites
 					size_t primeMultipleIncrement = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
-						this->template setPrimesBitsetValueMPI(compositeNumber, false);
+						this->template setPrimesBitsetValueMPI(compositeNumber, true);
 					}
 					sievingMultiples.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
 				}
@@ -473,7 +473,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			size_t possiblePrime = this->template getStartSieveNumber();
 			size_t maxRange = this->template getMaxRange();
 			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
+				if (!(this->template getPrimesBitsetValueMPI(possiblePrime))) {
 					primesValues.push_back(possiblePrime);
 				}
 			}
@@ -500,7 +500,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 				size_t maxRange = this->template getMaxRange();
 				for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
-					if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
+					if (!(this->template getPrimesBitsetValueMPI(possiblePrime))) {
 						outputStream << possiblePrime << endl;
 					}
 				}
@@ -537,7 +537,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			}
 			size_t maxRange = this->template getMaxRange();
 			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (this->template getPrimesBitsetValueMPI(possiblePrime)) {
+				if (!(this->template getPrimesBitsetValueMPI(possiblePrime))) {
 					++primesFound;
 				}
 			}

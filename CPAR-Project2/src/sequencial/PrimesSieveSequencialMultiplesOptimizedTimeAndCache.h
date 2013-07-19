@@ -33,7 +33,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 				size_t primeDoubled = primesValues[primesMultiplesIndex] << 1;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeDoubled) {
-					this->template setPrimesBitsetValueBlock(primeMultiple, blockBeginNumber, false);
+					this->template setPrimesBitsetValueBlock(primeMultiple, blockBeginNumber, true);
 				}
 
 				_primesMultiples[primesMultiplesIndex] = primeMultiple;
@@ -48,14 +48,14 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber += 2) {
 				// for each number not marked as composite (prime number)
-				if (this->template getPrimesBitsetValueBlock(primeNumber, blockBeginNumber)) {
+				if (!this->template getPrimesBitsetValueBlock(primeNumber, blockBeginNumber)) {
 					primesValues.push_back(primeNumber);
 
 					//use it to calculate his composites
 					size_t primeDoubled = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeDoubled) {
-						this->template setPrimesBitsetValueBlock(compositeNumber, blockBeginNumber, false);
+						this->template setPrimesBitsetValueBlock(compositeNumber, blockBeginNumber, true);
 					}
 					_primesMultiples.push_back(compositeNumber);
 				}
@@ -81,7 +81,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 			vector<size_t>& primesValues = this->template getPrimesValues();
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			for (; cullingIndex < endIndex; ++cullingIndex) {
-				if (primesBitset[cullingIndex]) {
+				if (!primesBitset[cullingIndex]) {
 					size_t numberToCull = blockBeginNumber + (cullingIndex << 1);
 					if (numberToCull >= blockEndNumber)
 						break;

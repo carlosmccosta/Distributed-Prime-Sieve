@@ -112,7 +112,7 @@ class WheelFactorization {
 						continue;
 					}
 
-					if (possiblePrimePosition >= primesBitsetSize || primesBitset[possiblePrimePosition] == false) {
+					if (possiblePrimePosition >= primesBitsetSize || primesBitset[possiblePrimePosition]) {
 						return false;
 					}
 					possiblePrime = getNextPossiblePrime(possiblePrime);

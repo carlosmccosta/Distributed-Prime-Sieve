@@ -45,7 +45,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				size_t primeMultipleIncrement = primeCompositeInfo.second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					primesBitset[primeMultiple] = false;
+					primesBitset[primeMultiple] = true;
 				}
 
 				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
@@ -68,14 +68,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = _wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
-				if (primesBitset[primeNumber]) {
+				if (!primesBitset[primeNumber]) {
 					_sievingPrimes.push_back(primeNumber);
 
 					//use it to calculate his composites
 					size_t primeMultipleIncrement = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
-						primesBitset[compositeNumber] = false;
+						primesBitset[compositeNumber] = true;
 					}
 					sievingMultiples.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
 				}
@@ -113,7 +113,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 
 			size_t maxRange = this->template getMaxRange();
 			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (primesBitset[possiblePrime]) {
+				if (!primesBitset[possiblePrime]) {
 					primesValues.push_back(possiblePrime);
 				}
 			}
@@ -133,7 +133,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 
 				size_t maxRange = this->template getMaxRange();
 				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
-					if (primesBitset[possiblePrime]) {
+					if (!primesBitset[possiblePrime]) {
 						outputStream << possiblePrime << endl;
 					}
 				}
@@ -176,7 +176,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + 11, maxRange + 1);
 
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
-					if (primesBitset[possiblePrime]) {
+					if (!primesBitset[possiblePrime]) {
 						++primesFound;
 					}
 					possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);

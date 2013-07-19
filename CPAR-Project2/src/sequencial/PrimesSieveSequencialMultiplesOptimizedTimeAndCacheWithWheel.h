@@ -39,7 +39,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public Prime
 				size_t primeMultipleIncrement = primeCompositeInfo.second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					primesBitset[primeMultiple] = false;
+					primesBitset[primeMultiple] = true;
 				}
 
 				_sievingPrimes[sievingPrimesIndex].first = primeMultiple;
@@ -60,12 +60,12 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public Prime
 
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
-				if (primesBitset[primeNumber]) {
+				if (!primesBitset[primeNumber]) {
 					//use it to calculate his composites
 					size_t primeMultipleIncrement = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
-						primesBitset[compositeNumber] = false;
+						primesBitset[compositeNumber] = true;
 					}
 
 					_sievingPrimes.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
@@ -110,7 +110,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public Prime
 
 			size_t maxRange = this->template getMaxRange();
 			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (primesBitset[possiblePrime]) {
+				if (!primesBitset[possiblePrime]) {
 					primesValues.push_back(possiblePrime);
 				}
 			}
@@ -130,7 +130,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public Prime
 
 				size_t maxRange = this->template getMaxRange();
 				for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-					if (primesBitset[possiblePrime]) {
+					if (!primesBitset[possiblePrime]) {
 						outputStream << possiblePrime << endl;
 					}
 				}
@@ -152,7 +152,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public Prime
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
 			for (size_t possiblePrime = 11; possiblePrime <= maxRange; possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime)) {
-				if (primesBitset[possiblePrime]) {
+				if (!primesBitset[possiblePrime]) {
 					++primesFound;
 				}
 			}

@@ -8,6 +8,7 @@
 #include <deque>
 #include <string>
 #include <fstream>
+#include <limits>
 
 using std::cout;
 using std::cerr;
@@ -18,6 +19,7 @@ using std::string;
 using std::ostream;
 using std::ofstream;
 using std::ifstream;
+
 
 //typedef vector<bool> PrimesBitset;
 //typedef vector<unsigned char> PrimesBitset;
@@ -94,7 +96,7 @@ class PrimesSieve {
 			_primesValues.push_back(2);
 			size_t iSize = _primesBitset.size();
 			for (size_t i = 0; i < iSize; ++i) {
-				if (_primesBitset[i]) {
+				if (!_primesBitset[i]) {
 					_primesValues.push_back(getNumberAssociatedWithBitsetPosition(i));
 				}
 			}
@@ -154,7 +156,7 @@ class PrimesSieve {
 				outputStream << 2 << endl;
 				size_t iSize = _primesBitset.size();
 				for (size_t i = 0; i < iSize; ++i) {
-					if (_primesBitset[i]) {
+					if (!_primesBitset[i]) {
 						outputStream << getNumberAssociatedWithBitsetPosition(i) << endl;
 					}
 				}
@@ -183,7 +185,7 @@ class PrimesSieve {
 
 		virtual void initPrimesBitset(size_t maxRange) {
 			this->_maxRange = maxRange;
-			_primesBitset = FlagsContainer(this->template getNumberBitsToStore(maxRange), true);
+			_primesBitset = FlagsContainer(this->template getNumberBitsToStore(maxRange), false);
 //			size_t iSize = _primesBitset.size();
 //			for (size_t i = 0; i < iSize; ++i) {
 //				_primesBitset[i] = true;
@@ -191,17 +193,17 @@ class PrimesSieve {
 		}
 
 		virtual void initPrimesBitSetSize(size_t newBitsetSize) {
-			_primesBitset = FlagsContainer(newBitsetSize, true);
-//			size_t iSize = primesBitset.size();
+			_primesBitset = FlagsContainer(newBitsetSize, false);
+//			size_t iSize = _primesBitset.size();
 //			for (size_t i = 0; i < iSize; ++i) {
-//				primesBitset[i] = true;
+//				_primesBitset[i] = true;
 //			}
 		}
 
 		void resetPrimesBitsetBlock() {
 			size_t iSize = _primesBitset.size();
 			for (size_t i = 0; i < iSize; ++i) {
-				_primesBitset[i] = true;
+				_primesBitset[i] = false;
 			}
 		}
 
@@ -237,7 +239,7 @@ class PrimesSieve {
 			size_t primesFound = 1;   // prime number 2 isn't in _primesBitset
 			size_t iSize = _primesBitset.size();
 			for (size_t i = 0; i < iSize; ++i) {
-				if (_primesBitset[i]) {
+				if (!_primesBitset[i]) {
 					++primesFound;
 				}
 			}

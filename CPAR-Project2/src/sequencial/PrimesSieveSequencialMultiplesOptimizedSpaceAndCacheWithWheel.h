@@ -38,7 +38,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 				size_t primeMultipleIncrement = _sievingPrimes[sievingPrimesIndex].second;
 
 				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					wheelSieve.setBitsetPositionToNumber(primesBitset, primeMultiple, false);
+					wheelSieve.setBitsetPositionToNumber(primesBitset, primeMultiple, true);
 				}
 
 				_sievingPrimes[sievingPrimesIndex].first = primeMultiple;
@@ -57,12 +57,12 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 			for (; primeNumber < maxPrimeNumberSearch; primeNumber = wheelSieve.getNextPossiblePrime(primeNumber)) {
 				// for each number not marked as composite (prime number)
 				size_t positionOnBitset = wheelSieve.getBitsetPositionToNumber(primeNumber);
-				if (primesBitset[positionOnBitset]) {
+				if (!primesBitset[positionOnBitset]) {
 					//use it to calculate his composites
 					size_t primeMultipleIncrement = primeNumber << 1;
 					size_t compositeNumber = primeNumber * primeNumber;
 					for (; compositeNumber < blockEndNumber; compositeNumber += primeMultipleIncrement) {
-						wheelSieve.setBitsetPositionToNumber(primesBitset, compositeNumber, false);
+						wheelSieve.setBitsetPositionToNumber(primesBitset, compositeNumber, true);
 					}
 
 					_sievingPrimes.push_back(pair<size_t, size_t>(compositeNumber, primeMultipleIncrement));
@@ -100,7 +100,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 
 			size_t iSize = primesBitset.size();
 			for (size_t i = 1; i < iSize; ++i) {   // position 0 has number 1 of spoke 1
-				if (primesBitset[i]) {
+				if (!primesBitset[i]) {
 					primesValues.push_back(possiblePrime);
 				}
 
@@ -127,7 +127,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 
 				size_t iSize = primesBitset.size();
 				for (size_t i = 1; i < iSize; ++i) {   // position 2 has prime number 11
-					if (primesBitset[i]) {
+					if (!primesBitset[i]) {
 						outputStream << possiblePrime << endl;
 					}
 
@@ -151,7 +151,7 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCacheWithWheel: public Prim
 			size_t primesFound = wheelSieve.getNumberPrimesSievedByTheWheel();
 			size_t iSize = primesBitset.size();
 			for (size_t i = 1; i < iSize; ++i) { // in position 0 is spoke 1 of wheel and number 1 is not prime
-				if (primesBitset[i]) {
+				if (!primesBitset[i]) {
 					++primesFound;
 				}
 			}
