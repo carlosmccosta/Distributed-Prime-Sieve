@@ -394,15 +394,15 @@ size_t PrimesCLI::countNumberOfPrimes() {
 
 bool PrimesCLI::checkPrimesFromFile() {
 	if (_resultsConfirmationFile != "") {
+		int processID = 0;
 		if (_algorithmToUse > 13) {
-			int processID;
 			if (_sendResultsToRoot) {
 				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId();
 			} else {
 				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->getProcessId();
 			}
 
-			if (_mpiThreadSupport < MPI_THREAD_MULTIPLE) {
+			if ((_algorithmToUse == 16 || _algorithmToUse == 19) && _mpiThreadSupport < MPI_THREAD_MULTIPLE) {
 				if (processID != 1) {
 					return false;
 				}
@@ -413,7 +413,12 @@ bool PrimesCLI::checkPrimesFromFile() {
 			}
 		}
 
-		cout << "\n    > Validating computed primes with result file supplied...\n";
+		cout << "\n    > Validating computed primes with file " << _resultsConfirmationFile;
+		if (_algorithmToUse > 13) {
+			cout << " in process " << processID;
+		}
+		cout << "... " << endl;
+
 		bool validationResult = (
 				(_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->checkPrimesFromFile(_resultsConfirmationFile) : _primesSieve->checkPrimesFromFile(_resultsConfirmationFile));
 
@@ -457,20 +462,29 @@ bool PrimesCLI::outputResults() {
 		((_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->printPrimesToConsole() : _primesSieve->printPrimesToConsole());
 		cout << "\n" << endl;
 	} else if (_outputResultsFilename != "") {
-		int numberProcesses;
+		int numberProcesses = 1;
+		int processID = 0;
 		if (_algorithmToUse > 13) {
 			if (_sendResultsToRoot) {
 				numberProcesses = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getNumberProcesses();
+				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId();
 			} else {
 				numberProcesses = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainer, Modulo210Wheel>*) _primesSieve)->getNumberProcesses();
+				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->getProcessId();
 			}
 		} else {
 			numberProcesses = 1;
 		}
 
 		if (_sendResultsToRoot || numberProcesses == 1) {
-			cout << "\n    > Exporting results to file " << _outputResultsFilename << "..." << endl;
+			cout << "\n    > Exporting results to file " << _outputResultsFilename;
 		}
+
+		if (_algorithmToUse > 13) {
+			cout << " in process " << processID;
+		}
+
+		cout << "..." << endl;
 
 		PerformanceTimer performanceTimer;
 		performanceTimer.reset();

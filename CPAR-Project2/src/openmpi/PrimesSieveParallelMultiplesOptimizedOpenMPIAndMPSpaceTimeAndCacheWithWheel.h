@@ -13,16 +13,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWhee
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel() {
 		}
 
-		inline size_t getNumberBitsToStore(size_t maxRange) {
-			return ((maxRange - this->template getStartSieveNumber()) >> 1) + 1;
-		}
-
 		inline size_t getNumberBitsToStoreBlock(size_t blockSize) {
-			return ((blockSize >> 1) + 1);
-		}
-
-		inline size_t getNumberBitsToStoreSievingPrimes(size_t maxRange) {
-			return ((maxRange - this->template getBlockBeginNumber()) >> 1) + 1;
+			if (blockSize % 2 == 0) {
+				return (blockSize >> 1);
+			} else {
+				return ((blockSize >> 1) + 1);
+			}
 		}
 
 		inline size_t getBitsetPositionToNumberMPI(size_t number) {

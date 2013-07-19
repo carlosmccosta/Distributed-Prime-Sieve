@@ -372,8 +372,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 			if (outputStream.is_open()) {
 #				ifdef DEBUG_OUTPUT
+				int processID = this->template getProcessId();
 				if (!_sendResultsToRoot && _numberProcesses > 1) {
-					cout << "\n    --> Exporting partial results to file " << filename << "..." << endl;
+					cout << "\n    --> Exporting partial results to file " << filename << " in process " << processID << "..." << endl;
 				}
 #				endif
 
@@ -381,7 +382,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 #				ifdef DEBUG_OUTPUT
 				if (!_sendResultsToRoot && _numberProcesses > 1) {
-					cout << "    --> Export partial results to file " << filename << " finished!" << endl;
+					cout << "    --> Export partial results to file " << filename << " in process " << processID << " finished!" << endl;
 				}
 #				endif
 				return true;
@@ -485,7 +486,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 			if (primesValues.size() <= 2) {
 
-				if (this->template getProcessId() == 0) {
+				if (this->template getProcessId() == this->template processIDWithFirstPrimesBlock()) {
 					outputStream << 2 << endl;
 					outputStream << 3 << endl;
 					outputStream << 5 << endl;
@@ -564,7 +565,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual void initPrimesBitSetSizeForSievingPrimes(size_t maxRangeSquareRoot) {
-			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStoreSievingPrimes(maxRangeSquareRoot));
+			this->PrimesSieve<FlagsContainer>::template initPrimesBitSetSize(this->template getNumberBitsToStore(maxRangeSquareRoot));
 
 			size_t numberSievingPrimes = this->template getNumberOfPrimesInRange(maxRangeSquareRoot);
 
@@ -590,13 +591,19 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			return this->template getNumberBitsToStoreBlock(processEndBlockNumber - processStartBlockNumber);
 		}
 
+		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
+			return (this->template getNumberBitsToStoreBlock((maxRange + 1) - this->template getStartSieveNumber()));
+		}
+
 		// bitset specific memory management
-		virtual size_t getNumberBitsToStore(size_t maxRange) = 0;
 		virtual size_t getNumberBitsToStoreBlock(size_t blockSize) = 0;
-		virtual size_t getNumberBitsToStoreSievingPrimes(size_t maxRange) = 0;
 		virtual size_t getBitsetPositionToNumberMPI(size_t number) = 0;
 		virtual size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) = 0;
 		// end bitset specific memory management
+
+		virtual int processIDWithFirstPrimesBlock() {
+			return 0;
+		}
 
 		virtual inline size_t getBlockBeginNumber() {
 			return _wheelSieve.getFirstPrimeToSieve();

@@ -87,7 +87,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 		}
 
 		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
-			return ((maxRange - 3) >> 1) + 1;
+			return this->PrimesSieve<FlagsContainer>::template getNumberBitsToStore(maxRange);
 		}
 
 		virtual inline size_t getBitsetPositionToNumberOpenMP(size_t number) {

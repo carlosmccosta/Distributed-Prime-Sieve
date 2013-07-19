@@ -19,6 +19,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		size_t _dynamicSchedulingNumberSegments;
 
 		int _mpiThreadSupport;
+		int _processIDWithFirstPrimesBlock;
+		size_t _numberSievingProcesses;
 
 		unsigned long long _numberSegmentsSieved;
 		size_t _numberSegmentsCreated;
@@ -30,8 +32,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				string outputResultsFilename = "") :
 				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP<FlagsContainer, WheelType>(maxRange, blockSizeInElements, numberOfThreads, sendResultsToRoot, countNumberOfPrimesOnNode,
 						sendPrimesCountToRoot), _processStartBlockNumber(0), _processEndBlockNumber(0), _outputResultsFilename(outputResultsFilename), _dynamicSchedulingSegmentSizeInElements(
-						dynamicSchedulingSegmentSizeInElements), _dynamicSchedulingNumberSegments(dynamicSchedulingNumberSegments), _mpiThreadSupport(MPI_THREAD_SINGLE), _numberSegmentsSieved(0), _numberSegmentsCreated(
-						0) {
+						dynamicSchedulingSegmentSizeInElements), _dynamicSchedulingNumberSegments(dynamicSchedulingNumberSegments), _mpiThreadSupport(MPI_THREAD_SINGLE), _processIDWithFirstPrimesBlock(
+						0), _numberSievingProcesses(1), _numberSegmentsSieved(0), _numberSegmentsCreated(0) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling() {
@@ -43,7 +45,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				cerr << "    --> Check with ompi_info if current MPI implementation supports MPI_THREAD_MULTIPLE" << endl;
 				cerr << "    --> In ompi_info should appear the following line: Thread support: posix (mpi: yes, progress: no)" << endl;
 				cerr << " If your implementation doesn't provide MPI_THREAD_MULTIPLE, it will be necessary:" << endl;
-				cerr << "    --> 1 process to dynamic schedule the blocks for each worker process" << endl;
+				cerr << "    --> 1 process to dynamic schedule the blocks for each sieving process" << endl;
 				cerr << "    --> 1 Additional process if flag --sendPrimesCountToRoot is set" << endl;
 				cerr << "    --> 1 Additional process if flag --sendResultsToRoot is set" << endl;
 				cerr << "    --> The remaining process are used to sieve the primes segments\n\n" << endl;
@@ -75,20 +77,21 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			bool _countNumberOfPrimesOnNode = this->template isCountNumberOfPrimesOnNode();
 			bool _sendPrimesCountToRoot = this->template isSendPrimesCountToRoot();
 
-			size_t numberSievingProcesses = numberProcesses - 1;
+			_numberSievingProcesses = numberProcesses - 1;
 			if (_mpiThreadSupport < MPI_THREAD_MULTIPLE) {
+				_processIDWithFirstPrimesBlock = 1;
 				if (_sendResultsToRoot) {
-					--numberSievingProcesses;
+					--_numberSievingProcesses;
 				}
 				if (_sendPrimesCountToRoot) {
-					--numberSievingProcesses;
+					--_numberSievingProcesses;
 				}
 			}
 
 			if (_mpiThreadSupport < MPI_THREAD_MULTIPLE) {
 				if (_processID == 0) {
 					this->template setupSegmentDistribution(maxRange);
-					this->template startServerOfSegmentsAvailable(_numberSegmentsCreated, _segmentsDistribution, numberSievingProcesses);
+					this->template startServerOfSegmentsAvailable(_numberSegmentsCreated, _segmentsDistribution, _numberSievingProcesses);
 				} else if (_sendResultsToRoot && _processID == 1) {
 					this->template setMaxRange(maxRange);
 					this->template initPrimesBitSetSizeForRootWithAllValues(maxRange);
@@ -106,7 +109,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 					double elapsedTimeMicroSec = this->template getPerformanceTimer().getElapsedTimeInMicroSec();
 					MPI_Send(&elapsedTimeMicroSec, 1, MPI_DOUBLE, 0, MSG_NODE_SIEVING_FINISHED, MPI_COMM_WORLD);
 				} else {
-					this->template startSievingSegmentsInWorkerProcesses(maxRangeSquareRoot, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
+					this->template startSievingSegmentsInSievingProcesses(maxRangeSquareRoot, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
 				}
 			} else {
 				if (_processID == 0) {
@@ -119,9 +122,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 
 					this->template setupSegmentDistribution(maxRange);
 //					this->template setupRootSegmentManagementTasks(maxRangeSquareRoot);
-					this->template setupRootSegmentManagementSections(maxRangeSquareRoot, numberSievingProcesses);
+					this->template setupRootSegmentManagementSections(maxRangeSquareRoot, _numberSievingProcesses);
 				} else {
-					this->template startSievingSegmentsInWorkerProcesses(maxRangeSquareRoot, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
+					this->template startSievingSegmentsInSievingProcesses(maxRangeSquareRoot, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
 				}
 			}
 		}
@@ -146,7 +149,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			}
 		}
 
-		void startSievingSegmentsInWorkerProcesses(size_t maxRangeSquareRoot, bool sendResultsToRoot, bool countNumberOfPrimesOnNode, bool sendPrimesCountToRoot) {
+		void startSievingSegmentsInSievingProcesses(size_t maxRangeSquareRoot, bool sendResultsToRoot, bool countNumberOfPrimesOnNode, bool sendPrimesCountToRoot) {
 			this->template initPrimesBitSetSizeForSievingPrimes(maxRangeSquareRoot);
 
 			vector<pair<size_t, size_t> > sievingMultiples;
@@ -452,18 +455,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				}
 			}
 
-			size_t numberProcesses = (size_t) this->template getNumberProcesses() - 1;
-			if (_mpiThreadSupport < MPI_THREAD_MULTIPLE) {
-				if (this->template isSendResultsToRoot()) {
-					--numberProcesses;
-				}
-				if (this->template isSendPrimesCountToRoot()) {
-					--numberProcesses;
-				}
-			}
 
 			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
-			cout << "\n    >>>>> Finish sieving in " << numberProcesses << " worker processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
+			cout << "\n    >>>>> Finish sieving in " << _numberSievingProcesses << " sieving processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
 
 			if (_mpiThreadSupport < MPI_THREAD_MULTIPLE) {
 				int processIDForPrimesCountCollector = 1;
@@ -516,7 +510,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			this->template sendSievingDataMPI(primesBitset, 0, blockSize, processIDToSendResults, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
 		}
 
-		virtual void receiveSievedBlockFromNode() {
+		virtual size_t receiveSievedBlockFromNode() {
 			// received block range
 			unsigned long long segmentRange[2];
 			MPI_Status status;
@@ -528,32 +522,31 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			MPI_Recv(&segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK_RANGE, MPI_COMM_WORLD, &status);
 
 			if (status.MPI_ERROR == MPI_SUCCESS) {
-				size_t processSegmentEndNumber = segmentRange[1];
-				size_t maxRange = this->template getMaxRange();
-				if (processSegmentEndNumber > maxRange) {
-					processSegmentEndNumber = maxRange;
-				}
-
 				size_t blockSize = this->template getNumberBitsToStoreBlock(segmentRange[1] - segmentRange[0]);
-				size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(processSegmentEndNumber);
+				size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(segmentRange[0]);
 
 				// receive sieving data
 				FlagsContainer& primesBitset = this->template getPrimesBitset();
 				this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
+				return blockSize;
 			} else {
 				cerr << "    !!!!! Detected error " << status.MPI_ERROR << " when receiving sieving segment results data from process with rank " << status.MPI_SOURCE << "!!!!!" << endl;
+				return 0;
 			}
 		}
 
 		virtual void startCollectorOfSievingDataResults(size_t numberSegmentsCreated) {
-			cout << "    > Root collector for nodes segments results started..." << endl;
+			size_t numberBytesReceived = 0;
+			cout << "    > Collector for nodes segments results started..." << endl;
 			for (size_t numberSegmentsPrimesCountReceived = 0; numberSegmentsPrimesCountReceived < numberSegmentsCreated; ++numberSegmentsPrimesCountReceived) {
-				this->template receiveSievedBlockFromNode();
+				numberBytesReceived += this->template receiveSievedBlockFromNode();
 			}
+
+			cout << "    --> Results collector received " << numberBytesReceived << " bytes from " << numberSegmentsCreated << " segments" << endl;
 		}
 
 		virtual void startCollectorOfSievingDataResultsTask() {
-			cout << "    > Root collector for nodes segments results started..." << endl;
+			cout << "    > Collector for nodes segments results started..." << endl;
 
 #			pragma omp for \
 				schedule(dynamic)
@@ -563,7 +556,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		}
 
 		virtual size_t startCollectorOfNodesPrimesCount(size_t numberSegmentsCreated) {
-			cout << "    > Root collector for nodes segments primes count started..." << endl;
+			cout << "    > Collector for nodes segments primes count started..." << endl;
 
 			// root node only has sieving primes
 			size_t numberSievingPrimes = this->template getSievingPrimes().size();
@@ -574,8 +567,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				numberPrimesFound += this->template receivePrimesCountFromNode(MPI_ANY_SOURCE);
 			}
 
-			int _numberProcesses = this->template getNumberProcesses();
-			cout << "\n    >>>>> Counted " << numberPrimesFound << " primes on " << _numberProcesses << " processes <<<<<\n" << endl;
+			cout << "\n    >>>>> Counted " << numberPrimesFound << " primes on " << _numberSievingProcesses << " sieving processes <<<<<\n" << endl;
 			return numberPrimesFound;
 		}
 
@@ -620,8 +612,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			} else if (_outputResultsFilename != "") {
 				bool sendResultsToRoot = this->template isSendResultsToRoot();
 
+				int processID = this->template getProcessId();
+
 				if (sendResultsToRoot) {
-					cout << "\n    > Exporting results to file " << _outputResultsFilename << "..." << endl;
+					cout << "\n    > Exporting results to file " << _outputResultsFilename << " in process " << processID << "..." << endl;
 				}
 
 				PerformanceTimer performanceTimer;
@@ -631,7 +625,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 					performanceTimer.stop();
 
 					if (sendResultsToRoot) {
-						cout << "    --> Export to file " << _outputResultsFilename << " finished in " << performanceTimer.getElapsedTimeFormated() << endl;
+						cout << "    --> Export to file " << _outputResultsFilename << " in process " << processID << " finished in " << performanceTimer.getElapsedTimeFormated() << endl;
 					}
 					return true;
 				} else {
@@ -647,6 +641,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 
 		void setMpiThreadSupport(int mpiThreadSupport) {
 			_mpiThreadSupport = mpiThreadSupport;
+		}
+
+		virtual int processIDWithFirstPrimesBlock() {
+			return _processIDWithFirstPrimesBlock;
 		}
 };
 
