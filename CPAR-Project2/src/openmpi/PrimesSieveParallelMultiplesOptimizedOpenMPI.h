@@ -4,6 +4,8 @@
 #include "../WheelFactorization.h"
 #include "../lib/PrimesUtils.h"
 
+#include "../lib/Settings.h"
+
 #include <cmath>
 #include <algorithm>
 #include <utility>
@@ -38,7 +40,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		WheelType _wheelSieve;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 16 * 1024, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
+		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 16 * 1024, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true,
+				bool sendPrimesCountToRoot = true) :
 				_blockSizeInElements(blockSizeInElements), _sendResultsToRoot(sendResultsToRoot), _countNumberOfPrimesOnNode(countNumberOfPrimesOnNode), _sendPrimesCountToRoot(sendPrimesCountToRoot) {
 			int flag;
 			MPI_Initialized(&flag);
@@ -158,9 +161,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
-#ifdef DEBUG_OUTPUT
+#			ifdef DEBUG_OUTPUT
 			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
-#endif
+#			endif
 
 			const size_t blockSizeInElements = _blockSizeInElements;
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
@@ -226,7 +229,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				this->template sendFinishSievingMessageToRoot();
 
 				if (_sendPrimesCountToRoot) {
-					this->template sendPrimesCountToRoot();
+					this->template sendPrimesCountToCollector(0);
 				} else if (_countNumberOfPrimesOnNode) {
 					this->template countPrimesInNode();
 				}
@@ -240,13 +243,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		virtual MPI_Status receiveSievingDataMPI(FlagsContainer& primesBitset, size_t positionToStoreResults, size_t blockSize, int source, int tag) {
 			MPI_Status status;
 			cerr << "\n\n!!!!!Missing implementation for this type of bitset container !!!!!" << endl << endl;
-//			MPI_Recv(&(primesBitset[positionToStoreResults]), blockSize, MPI_UNSIGNED_CHAR, source, tag, MPI_COMM_WORLD, &status);
 			return status;
 		}
 
 		virtual void sendSievingDataMPI(FlagsContainer& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination, int tag) {
 			cerr << "\n\n!!!!!Missing implementation for this type of bitset container !!!!!" << endl << endl;
-//			MPI_Send(&primesBitset[0], blockSize, MPI_UNSIGNED_CHAR, destination, tag, MPI_COMM_WORLD);
 		}
 
 		virtual void sendFinishSievingMessageToRoot() {
@@ -267,34 +268,33 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		}
 
 		virtual size_t countPrimesInNode() {
-			PerformanceTimer countingPrimesTimer;
-			countingPrimesTimer.reset();
-			countingPrimesTimer.start();
-
-#ifdef DEBUG_OUTPUT
-			size_t startPossiblePrime = this->template getStartSieveNumber();
-						size_t maxRange = this->template getMaxRange();
-			cout << "    --> Process with rank " << _processID << " counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
-#endif
-
-			// compute primes in this process
-			PerformanceTimer performanceTimer;
-			performanceTimer.reset();
-			performanceTimer.start();
-
 			this->template setPrimesCount(0);
-			size_t numberPrimesFound = this->template getNumberPrimesFound();
-			performanceTimer.stop();
+#					ifdef DEBUG_OUTPUT
+					size_t startPossiblePrime = this->template getStartSieveNumber();
+					size_t maxRange = this->template getMaxRange();
+					cout << "    --> Process with rank " << _processID << " counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
 
-#ifdef DEBUG_OUTPUT
-			cout << "    --> Process " << _processID << " counted " << numberPrimesFound << " primes in [" << startPossiblePrime << ", " << maxRange << "] in " << performanceTimer.getElapsedTimeFormated() << endl;
-#endif
+					// compute primes in this process
+					PerformanceTimer performanceTimer;
+					performanceTimer.reset();
+					performanceTimer.start();
+#					endif
+
+					size_t numberPrimesFound = this->template getNumberPrimesFound();
+
+#					ifdef DEBUG_OUTPUT
+					performanceTimer.stop();
+					cout << "    --> Process " << _processID << " counted " << numberPrimesFound << " primes in [" << startPossiblePrime << ", " << maxRange << "] in " << performanceTimer.getElapsedTimeFormated() << endl;
+#					endif
 			return numberPrimesFound;
 		}
 
-		virtual void sendPrimesCountToRoot() {
+		virtual void sendPrimesCountToCollector(int sendPrimesCountToRoot) {
 			unsigned long long numberPrimesFound = (unsigned long long)this->template countPrimesInNode();
-			MPI_Send(&numberPrimesFound, 1, MPI_LONG_LONG, 0, MSG_NODE_PRIMES_COUNT_FOUND, MPI_COMM_WORLD);
+#			ifdef DEBUG_OUTPUT
+			cout << "    --> Sending " << numberPrimesFound << " primes count to node " << sendPrimesCountToRoot << " from " << _processID << endl;
+#			endif
+			MPI_Send(&numberPrimesFound, 1, MPI_LONG_LONG, sendPrimesCountToRoot, MSG_NODE_PRIMES_COUNT_FOUND, MPI_COMM_WORLD);
 		}
 
 		virtual void collectPrimesCountFromProcessGroup() {
@@ -333,9 +333,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			cout << "\n    > Collecting results from other processes..." << endl;
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < _numberProcesses; ++numberProcessesResultsCollected) {
-#ifdef DEBUG_OUTPUT
+#				ifdef DEBUG_OUTPUT
 				cout << "    > Probing for results..." << endl;
-#endif
+#				endif
 				MPI_Status status;
 				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
 				if (status.MPI_ERROR == MPI_SUCCESS) {
@@ -371,19 +371,19 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			ofstream outputStream(filename.c_str());
 
 			if (outputStream.is_open()) {
-#ifdef DEBUG_OUTPUT
+#				ifdef DEBUG_OUTPUT
 				if (!_sendResultsToRoot && _numberProcesses > 1) {
-					cout << "\n    > Exporting partial results to file " << filename << "...";
+					cout << "\n    --> Exporting partial results to file " << filename << "..." << endl;
 				}
-#endif
+#				endif
 
 				this-> template savePrimes(outputStream);
 
-#ifdef DEBUG_OUTPUT
+#				ifdef DEBUG_OUTPUT
 				if (!_sendResultsToRoot && _numberProcesses > 1) {
-					cout << "\n    --> Export partial results to file " << filename << " finished!" << endl;
+					cout << "    --> Export partial results to file " << filename << " finished!" << endl;
 				}
-#endif
+#				endif
 				return true;
 			}
 

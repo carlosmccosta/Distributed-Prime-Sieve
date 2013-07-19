@@ -46,6 +46,8 @@ class PrimesCLI {
 		bool _sendPrimesCountToRoot;
 		bool _sendResultsToRoot;
 
+		int _mpiThreadSupport;
+
 		string _programName;
 		PerformanceTimer performanceTimer;
 
@@ -151,5 +153,13 @@ class PrimesCLI {
 
 		void setProgramName(const string& programName) {
 			_programName = programName;
+		}
+
+		int getMpiThreadSupport() const {
+			return _mpiThreadSupport;
+		}
+
+		void setMpiThreadSupport(int mpiThreadSupport) {
+			_mpiThreadSupport = mpiThreadSupport;
 		}
 };
