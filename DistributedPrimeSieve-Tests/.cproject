@@ -18,7 +18,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.818470439." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.969395868" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.814172948" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
-							<builder buildPath="${workspace_loc:/CPAR-Project2-Tests}/Debug" id="cdt.managedbuild.target.gnu.builder.exe.debug.1346461687" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug">
+							<builder buildPath="${workspace_loc:/DistributedPrimeSieve-Tests}/Debug" id="cdt.managedbuild.target.gnu.builder.exe.debug.1346461687" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
@@ -29,7 +29,7 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1866936057" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.533374894" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.745005639" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CPAR-Project2/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DistributedPrimeSieve/src}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.902820743" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -87,13 +87,13 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.release.716241996." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.336971799" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.release.964139484" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
-							<builder buildPath="${workspace_loc:/CPAR-Project2-Tests}/Release" id="cdt.managedbuild.target.gnu.builder.exe.release.397374517" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
+							<builder buildPath="${workspace_loc:/DistributedPrimeSieve-Tests}/Release" id="cdt.managedbuild.target.gnu.builder.exe.release.397374517" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.555569733" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool command="mpic++ -fopenmp" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2073826879" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 								<option id="gnu.cpp.compiler.exe.release.option.optimization.level.2123770579" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.exe.release.option.debugging.level.897401191" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.819989095" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CPAR-Project2/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DistributedPrimeSieve/src}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/lib/openmpi/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.473582739" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -125,6 +125,26 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.release.716241996.956964593" name="/" resourcePath="src">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.2005581137" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.573566818" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.555569733"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1731041594" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2073826879">
+								<option id="gnu.cpp.compiler.option.include.paths.407777504" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DistributedPrimeSieve/src}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/lib/openmpi/include"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.573613570" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.898201491" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1990951099">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.395980707" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1722232209" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release.796692607"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.2006411998" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.138274578"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.913375800" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release.416372493">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1931756968" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
 						<entry excluding="src|tests" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry excluding="cli/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
@@ -136,31 +156,31 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="CPAR-Project2-Tests.cdt.managedbuild.target.gnu.exe.1932449010" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
+		<project id="DistributedPrimeSieve-Tests.cdt.managedbuild.target.gnu.exe.1932449010" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/DistributedPrimeSieve-Tests"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/DistributedPrimeSieve-Tests"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.818470439;cdt.managedbuild.config.gnu.exe.debug.818470439.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.207729110;cdt.managedbuild.tool.gnu.cpp.compiler.input.902820743">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.818470439;cdt.managedbuild.config.gnu.exe.debug.818470439.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.553771782;cdt.managedbuild.tool.gnu.c.compiler.input.52177669">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.716241996;cdt.managedbuild.config.gnu.exe.release.716241996.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2073826879;cdt.managedbuild.tool.gnu.cpp.compiler.input.473582739">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.716241996;cdt.managedbuild.config.gnu.exe.release.716241996.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1990951099;cdt.managedbuild.tool.gnu.c.compiler.input.991830792">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.818470439;cdt.managedbuild.config.gnu.exe.debug.818470439.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.553771782;cdt.managedbuild.tool.gnu.c.compiler.input.52177669">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.818470439;cdt.managedbuild.config.gnu.exe.debug.818470439.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.207729110;cdt.managedbuild.tool.gnu.cpp.compiler.input.902820743">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/CPAR-Project2-Tests"/>
-		</configuration>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/CPAR-Project2-Tests"/>
-		</configuration>
-	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

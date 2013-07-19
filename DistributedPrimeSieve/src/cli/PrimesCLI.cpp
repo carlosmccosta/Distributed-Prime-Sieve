@@ -89,8 +89,7 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 13 - Fastest OpenMP implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 14 - OpenMPI implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
-		cout
-				<< " 16 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
+		cout << " 16 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
 		cout << " 17 - OpenMPI implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 18 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 19 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time with modulo 210 wheel and with dynamic scheduling\n\n";
@@ -118,7 +117,7 @@ void PrimesCLI::startInteractiveCLI() {
 				_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
 				_primesMaxRange = (size_t) pow(2, _primesMaxRange);
 			} else {
-				_primesMaxRange = ConsoleInput::getInstance()->getNumberCin("    # Max search range: ", "Range must be >= 11", (size_t)11);
+				_primesMaxRange = ConsoleInput::getInstance()->getNumberCin("    # Max search range: ", "Range must be >= 11", (size_t) 11);
 			}
 
 			if (_algorithmToUse > 2) {
@@ -567,6 +566,15 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			} else {
 				_algorithmToUse = algorithm;
 			}
+		} else if (argSelector == "--maxRangeInBits") {
+			stringstream sstream(argValue);
+			size_t rangeInBits;
+			if (!(sstream >> rangeInBits) || (rangeInBits < 4 || rangeInBits > 64)) {
+				showUsage("  >>> Invalid primes max range in bits! Max range must be >= 4 and <= 64");
+				return false;
+			} else {
+				_primesMaxRange = (size_t) pow(2, rangeInBits);
+			}
 		} else if (argSelector == "--maxRange") {
 			stringstream sstream(argValue);
 			size_t range;
@@ -676,6 +684,7 @@ void PrimesCLI::showUsage(string message) {
 	cout << " >>> Usage:" << endl;
 	cout << "  " << _programName;
 	cout << "\n    [--algorithm <number>]";
+	cout << "\n    [--maxRangeInBits <number>]";
 	cout << "\n    [--maxRange <number>]";
 	cout << "\n    [--cacheBlockSize <number>]";
 	cout << "\n    [--dynamicSchedulingSegmentSize <number>]";
@@ -689,18 +698,24 @@ void PrimesCLI::showUsage(string message) {
 	cout << "\n    [--help]";
 	cout << "\n    [--version]" << endl;
 	cout << "\t --algorithm                        -> number in [1, 19]" << endl;
-	cout << "\t --maxRange                         -> number >= 11 (default 2^32)" << endl;
-	cout << "\t --cacheBlockSize                   -> block size in bytes >= 128 to optimize cache hit rate (default 16384)" << endl;
-	cout << "\t --dynamicSchedulingSegmentSize     -> block size in elements >= 256 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576)" << endl;
-	cout << "\t --dynamicSchedulingNumberSegments  -> number segments to use in mpi dynamic scheduling >= 1 (overrides dynamicSchedulingSegmentSize if set, default not used)" << endl;
-	cout << "\t --numberThreads                    -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads)" << endl;
-	cout << "\t --outputResult                     -> filename of file to output results (default doesn't output results)" << endl;
-	cout << "\t --checkResult                      -> filename of file with primes to check the algorithm result in root node (default doesn't check algorithm result)" << endl;
-	cout << "\t --countPrimesInNode                -> Y/N to count the primes computed each node (default N)" << endl;
+	cout << "\t --maxRangeInBits                   -> number >= 4  and <= 64 (used to set maxRange using the number of bits instead of direct range -> 2^n)" << endl;
+	cout << "\t --maxRange                         -> number >= 11 and <= 2^64 (default 2^32)" << endl;
+	cout << "\t --cacheBlockSize                   -> block size in bytes >= 128 to optimize cache hit rate (default 16384; used in --algorithm >= 3)" << endl;
 	cout
-			<< "\t --sendPrimesCountToRoot            -> Y/N to to count the number of primes found in each mpi process and send the result to the root node (default Y and overrides the --countPrimesInNode flag if set to N)"
+			<< "\t --dynamicSchedulingSegmentSize     -> block size in elements >= 256 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576; used in --algorithm 16 and 19)"
 			<< endl;
-	cout << "\t --sendResultsToRoot                -> Y/N to send the computation results to the root node (default N)" << endl;
+	cout
+			<< "\t --dynamicSchedulingNumberSegments  -> number segments to use in mpi dynamic scheduling >= 1 (overrides dynamicSchedulingSegmentSize if set, default not used; applies to --algorithm 16 and 19)"
+			<< endl;
+	cout << "\t --numberThreads                    -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads; used in --algorithm 12, 13, 15, 16, 18, 19)"
+			<< endl;
+	cout << "\t --outputResult                     -> filename of file to output results (default doesn't output results; used in all algorithms)" << endl;
+	cout << "\t --checkResult                      -> filename of file with primes to check the algorithm result in root node (default doesn't check algorithm result; used in all algorithms)" << endl;
+	cout << "\t --countPrimesInNode                -> Y/N to count the primes computed each node (default N; used in all algorithms)" << endl;
+	cout
+			<< "\t --sendPrimesCountToRoot            -> Y/N to to count the number of primes found in each mpi process and send the result to the root node (default Y and overrides the --countPrimesInNode flag if set to N; used in --algorithm >= 14)"
+			<< endl;
+	cout << "\t --sendResultsToRoot                -> Y/N to send the computation results to the root node (default N; used in --algorithm >= 14)" << endl;
 	cout << "\t --help                             -> show program usage" << endl;
 	cout << "\t --version                          -> show program version" << endl;
 	cout << "\n\tWith no arguments starts interactive command line interface\n\n" << endl;

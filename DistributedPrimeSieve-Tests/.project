@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>CPAR-Project2-Tests</name>
+	<name>DistributedPrimeSieve-Tests</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -28,7 +28,13 @@
 		<link>
 			<name>src</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/CPAR-Project2/src</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/DistributedPrimeSieve/src</locationURI>			
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/git/cpar-12-13</value>
+		</variable>
+	</variableList>
 </projectDescription>
