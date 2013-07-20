@@ -360,6 +360,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			if (!_sendResultsToRoot && _numberProcesses > 1) {
 				stringstream sstream;
 				size_t startPossiblePrime = this->template getStartSieveNumber();
+
+				if (startPossiblePrime == this->template getWheelSieve().getFirstPrimeToSieve()) {
+					startPossiblePrime = 2;
+				}
+
 				size_t maxRange = this->template getMaxRange();
 				sstream << filename.substr(0, filename.rfind("."));
 				sstream << "_primes_in[" << startPossiblePrime << ", " << maxRange << "]";
@@ -485,15 +490,15 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			vector<size_t>& primesValues = this->template getPrimesValues();
 
 			if (primesValues.size() <= 2) {
+				size_t possiblePrime = this->template getStartSieveNumber();
 
-				if (this->template getProcessId() == this->template processIDWithFirstPrimesBlock()) {
+				if (possiblePrime == this->template getWheelSieve().getFirstPrimeToSieve()) {
 					outputStream << 2 << endl;
 					outputStream << 3 << endl;
 					outputStream << 5 << endl;
 					outputStream << 7 << endl;
 				}
 
-				size_t possiblePrime = this->template getStartSieveNumber();
 				if (!(_wheelSieve.isNumberPossiblePrime(possiblePrime))) {
 					possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
@@ -601,7 +606,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		virtual size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) = 0;
 		// end bitset specific memory management
 
-		virtual int processIDWithFirstPrimesBlock() {
+		virtual int getProcessIDWithFirstPrimesBlock() {
 			return 0;
 		}
 
