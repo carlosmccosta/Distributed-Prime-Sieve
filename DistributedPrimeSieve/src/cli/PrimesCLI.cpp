@@ -82,17 +82,16 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << "  6 - Single processor implementation using block search with bitset with only possible primes numbers optimized for space and with modulo 30 wheel factorization\n";
 		cout << "  7 - Single processor implementation using block search with bitset with only possible primes numbers optimized for space and with modulo 210 wheel factorization\n";
 		cout << "  8 - Single processor implementation using block search with bitset with all even numbers optimized for time and space and with modulo 30 wheel factorization\n";
-		cout << "  9 - Single processor implementation using block search with bitset with all even numbers optimized for time and space and with modulo 210 wheel factorization\n";
+		cout << "  9 - Fastest single processor implementation using block search with bitset with all even numbers optimized for time and space and with modulo 210 wheel factorization\n";
 		cout << " 10 - Single processor implementation using block search with bitset with all numbers optimized for time and with modulo 30 wheel factorization\n";
-		cout << " 11 - Fastest single processor implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization\n";
-		cout << " 12 - OpenMP implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
-		cout << " 13 - Fastest OpenMP implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 11 - Single processor implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel factorization\n";
+		cout << " 12 - Fastest OpenMP implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
+		cout << " 13 - OpenMP implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 14 - OpenMPI implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 15 - OpenMPI implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 16 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 17 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
-		cout
-				<< " 18 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
+		cout << " 18 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
 		cout << " 19 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time with modulo 210 wheel and with dynamic scheduling\n\n";
 		cout << " 20 - Command line help\n";
 		cout << " 21 - About\n";

@@ -54,7 +54,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			}
 
 			size_t blockIndexBegin = this->template getBitsetPositionToNumberOpenMP(blockBeginNumber);
-			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot);
+			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot + 1);
 			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
 
 			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
