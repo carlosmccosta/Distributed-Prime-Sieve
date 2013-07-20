@@ -18,11 +18,76 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP() {
 		}
 
+		void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+			size_t numberThreadsToUse = omp_get_max_threads();
+			size_t numberOfThreads = this->template getNumberOfThreads();
+
+			if (numberOfThreads != 0) {
+				numberThreadsToUse = numberOfThreads;
+			}
+
+			size_t sievingMultiplesSize = sievingMultiples.size();
+
+#			pragma omp parallel for \
+				if (sievingMultiplesSize > 16) \
+				default(shared) \
+				schedule(guided) \
+				num_threads(numberThreadsToUse)
+			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
+				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
+				size_t primeMultiple = primeCompositeInfo.first;
+				size_t primeMultipleIncrement = primeCompositeInfo.second;
+
+				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
+					this->template setPrimesBitsetValueMPI(primeMultiple, true);
+				}
+
+				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
+			}
+		}
+
+
+		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
+			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumberMPI(maxRangeSquareRoot);
+			size_t blockBeginNumber = this->template getBlockBeginNumber();
+
+			if (maxRangeSquareRoot < blockBeginNumber) {
+				return;
+			}
+
+			size_t blockSizeInElements = this->template getBlockSizeInElements();
+
+			size_t blockIndexBegin = this->template getBitsetPositionToNumberMPI(blockBeginNumber);
+			size_t blockIndexEnd = min(blockIndexBegin + blockSizeInElements, maxIndexRangeSquareRoot + 1);
+			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
+
+			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) blockSizeInElements);
+
+			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
+
+			for (size_t blockNumber = 1; blockNumber < numberBlocks; ++blockNumber) {
+				blockIndexBegin = blockIndexEnd;
+				blockIndexEnd += blockSizeInElements;
+
+				blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
+				blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
+
+				if (blockEndNumber >= maxRangeSquareRoot) {
+					blockEndNumber = maxRangeSquareRoot + 1;
+				}
+
+//				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
+				this->template removeMultiplesOfPrimesFromPreviousBlocksParallel(blockBeginNumber, blockEndNumber, sievingMultiples);
+				this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
+			}
+		}
+
+
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
-#ifdef DEBUG_OUTPUT
+#			ifdef DEBUG_OUTPUT
 			int _processID = this->template getProcessId();
 			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
-#endif
+#			endif
 
 			const size_t blockSizeInElements = this->template getBlockSizeInElements();
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);

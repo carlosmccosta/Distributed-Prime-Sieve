@@ -107,7 +107,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 					this->template startServerOfSegmentsAvailable(_numberSegmentsCreated, _segmentsDistribution, _numberSievingProcesses);
 				} else if (_sendResultsToRoot && _processID == 1) {
 					this->template setMaxRange(maxRange);
+
+					PerformanceTimer memoryAllocationTimer;
+					memoryAllocationTimer.reset();
+					memoryAllocationTimer.start();
 					this->template initPrimesBitSetSizeForRootWithAllValues(maxRange);
+					memoryAllocationTimer.stop();
+					cout << "    --> Allocated memory for " << maxRange << " numbers in " << memoryAllocationTimer.getElapsedTimeFormated() << endl;
+
 					vector<pair<size_t, size_t> > sievingMultiples;
 					this->template calculateSievingMultiples(maxRangeSquareRoot, sievingMultiples);
 					this->template startCollectorOfSievingDataResults(_dynamicSchedulingNumberSegments);
@@ -188,36 +195,49 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			if (!sendResultsToRoot) {
 				this->template outputResults();
 			}
+/*
+			size_t _numberOfThreads = this->template getNumberOfThreads();
+			size_t numberThreadsToUse = omp_get_max_threads();
+			if (_numberOfThreads != 0) {
+				numberThreadsToUse = _numberOfThreads;
+			}
 
-			// sieve all assigned blocks
-			while (this->template getNewSegmentFromRoot()) {
-				this->template initPrimesBitSetSizeForSieving(_processEndBlockNumber - _processStartBlockNumber);
+#			pragma omp parallel \
+				default(shared) \
+				num_threads(numberThreadsToUse)
+			{
+#				pragma omp master
+				{*/
+					while (this->template getNewSegmentFromRoot()) {
+						this->template initPrimesBitSetSizeForSieving(_processEndBlockNumber - _processStartBlockNumber);
 
-				// to avoid computing sieving multiples when the segments are contiguous
-				if (previousProcessEndBlockNumber != _processStartBlockNumber) {
-					this->template computeSievingMultiples(_processStartBlockNumber, _processEndBlockNumber, sievingMultiples);
-					previousProcessEndBlockNumber = _processEndBlockNumber;
-				}
+						// to avoid computing sieving multiples when the segments are contiguous
+						if (previousProcessEndBlockNumber != _processStartBlockNumber) {
+							this->template computeSievingMultiples(_processStartBlockNumber, _processEndBlockNumber, sievingMultiples);
+							previousProcessEndBlockNumber = _processEndBlockNumber;
+						}
 
-				this->template removeComposites(_processStartBlockNumber, _processEndBlockNumber, sievingMultiples);
-				++_numberSegmentsSieved;
+						this->template removeComposites(_processStartBlockNumber, _processEndBlockNumber, sievingMultiples);
+						++_numberSegmentsSieved;
 
-				if (sendPrimesCountToRoot) {
-					this->template sendPrimesCountToCollector(processIDToSendPrimesCount);
-				} else if (countNumberOfPrimesOnNode) {
-					this->template countPrimesInNode();
-				}
+						if (sendPrimesCountToRoot) {
+							this->template sendPrimesCountToCollector(processIDToSendPrimesCount);
+						} else if (countNumberOfPrimesOnNode) {
+							this->template countPrimesInNode();
+						}
 
-				if (sendResultsToRoot) {
-					this->template sendSievedBlockDataToCollector(processIDToSendResults);
-				} else {
-					this->template outputResults();
-				}
+						if (sendResultsToRoot) {
+							this->template sendSievedBlockDataToCollector(processIDToSendResults);
+						} else {
+							this->template outputResults();
+						}
 
 #				ifdef DEBUG_OUTPUT
-				cout << "    --> Finish sieving segment [" << _processStartBlockNumber << ", " << (_processEndBlockNumber - 1) << "]" << endl;
+						cout << "    --> Finish sieving segment [" << _processStartBlockNumber << ", " << (_processEndBlockNumber - 1) << "]" << endl;
 #				endif
-			}
+					}
+				//}
+			//}
 
 			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
 			performanceTimer.stop();
@@ -238,6 +258,46 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			cout << "    --> Computed " << sievingMultiples.size() << " sieving primes in [" << startSievingNumber << ", " << maxRangeSquareRoot << "], on process with rank " << _processID << " in "
 					<< computeSievingPrimesTimer.getElapsedTimeFormated() << endl << endl;
 		}
+
+		/*
+		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
+#			ifdef DEBUG_OUTPUT
+			int _processID = this->template getProcessId();
+			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
+#			endif
+
+			const size_t blockSizeInElements = this->template getBlockSizeInElements();
+			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
+			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);
+
+			const size_t numberBlocks = ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
+
+			vector<pair<size_t, size_t> > sievingMultiples;
+			size_t priviousBlockNumber = -1;
+
+#			pragma omp for \
+				schedule(guided, 64)
+			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
+				size_t blockIndexBegin = blockNumber * blockSizeInElements + processBeginBlockNumberIndex;
+				size_t blockIndexEnd = blockIndexBegin + blockSizeInElements;
+
+				size_t blockBeginNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexBegin);
+				size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
+
+				if (blockEndNumber > processEndBlockNumber) {
+					blockEndNumber = processEndBlockNumber;
+				}
+
+				if (blockNumber == 0 && this->template getProcessId() == 0) {
+					sievingMultiples = sievingMultiplesFirstBlock;
+				} else if (sievingMultiples.empty() || blockNumber != priviousBlockNumber + 1) {
+					this->template computeSievingMultiples(blockBeginNumber, blockEndNumber, sievingMultiples);
+				}
+				priviousBlockNumber = blockNumber;
+				this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
+			}
+		}
+		*/
 
 		virtual void setupSegmentDistribution(size_t maxRange) {
 			size_t numberProcesses = (size_t) this->template getNumberProcesses() - 1; // process 0 acts only as a management node

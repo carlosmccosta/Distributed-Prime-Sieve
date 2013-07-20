@@ -33,12 +33,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
 			size_t sievingMultiplesSize = sievingMultiples.size();
-
-			// worse performance with omp parallel because of false sharing
-			/*	#pragma omp parallel for \
-				default(shared) \
-				schedule(guided) \
-				firstprivate(sievingMultiplesSize, blockEndNumber)*/
 			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
 				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
 				size_t primeMultiple = primeCompositeInfo.first;
@@ -51,6 +45,37 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
 			}
 		}
+
+
+		void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+			size_t numberThreadsToUse = omp_get_max_threads();
+			size_t numberOfThreads = this->template getNumberOfThreads();
+
+			if (numberOfThreads != 0) {
+				numberThreadsToUse = numberOfThreads;
+			}
+
+			size_t sievingMultiplesSize = sievingMultiples.size();
+			FlagsContainer& primesBitset = this->template getPrimesBitset();
+
+#			pragma omp parallel for \
+				if (sievingMultiplesSize > 16) \
+				default(shared) \
+				schedule(guided, 10) \
+				num_threads(numberThreadsToUse)
+			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
+				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
+				size_t primeMultiple = primeCompositeInfo.first;
+				size_t primeMultipleIncrement = primeCompositeInfo.second;
+
+				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
+					primesBitset[primeMultiple] = true;
+				}
+
+				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
+			}
+		}
+
 
 		void calculatePrimesInBlock(size_t blockBeginNumber, size_t blockEndNumber, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxPrimeNumberSearch = blockEndNumber;

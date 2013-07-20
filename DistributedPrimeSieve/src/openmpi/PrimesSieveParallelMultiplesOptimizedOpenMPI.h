@@ -94,7 +94,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 			if (_processID == 0) {
 				if (_sendResultsToRoot) {
+					PerformanceTimer memoryAllocationTimer;
+					memoryAllocationTimer.reset();
+					memoryAllocationTimer.start();
 					this->template initPrimesBitSetSizeForRootWithAllValues(maxRange);
+					memoryAllocationTimer.stop();
+					cout << "    --> Allocated memory for " << maxRange << " numbers in " << memoryAllocationTimer.getElapsedTimeFormated() << endl;
 				} else {
 					this->template initPrimesBitSetSizeForRoot(maxRange, processEndBlockNumber - 1);
 				}
