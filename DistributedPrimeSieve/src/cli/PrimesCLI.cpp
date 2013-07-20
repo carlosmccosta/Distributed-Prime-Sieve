@@ -88,10 +88,11 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 12 - OpenMP implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
 		cout << " 13 - Fastest OpenMP implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
 		cout << " 14 - OpenMPI implementation using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
-		cout << " 15 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
-		cout << " 16 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
-		cout << " 17 - OpenMPI implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
-		cout << " 18 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 15 - OpenMPI implementation using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
+		cout << " 16 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time and with modulo 210 wheel\n";
+		cout << " 17 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time and with modulo 210 wheel\n";
+		cout
+				<< " 18 - Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling\n";
 		cout << " 19 - Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time with modulo 210 wheel and with dynamic scheduling\n\n";
 		cout << " 20 - Command line help\n";
 		cout << " 21 - About\n";
@@ -120,15 +121,15 @@ void PrimesCLI::startInteractiveCLI() {
 				_primesMaxRange = ConsoleInput::getInstance()->getNumberCin("    # Max search range: ", "Range must be >= 11", (size_t) 11);
 			}
 
-			if (_algorithmToUse > 2) {
+			if (_algorithmToUse >= 3) {
 				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("    # Cache block size in bytes: ", "Block size must be >= 512", 512);
 			}
 
-			if (_algorithmToUse == 16) {
-				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in elements to split primes domain for mpi dynamic scheduling: ", "Block size must be >= 100", 100);
-			}
+//			if (_algorithmToUse == 16) {
+//				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in elements to split primes domain for mpi dynamic scheduling: ", "Block size must be >= 100", 100);
+//			}
 
-			if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15 || _algorithmToUse == 16 || _algorithmToUse == 18) {
+			if (_algorithmToUse >= 12 || _algorithmToUse <= 17) {
 				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
 			}
 
@@ -247,32 +248,6 @@ bool PrimesCLI::computePrimes() {
 
 		case 15: {
 			if (_sendResultsToRoot) {
-				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize,
-						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
-			} else {
-				_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel<PrimesFlagsContainer, Modulo210Wheel>(_primesMaxRange, _cacheBlockSize,
-						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
-			}
-			break;
-		}
-
-		case 16: {
-			if (_sendResultsToRoot) {
-				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange,
-						_cacheBlockSize, _numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot, _dynamicSchedulingSegmentSizeInElements,
-						_dynamicSchedulingNumberSegments, _outputResultsFilename);
-				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->setMpiThreadSupport(_mpiThreadSupport);
-			} else {
-				_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel<PrimesFlagsContainer, Modulo210Wheel>(_primesMaxRange, _cacheBlockSize,
-						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot, _dynamicSchedulingSegmentSizeInElements,
-						_dynamicSchedulingNumberSegments, _outputResultsFilename);
-				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->setMpiThreadSupport(_mpiThreadSupport);
-			}
-			break;
-		}
-
-		case 17: {
-			if (_sendResultsToRoot) {
 				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize,
 						_sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
 			} else {
@@ -282,7 +257,18 @@ bool PrimesCLI::computePrimes() {
 			break;
 		}
 
-		case 18: {
+		case 16: {
+			if (_sendResultsToRoot) {
+				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize,
+						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
+			} else {
+				_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel<PrimesFlagsContainer, Modulo210Wheel>(_primesMaxRange, _cacheBlockSize,
+						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
+			}
+			break;
+		}
+
+		case 17: {
 			if (_sendResultsToRoot) {
 				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange, _cacheBlockSize,
 						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot);
@@ -293,18 +279,33 @@ bool PrimesCLI::computePrimes() {
 			break;
 		}
 
+		case 18: {
+			if (_sendResultsToRoot) {
+				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange,
+						_cacheBlockSize, _numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot, _dynamicSchedulingSegmentSizeInElements,
+						_dynamicSchedulingNumberSegments, _outputResultsFilename);
+//				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->setMpiThreadSupport(_mpiThreadSupport);
+			} else {
+				_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel<PrimesFlagsContainer, Modulo210Wheel>(_primesMaxRange, _cacheBlockSize,
+						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot, _dynamicSchedulingSegmentSizeInElements,
+						_dynamicSchedulingNumberSegments, _outputResultsFilename);
+//				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->setMpiThreadSupport(_mpiThreadSupport);
+			}
+			break;
+		}
+
 		case 19: {
 			if (_sendResultsToRoot) {
 				_primesSieveMPI = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>(_primesMaxRange,
 						_cacheBlockSize, _numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot, _dynamicSchedulingSegmentSizeInElements,
 						_dynamicSchedulingNumberSegments, _outputResultsFilename);
 
-				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->setMpiThreadSupport(_mpiThreadSupport);
+//				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->setMpiThreadSupport(_mpiThreadSupport);
 			} else {
 				_primesSieve = new PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel<PrimesFlagsContainer, Modulo210Wheel>(_primesMaxRange, _cacheBlockSize,
 						_numberOfThreadsToUseInSieving, _sendResultsToRoot, _countNumberOfPrimesOnNode, _sendPrimesCountToRoot, _dynamicSchedulingSegmentSizeInElements,
 						_dynamicSchedulingNumberSegments, _outputResultsFilename);
-				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->setMpiThreadSupport(_mpiThreadSupport);
+//				((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->setMpiThreadSupport(_mpiThreadSupport);
 			}
 			break;
 		}
@@ -316,18 +317,18 @@ bool PrimesCLI::computePrimes() {
 	}
 
 	if (validAlgorithmToUse) {
-		if ((_algorithmToUse < 14 && _primesSieve == NULL) || (_algorithmToUse >= 14 && _sendResultsToRoot && _primesSieveMPI == NULL)) {
+		if ((_algorithmToUse <= 13 && _primesSieve == NULL) || (_algorithmToUse >= 14 && _sendResultsToRoot && _primesSieveMPI == NULL)) {
 			return false;
 		}
 
-		size_t processStartBlockNumber = ((_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->getStartSieveNumber() : _primesSieve->getStartSieveNumber());
-		size_t processEndBlockNumber = ((_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->getMaxRange() : _primesMaxRange);
+		size_t processStartBlockNumber = ((_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->getStartSieveNumber() : _primesSieve->getStartSieveNumber());
+		size_t processEndBlockNumber = ((_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->getMaxRange() : _primesMaxRange);
 
-		if (_algorithmToUse != 16 && _algorithmToUse != 19) {
+		if (_algorithmToUse <= 17) {
 			cout << "\n    > Computing primes";
 		}
 
-		if (_algorithmToUse > 13 && _algorithmToUse != 16 && _algorithmToUse != 19) {
+		if (_algorithmToUse >= 14 && _algorithmToUse <= 17) {
 			int processRank;
 			if (_sendResultsToRoot) {
 				processRank = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId();
@@ -337,13 +338,13 @@ bool PrimesCLI::computePrimes() {
 			cout << " in process with rank " << processRank;
 		}
 
-		if (_algorithmToUse != 16 && _algorithmToUse != 19) {
+		if (_algorithmToUse <= 17) {
 			cout << " from " << processStartBlockNumber << " to " << processEndBlockNumber << "..." << endl;
 		}
 
-		((_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->computePrimes(_primesMaxRange) : _primesSieve->computePrimes(_primesMaxRange));
+		((_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->computePrimes(_primesMaxRange) : _primesSieve->computePrimes(_primesMaxRange));
 
-		if (_algorithmToUse < 14) {
+		if (_algorithmToUse <= 13) {
 			cout << "    --> Finished sieving in " << _primesSieve->getPerformanceTimer().getElapsedTimeFormated();
 			if (_algorithmToUse == 12 || _algorithmToUse == 13) {
 				cout << " using at most " << omp_get_num_procs() << " processors and ";
@@ -365,7 +366,7 @@ bool PrimesCLI::computePrimes() {
 
 size_t PrimesCLI::countNumberOfPrimes() {
 	if (_countNumberOfPrimesOnNode) {
-		if (_algorithmToUse < 14) {
+		if (_algorithmToUse <= 13) {
 			size_t startPossiblePrime = _primesSieve->getStartSieveNumber();
 			size_t maxRange = _primesSieve->getMaxRange();
 
@@ -394,14 +395,14 @@ size_t PrimesCLI::countNumberOfPrimes() {
 bool PrimesCLI::checkPrimesFromFile() {
 	if (_resultsConfirmationFile != "") {
 		int processID = 0;
-		if (_algorithmToUse > 13) {
+		if (_algorithmToUse >= 14) {
 			if (_sendResultsToRoot) {
 				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId();
 			} else {
 				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieve)->getProcessId();
 			}
 
-			if ((_algorithmToUse == 16 || _algorithmToUse == 19) && _mpiThreadSupport < MPI_THREAD_MULTIPLE) {
+			if ((_algorithmToUse >= 18) && _mpiThreadSupport < MPI_THREAD_MULTIPLE) {
 				if (processID != 1) {
 					return false;
 				}
@@ -413,13 +414,13 @@ bool PrimesCLI::checkPrimesFromFile() {
 		}
 
 		cout << "\n    > Validating computed primes with file " << _resultsConfirmationFile;
-		if (_algorithmToUse > 13) {
+		if (_algorithmToUse >= 14) {
 			cout << " in process " << processID;
 		}
 		cout << "... " << endl;
 
 		bool validationResult = (
-				(_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->checkPrimesFromFile(_resultsConfirmationFile) : _primesSieve->checkPrimesFromFile(_resultsConfirmationFile));
+				(_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->checkPrimesFromFile(_resultsConfirmationFile) : _primesSieve->checkPrimesFromFile(_resultsConfirmationFile));
 
 		if (validationResult) {
 			cout << "    --> Computed primes are correct!\n\n";
@@ -434,7 +435,7 @@ bool PrimesCLI::checkPrimesFromFile() {
 }
 
 bool PrimesCLI::outputResults() {
-	if (_algorithmToUse == 16 || _algorithmToUse == 19) {
+	if (_algorithmToUse >= 18) {
 		return false;
 //
 //		if (_sendResultsToRoot) {
@@ -444,7 +445,7 @@ bool PrimesCLI::outputResults() {
 //		}
 	}
 
-	if (_algorithmToUse > 13) {
+	if (_algorithmToUse >= 14) {
 		if (_sendResultsToRoot) {
 			if (((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId() != 0 && _sendResultsToRoot) {
 				return false;
@@ -458,12 +459,12 @@ bool PrimesCLI::outputResults() {
 
 	if (_outputResultsFilename == "stdout") {
 		cout << "\n\n=============================================  Computed primes  =============================================\n\n";
-		((_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->printPrimesToConsole() : _primesSieve->printPrimesToConsole());
+		((_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->printPrimesToConsole() : _primesSieve->printPrimesToConsole());
 		cout << "\n" << endl;
 	} else if (_outputResultsFilename != "") {
 		int numberProcesses = 1;
 		int processID = 0;
-		if (_algorithmToUse > 13) {
+		if (_algorithmToUse >= 14) {
 			if (_sendResultsToRoot) {
 				numberProcesses = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getNumberProcesses();
 				processID = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId();
@@ -479,7 +480,7 @@ bool PrimesCLI::outputResults() {
 			cout << "\n    > Exporting results to file " << _outputResultsFilename;
 		}
 
-		if (_algorithmToUse > 13) {
+		if (_algorithmToUse >= 14) {
 			cout << " in process " << processID;
 		}
 
@@ -488,7 +489,7 @@ bool PrimesCLI::outputResults() {
 		PerformanceTimer performanceTimer;
 		performanceTimer.reset();
 		performanceTimer.start();
-		if ((_algorithmToUse > 13 && _sendResultsToRoot) ? _primesSieveMPI->savePrimesToFile(_outputResultsFilename) : _primesSieve->savePrimesToFile(_outputResultsFilename)) {
+		if ((_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->savePrimesToFile(_outputResultsFilename) : _primesSieve->savePrimesToFile(_outputResultsFilename)) {
 			performanceTimer.stop();
 			cout << "    --> Export to file " << _outputResultsFilename << " finished in " << performanceTimer.getElapsedTimeFormated() << endl;
 		} else {
@@ -503,7 +504,7 @@ bool PrimesCLI::outputResults() {
 
 void PrimesCLI::showTotalComputationTimte() {
 	cout << "\n\n  > Finished program in ";
-	if (_algorithmToUse > 13) {
+	if (_algorithmToUse >= 14) {
 		int processRank;
 		if (_sendResultsToRoot) {
 			processRank = ((PrimesSieveParallelMultiplesOptimizedOpenMPI<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getProcessId();
@@ -514,10 +515,10 @@ void PrimesCLI::showTotalComputationTimte() {
 	}
 	stopTimer();
 	cout << getElapsedTimeFormated();
-	if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse == 15 || _algorithmToUse == 16) {
+	if (_algorithmToUse == 12 || _algorithmToUse == 13 || _algorithmToUse >= 16) {
 		cout << " using at most " << omp_get_num_procs() << " processors and using ";
 		if (_numberOfThreadsToUseInSieving != 0) {
-			if (_algorithmToUse == 15 || _algorithmToUse == 16) {
+			if (_algorithmToUse >= 16) {
 				if (_sendResultsToRoot) {
 					cout << ((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWheel<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->getNumberOfThreads();
 				} else {

@@ -48,7 +48,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				cerr << "    --> 1 process to dynamic schedule the blocks for each sieving process" << endl;
 				cerr << "    --> 1 Additional process if flag --sendPrimesCountToRoot is set" << endl;
 				cerr << "    --> 1 Additional process if flag --sendResultsToRoot is set" << endl;
-				cerr << "    --> The remaining process are used to sieve the primes segments\n\n" << endl;
+				cerr << "    --> The remaining process are used to sieve the primes segments\n" << endl;
+				cerr << " Although the current implementation is prepared for systems with support for MPI_THREAD_MULTIPLE, since it isn't tested yet, it was decided to be left deactivated" << endl;
+				cerr << " Implementation tested in a Ubuntu 13.04 64 bits, with Open MPI: 1.4.5, Open MPI SVN revision: r25905, Open MPI release date: Feb 10, 2012, Thread support: posix (mpi: no, progress: no)\n\n" << endl;
 
 				exit(EXIT_FAILURE);
 			}
@@ -66,9 +68,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			this->template setMaxRange(maxRangeSquareRoot);
 
 			if (_dynamicSchedulingNumberSegments != 0) {
-				_dynamicSchedulingSegmentSizeInElements = maxRange / _dynamicSchedulingNumberSegments;
+				_dynamicSchedulingSegmentSizeInElements = ceil((double)maxRange / (double)_dynamicSchedulingNumberSegments);
 			} else {
-				_dynamicSchedulingNumberSegments = ceil((double) (maxRange - maxRangeSquareRoot) / (double) _dynamicSchedulingSegmentSizeInElements);
+				_dynamicSchedulingNumberSegments = ceil((double)(maxRange - maxRangeSquareRoot) / (double)_dynamicSchedulingSegmentSizeInElements);
 			}
 
 			size_t numberProcesses = (size_t) this->template getNumberProcesses();
@@ -175,7 +177,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			while (this->template getNewSegmentFromRoot()) {
 				this->template initPrimesBitSetSizeForSieving(_processEndBlockNumber - _processStartBlockNumber);
 
-				// to avoid computing sieving multiples when the segment are contiguous
+				// to avoid computing sieving multiples when the segments are contiguous
 				if (previousProcessEndBlockNumber != _processStartBlockNumber) {
 					this->template computeSievingMultiples(_processStartBlockNumber, _processEndBlockNumber, sievingMultiples);
 					previousProcessEndBlockNumber = _processEndBlockNumber;
