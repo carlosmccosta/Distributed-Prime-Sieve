@@ -744,6 +744,6 @@ void PrimesCLI::showVersion() {
 
 void PrimesCLI::showProgramHeader() {
 	cout << "#######################################################################################\n";
-	cout << "  >>>                           Distributed primes sieve                          <<<  \n";
+	cout << "  >>>                           Distributed prime sieve                          <<<  \n";
 	cout << "#######################################################################################\n\n";
 }
