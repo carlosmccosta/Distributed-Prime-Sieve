@@ -7,9 +7,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTim
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, size_t numberOfThreads = 0,
 				bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true, size_t dynamicSchedulingSegmentSizeInElements = 1048576,
-				size_t dynamicSchedulingNumberSegments = 0, string outputResultsFilename = "") :
+				size_t dynamicSchedulingNumberSegments = 0, string outputResultsFilename = "", bool outputOnlyLastSegment = false) :
 				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType>(maxRange, blockSizeInBytes * 8, numberOfThreads, sendResultsToRoot,
-						countNumberOfPrimesOnNode, sendPrimesCountToRoot, dynamicSchedulingSegmentSizeInElements, dynamicSchedulingNumberSegments, outputResultsFilename) {
+						countNumberOfPrimesOnNode, sendPrimesCountToRoot, dynamicSchedulingSegmentSizeInElements, dynamicSchedulingNumberSegments, outputResultsFilename, outputOnlyLastSegment) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel() {

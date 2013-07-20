@@ -15,6 +15,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		size_t _processStartBlockNumber;
 		size_t _processEndBlockNumber;
 		string _outputResultsFilename;
+		bool _outputOnlyLastSegment;
 		size_t _dynamicSchedulingSegmentSizeInElements;
 		size_t _dynamicSchedulingNumberSegments;
 
@@ -26,14 +27,16 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		size_t _numberSegmentsCreated;
 		vector<vector<pair<size_t, size_t> > > _segmentsDistribution;
 
+		size_t _globalMaxRange;
+
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true,
 				bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true, size_t dynamicSchedulingSegmentSizeInElements = 1048576, size_t dynamicSchedulingNumberSegments = 0,
-				string outputResultsFilename = "") :
+				string outputResultsFilename = "", bool outputOnlyLastSegment = false) :
 				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP<FlagsContainer, WheelType>(maxRange, blockSizeInElements, numberOfThreads, sendResultsToRoot, countNumberOfPrimesOnNode,
-						sendPrimesCountToRoot), _processStartBlockNumber(0), _processEndBlockNumber(0), _outputResultsFilename(outputResultsFilename), _dynamicSchedulingSegmentSizeInElements(
+						sendPrimesCountToRoot), _processStartBlockNumber(0), _processEndBlockNumber(0), _outputResultsFilename(outputResultsFilename), _outputOnlyLastSegment(outputOnlyLastSegment), _dynamicSchedulingSegmentSizeInElements(
 						dynamicSchedulingSegmentSizeInElements), _dynamicSchedulingNumberSegments(dynamicSchedulingNumberSegments), _mpiThreadSupport(MPI_THREAD_SINGLE), _processIDWithFirstPrimesBlock(
-						0), _numberSievingProcesses(1), _numberSegmentsSieved(0), _numberSegmentsCreated(0) {
+						0), _numberSievingProcesses(1), _numberSegmentsSieved(0), _numberSegmentsCreated(0), _globalMaxRange(11) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling() {
@@ -56,6 +59,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 
 				exit(EXIT_FAILURE);
 			}
+
+			_globalMaxRange = maxRange;
 
 			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
 			performanceTimer.reset();
@@ -606,6 +611,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		}
 
 		virtual bool outputResults() {
+			if (_outputOnlyLastSegment) {
+				size_t maxRangeSegment = this->template getMaxRange();
+
+				if (maxRangeSegment != _globalMaxRange) {
+					return false;
+				}
+			}
+
 			int _processID = this->template getProcessId();
 			bool _sendResultsToRoot = this->template isSendResultsToRoot();
 			bool _sendPrimesCountToRoot = this->template isSendPrimesCountToRoot();

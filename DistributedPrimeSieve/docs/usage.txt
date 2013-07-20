@@ -70,11 +70,11 @@ mpirun -np 2 --hostfile ~/cpar/mpi_hostfile_hybrid.ini DistributedPrimeSieve --a
 
 ----- algorithm 18 -----
 Fastest hybrid implementation with OpenMPI and OpenMP using block search with bitset with all even numbers optimized for space and time with modulo 210 wheel and with dynamic scheduling
-mpirun -np 9 --hostfile ~/cpar/mpi_hostfile_hybrid_dynamic.ini DistributedPrimeSieve --algorithm 18 --countPrimesInNode N --sendPrimesCountToRoot N --sendResultsToRoot N --cacheBlockSize 16384 --numberThreads 0 --dynamicSchedulingNumberSegments 19 --maxRangeInBits 32
+mpirun -np 9 --hostfile ~/cpar/mpi_hostfile_hybrid_dynamic.ini DistributedPrimeSieve --algorithm 18 --countPrimesInNode N --sendPrimesCountToRoot N --sendResultsToRoot N --outputOnlyLastSegment N --cacheBlockSize 16384 --numberThreads 0 --dynamicSchedulingNumberSegments 19 --maxRangeInBits 32
 
 ----- algorithm 19 -----
 Hybrid implementation with OpenMPI and OpenMP using block search with bitset with all numbers optimized for time with modulo 210 wheel and with dynamic scheduling
-mpirun -np 9 --hostfile ~/cpar/mpi_hostfile_hybrid_dynamic.ini DistributedPrimeSieve --algorithm 19 --countPrimesInNode N --sendPrimesCountToRoot N --sendResultsToRoot N --cacheBlockSize 16384 --numberThreads 0 --dynamicSchedulingNumberSegments 19 --maxRangeInBits 32
+mpirun -np 9 --hostfile ~/cpar/mpi_hostfile_hybrid_dynamic.ini DistributedPrimeSieve --algorithm 19 --countPrimesInNode N --sendPrimesCountToRoot N --sendResultsToRoot N --outputOnlyLastSegment N --cacheBlockSize 16384 --numberThreads 0 --dynamicSchedulingNumberSegments 19 --maxRangeInBits 32
 
 
 
