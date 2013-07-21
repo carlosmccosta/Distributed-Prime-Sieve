@@ -59,9 +59,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
 #			pragma omp parallel for \
-				if (sievingMultiplesSize > 16) \
+				if (sievingMultiplesSize > 8) \
 				default(shared) \
-				schedule(guided, 10) \
+				schedule(guided, 8) \
 				num_threads(numberThreadsToUse)
 			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
 				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
@@ -174,8 +174,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			vector<size_t>& primesValues = this->template getPrimesValues();
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
-			if (primesValues.size() >= 2)
+			if (primesValues.size() >= 2) {
 				return primesValues.size();
+			}
 
 			size_t primesFound = 4;
 			size_t maxRange = this->template getMaxRange();
@@ -184,12 +185,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 			int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
 			size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
 
-#pragma omp parallel for \
-			default(shared) \
-			firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock) \
-			schedule(guided) \
-			reduction(+: primesFound) \
-			num_threads(numberThreads)
+#			pragma omp parallel for \
+				default(shared) \
+				firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock) \
+				reduction(+: primesFound) \
+				num_threads(numberThreads)
 			for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
 				size_t possiblePrime;
 

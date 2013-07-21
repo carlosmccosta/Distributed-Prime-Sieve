@@ -13,11 +13,11 @@ using std::cerr;
 using std::endl;
 using std::ifstream;
 
-#include <boost/dynamic_bitset.hpp>
+//#include <boost/dynamic_bitset.hpp>
 
 //typedef boost::dynamic_bitset<> PrimesFlagsContainer;
-typedef vector<bool> PrimesFlagsContainer;
 //typedef vector<unsigned char> PrimesFlagsContainer;
+typedef vector<bool> PrimesFlagsContainer;
 typedef vector<unsigned char> PrimesFlagsContainerMPI;
 
 
@@ -89,6 +89,7 @@ class WheelFactorization {
 			return numberBitsToStore;
 		}
 
+		/*
 		virtual bool checkPrimesFromFileMPI(FlagsContainer& primesBitset, size_t startSieveNumber, string filename) {
 			ifstream inputStream(filename.c_str());
 
@@ -130,6 +131,7 @@ class WheelFactorization {
 
 			return false;
 		}
+		*/
 
 		inline size_t getBitsetPositionToNumberMPI(size_t number, size_t startSieveNumber) {
 			return (number - startSieveNumber) >> 1;

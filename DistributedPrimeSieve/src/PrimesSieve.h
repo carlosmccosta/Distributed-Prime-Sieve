@@ -20,10 +20,6 @@ using std::ostream;
 using std::ofstream;
 using std::ifstream;
 
-
-//typedef vector<bool> PrimesBitset;
-//typedef vector<unsigned char> PrimesBitset;
-
 template<typename FlagsContainer>
 class PrimesSieve {
 	protected:
@@ -185,26 +181,18 @@ class PrimesSieve {
 
 		virtual void initPrimesBitset(size_t maxRange) {
 			this->_maxRange = maxRange;
-			_primesBitset = FlagsContainer(this->template getNumberBitsToStore(maxRange), false);
-//			size_t iSize = _primesBitset.size();
-//			for (size_t i = 0; i < iSize; ++i) {
-//				_primesBitset[i] = true;
-//			}
+			_primesBitset.assign(this->template getNumberBitsToStore(maxRange), false);
+//			_primesBitset = FlagsContainer(this->template getNumberBitsToStore(maxRange), false);
 		}
 
 		virtual void initPrimesBitSetSize(size_t newBitsetSize) {
-			_primesBitset = FlagsContainer(newBitsetSize, false);
-//			size_t iSize = _primesBitset.size();
-//			for (size_t i = 0; i < iSize; ++i) {
-//				_primesBitset[i] = true;
-//			}
+			_primesBitset.assign(newBitsetSize, false);
+//			_primesBitset = FlagsContainer(newBitsetSize, false);
 		}
 
 		void resetPrimesBitsetBlock() {
 			size_t iSize = _primesBitset.size();
-			for (size_t i = 0; i < iSize; ++i) {
-				_primesBitset[i] = false;
-			}
+			_primesBitset.assign(iSize, false);
 		}
 
 		inline size_t getMaxRange() const {

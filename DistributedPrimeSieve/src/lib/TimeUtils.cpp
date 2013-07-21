@@ -1,10 +1,3 @@
-/*
- * TimeUtils.cpp
- *
- *  Created on: May 25, 2013
- *      Author: carloscosta
- */
-
 #include "TimeUtils.h"
 
 string TimeUtils::formatSecondsToDate(double seconds) {

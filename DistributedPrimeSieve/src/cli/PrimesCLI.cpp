@@ -72,6 +72,11 @@ int main(int argc, char** argv) {
 
 void PrimesCLI::startInteractiveCLI() {
 	do {
+		delete _primesSieve;
+		_primesSieve = NULL;
+		delete _primesSieveMPI;
+		_primesSieveMPI = NULL;
+
 		showProgramHeader();
 
 		cout << "  1 - Single processor implementation using modulo division to cross of composites\n";
@@ -125,18 +130,9 @@ void PrimesCLI::startInteractiveCLI() {
 				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("    # Cache block size in bytes: ", "Block size must be >= 512", 512);
 			}
 
-//			if (_algorithmToUse == 16) {
-//				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("    # Block size in elements to split primes domain for mpi dynamic scheduling: ", "Block size must be >= 100", 100);
-//			}
-
 			if (_algorithmToUse >= 12 || _algorithmToUse <= 17) {
 				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("    # Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0");
 			}
-
-//			if (_algorithmToUse > 13) {
-//				_sendPrimesCountToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Perform primes computation on all processes and send it back to root node? (Y/N): ");
-//				_sendResultsToRoot = ConsoleInput::getInstance()->getYesNoCin("\n   # Send primes results to root node? (Y/N): ");
-//			}
 
 			cout << "   ## Output result to file (filename, stdout or empty to avoid output): ";
 			_outputResultsFilename = ConsoleInput::getInstance()->getLineCin();
@@ -373,7 +369,6 @@ size_t PrimesCLI::countNumberOfPrimes() {
 			cout << "    --> Counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
 
 			PerformanceTimer countingPrimesTimer;
-			countingPrimesTimer.reset();
 			countingPrimesTimer.start();
 			size_t numberPrimesFound = _primesSieve->getNumberPrimesFound();
 			countingPrimesTimer.stop();
@@ -437,12 +432,6 @@ bool PrimesCLI::checkPrimesFromFile() {
 bool PrimesCLI::outputResults() {
 	if (_algorithmToUse >= 18) {
 		return false;
-//
-//		if (_sendResultsToRoot) {
-//			return ((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainerMPI, Modulo210WheelByte>*) _primesSieveMPI)->outputResults();
-//		} else {
-//			return ((PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<PrimesFlagsContainer, Modulo210Wheel>*) _primesSieve)->outputResults();
-//		}
 	}
 
 	if (_algorithmToUse >= 14) {
@@ -487,7 +476,6 @@ bool PrimesCLI::outputResults() {
 		cout << "..." << endl;
 
 		PerformanceTimer performanceTimer;
-		performanceTimer.reset();
 		performanceTimer.start();
 		if ((_algorithmToUse >= 14 && _sendResultsToRoot) ? _primesSieveMPI->savePrimesToFile(_outputResultsFilename) : _primesSieve->savePrimesToFile(_outputResultsFilename)) {
 			performanceTimer.stop();
@@ -713,23 +701,14 @@ void PrimesCLI::showUsage(string message) {
 	cout << "\t --maxRangeInBits                   -> number >= 4  and <= 64 (used to set maxRange using the number of bits instead of direct range -> 2^n)" << endl;
 	cout << "\t --maxRange                         -> number >= 11 and <= 2^64 (default 2^32)" << endl;
 	cout << "\t --cacheBlockSize                   -> block size in bytes >= 128 to optimize cache hit rate (default 16384; used in --algorithm >= 3)" << endl;
-	cout
-			<< "\t --dynamicSchedulingSegmentSize     -> block size in elements >= 256 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576; used in --algorithm 16 and 19)"
-			<< endl;
-	cout
-			<< "\t --dynamicSchedulingNumberSegments  -> number segments to use in mpi dynamic scheduling >= 1 (overrides dynamicSchedulingSegmentSize if set, default not used; applies to --algorithm 16 and 19)"
-			<< endl;
-	cout << "\t --numberThreads                    -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads; used in --algorithm 12, 13, 15, 16, 18, 19)"
-			<< endl;
+	cout << "\t --dynamicSchedulingSegmentSize     -> block size in elements >= 256 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576; used in --algorithm 16 and 19)" << endl;
+	cout << "\t --dynamicSchedulingNumberSegments  -> number segments to use in mpi dynamic scheduling >= 1 (overrides dynamicSchedulingSegmentSize if set, default not used; applies to --algorithm 16 and 19)" << endl;
+	cout << "\t --numberThreads                    -> number threads to use in sieving >= 0 (default 0 -> let algorithm choose the best number of threads; used in --algorithm 12, 13, 15, 16, 18, 19)" << endl;
 	cout << "\t --outputResult                     -> filename of file to output results (default doesn't output results; used in all algorithms)" << endl;
-	cout
-			<< "\t --outputOnlyLastSegment            -> Y/N to output only the primes found on the last segment (default N; used only in mpi with dynamic scheduling - algorithms 18 and 19 - and only applies when --sendResultsToRoot is false)"
-			<< endl;
+	cout << "\t --outputOnlyLastSegment            -> Y/N to output only the primes found on the last segment (default N; used only in algorithms 18 and 19 - and only applies when --sendResultsToRoot is false)" << endl;
 	cout << "\t --checkResult                      -> filename of file with primes to check the algorithm result in root node (default doesn't check algorithm result; used in all algorithms)" << endl;
 	cout << "\t --countPrimesInNode                -> Y/N to count the primes computed each node (default N; used in all algorithms)" << endl;
-	cout
-			<< "\t --sendPrimesCountToRoot            -> Y/N to to count the number of primes found in each mpi process and send the result to the root node (default Y and overrides the --countPrimesInNode flag if set to N; used in --algorithm >= 14)"
-			<< endl;
+	cout << "\t --sendPrimesCountToRoot            -> Y/N to to send the number of primes found in each mpi process to the collector node (default Y; overrides the --countPrimesInNode; used in --algorithm >= 14)" << endl;
 	cout << "\t --sendResultsToRoot                -> Y/N to send the computation results to the root node (default N; used in --algorithm >= 14)" << endl;
 	cout << "\t --help                             -> show program usage" << endl;
 	cout << "\t --version                          -> show program version" << endl;

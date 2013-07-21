@@ -55,8 +55,8 @@ class PrimesCLI {
 	public:
 		PrimesCLI() :
 				_primesSieve(NULL), _primesSieveMPI(NULL), _algorithmToUse(13), _primesMaxRange(7920), _cacheBlockSize(16384), _dynamicSchedulingSegmentSizeInElements(1048576), _dynamicSchedulingNumberSegments(
-						0), _numberOfThreadsToUseInSieving(0), _outputResultsFilename(""), _outputOnlyLastSegment(false), _resultsConfirmationFile(""), _countNumberOfPrimesOnNode(false), _sendPrimesCountToRoot(false), _sendResultsToRoot(
-						false), _mpiThreadSupport(MPI_THREAD_SINGLE), _programName("PrimeSieve") {
+						0), _numberOfThreadsToUseInSieving(0), _outputResultsFilename(""), _outputOnlyLastSegment(false), _resultsConfirmationFile(""), _countNumberOfPrimesOnNode(false), _sendPrimesCountToRoot(
+						false), _sendResultsToRoot(false), _mpiThreadSupport(MPI_THREAD_SINGLE), _programName("PrimeSieve") {
 		}
 
 		virtual ~PrimesCLI() {

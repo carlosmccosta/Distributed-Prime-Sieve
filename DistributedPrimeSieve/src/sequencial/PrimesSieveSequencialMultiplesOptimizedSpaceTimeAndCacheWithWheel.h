@@ -25,10 +25,10 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel: public 
 		PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel(size_t blockSizeInBytes = 64 * 1024) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes * 8) {
 		}
-		
+
 		virtual ~PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel() {
 		}
-		
+
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
 			size_t sievingPrimesSize = _sievingPrimes.size();
 

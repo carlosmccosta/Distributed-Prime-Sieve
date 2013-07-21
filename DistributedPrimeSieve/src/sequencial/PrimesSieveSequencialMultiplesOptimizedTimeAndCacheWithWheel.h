@@ -77,7 +77,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel: public Prime
 			return (maxRange) + 1;
 		}
 
-		virtual inline size_t getBitsetPositionToNumber(size_t number) {
+		inline size_t getBitsetPositionToNumber(size_t number) {
 			return number;
 		}
 

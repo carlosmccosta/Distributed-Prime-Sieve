@@ -29,9 +29,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 			size_t sievingMultiplesSize = sievingMultiples.size();
 
 #			pragma omp parallel for \
-				if (sievingMultiplesSize > 16) \
+				if (sievingMultiplesSize > 32) \
 				default(shared) \
-				schedule(guided) \
+				schedule(guided, 8) \
 				num_threads(numberThreadsToUse)
 			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
 				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];

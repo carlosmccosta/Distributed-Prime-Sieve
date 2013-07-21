@@ -11,10 +11,10 @@ class PrimesSieveSequencialDivision: public PrimesSieve<FlagsContainer> {
 	public:
 		PrimesSieveSequencialDivision() {
 		}
-		
+
 		virtual ~PrimesSieveSequencialDivision() {
 		}
-		
+
 		void computePrimes(size_t maxRange) {
 			this->template getPerformanceTimer().reset();
 			this->template getPerformanceTimer().start();
@@ -38,4 +38,3 @@ class PrimesSieveSequencialDivision: public PrimesSieve<FlagsContainer> {
 			this->template getPerformanceTimer().stop();
 		}
 	};
-

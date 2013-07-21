@@ -95,7 +95,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			if (_processID == 0) {
 				if (_sendResultsToRoot) {
 					PerformanceTimer memoryAllocationTimer;
-					memoryAllocationTimer.reset();
 					memoryAllocationTimer.start();
 					this->template initPrimesBitSetSizeForRootWithAllValues(maxRange);
 					memoryAllocationTimer.stop();
@@ -109,7 +108,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 			// compute sieving primes
 			PerformanceTimer computeSievingPrimesTimer;
-			computeSievingPrimesTimer.reset();
 			computeSievingPrimesTimer.start();
 			this->template computeSievingPrimes(maxRangeSquareRoot, sievingMultiples);
 			computeSievingPrimesTimer.stop();
@@ -128,7 +126,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				totalPerformanceTimer.stop();
 			}
 
-			cout << "    > Finish sieving in process with rank " << _processID << " in " << totalPerformanceTimer.getElapsedTimeFormated() << endl;
+			cout << "    > Finished sieving in process with rank " << _processID << " in " << totalPerformanceTimer.getElapsedTimeFormated() << endl;
 
 			this->template syncProcesses(maxRange);
 		}
@@ -207,7 +205,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 				if (_numberProcesses > 1) {
 					this->template waitForAllProcessesInGroupToFinishSieving();
 					performanceTimer.stop();
-					cout << "\n    >>>>> Finish sieving in all " << _numberProcesses << " processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
+					cout << "\n    >>>>> Finished sieving in all " << _numberProcesses << " processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
 
 					if (_sendPrimesCountToRoot) {
 						this->template collectPrimesCountFromProcessGroup();
@@ -281,7 +279,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 					// compute primes in this process
 					PerformanceTimer performanceTimer;
-					performanceTimer.reset();
 					performanceTimer.start();
 #					endif
 
@@ -304,7 +301,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 		virtual void collectPrimesCountFromProcessGroup() {
 			PerformanceTimer countingPrimesTimer;
-			countingPrimesTimer.reset();
 			countingPrimesTimer.start();
 
 			size_t numberPrimesFound = this->template countPrimesInNode();

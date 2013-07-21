@@ -18,10 +18,10 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 		PrimesSieveSequencialMultiplesOptimizedTimeAndCache(size_t blockSizeInBytes = 204800) :
 				PrimesSieveSequencialMultiplesOptimized<FlagsContainer>(blockSizeInBytes * 8) {
 		}
-		
+
 		virtual ~PrimesSieveSequencialMultiplesOptimizedTimeAndCache() {
 		}
-		
+
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
 			this->template resetPrimesBitsetBlock();
 
