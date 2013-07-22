@@ -11,6 +11,7 @@
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedTimeAndCacheWithWheel.h"
 #include "../sequencial/PrimesSieveSequencialMultiplesOptimizedSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel.h"
+#include "../openmp/PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithWheel.h"
 #include "../openmp/PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel.h"
 #include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPI.h"
 #include "../openmpi/PrimesSieveParallelMultiplesOptimizedOpenMPISpaceTimeAndCacheWithWheel.h"
@@ -37,6 +38,7 @@ class PrimesCLI {
 		int _algorithmToUse;
 		size_t _primesMaxRange;
 		size_t _cacheBlockSize;
+		size_t _segmentSizeInBlocks;
 		size_t _dynamicSchedulingSegmentSizeInElements;
 		size_t _dynamicSchedulingNumberSegments;
 		size_t _numberOfThreadsToUseInSieving;
@@ -54,7 +56,7 @@ class PrimesCLI {
 
 	public:
 		PrimesCLI() :
-				_primesSieve(NULL), _primesSieveMPI(NULL), _algorithmToUse(13), _primesMaxRange(7920), _cacheBlockSize(16384), _dynamicSchedulingSegmentSizeInElements(1048576), _dynamicSchedulingNumberSegments(
+				_primesSieve(NULL), _primesSieveMPI(NULL), _algorithmToUse(13), _primesMaxRange(7920), _cacheBlockSize(16384), _segmentSizeInBlocks(4096), _dynamicSchedulingSegmentSizeInElements(1048576), _dynamicSchedulingNumberSegments(
 						0), _numberOfThreadsToUseInSieving(0), _outputResultsFilename(""), _outputOnlyLastSegment(false), _resultsConfirmationFile(""), _countNumberOfPrimesOnNode(false), _sendPrimesCountToRoot(
 						false), _sendResultsToRoot(false), _mpiThreadSupport(MPI_THREAD_SINGLE), _programName("PrimeSieve") {
 		}

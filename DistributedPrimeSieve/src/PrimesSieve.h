@@ -135,6 +135,8 @@ class PrimesSieve {
 					++i;
 				}
 
+				inputStream.close();
+
 				if (i != iSize) {
 					return false;
 				} else {
@@ -142,6 +144,37 @@ class PrimesSieve {
 				}
 			} else {
 				cerr << "    !!!!! File " << filename << " is not available !!!!!" << endl;
+			}
+
+			return false;
+		}
+
+		virtual bool checkPrimesFromFiles(string correctResults, string resultsToTest) {
+			ifstream correctResultsStream(correctResults.c_str());
+			ifstream resultsToTestStream(resultsToTest.c_str());
+
+			if (correctResultsStream.is_open() && resultsToTestStream.is_open()) {
+				size_t correctNumber;
+				size_t numberToCheck;
+				while (correctResultsStream >> correctNumber && resultsToTestStream >> numberToCheck) {
+					if (numberToCheck != correctNumber) {
+						correctResultsStream.close();
+						resultsToTestStream.close();
+						return false;
+					}
+				}
+
+				correctResultsStream.close();
+				resultsToTestStream.close();
+
+				// both files should have same amount of numbers
+				if (correctResultsStream >> correctNumber || resultsToTestStream >> numberToCheck) {
+					return false;
+				} else {
+					return true;
+				}
+			} else {
+				cerr << "    !!!!! Files to check results are not available !!!!!" << endl;
 			}
 
 			return false;
@@ -169,6 +202,7 @@ class PrimesSieve {
 
 			if (outputStream.is_open()) {
 				savePrimes(outputStream);
+				outputStream.close();
 				return true;
 			}
 

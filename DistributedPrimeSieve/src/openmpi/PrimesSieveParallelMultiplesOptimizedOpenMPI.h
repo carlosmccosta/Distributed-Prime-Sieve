@@ -299,6 +299,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 #				endif
 
 				this-> template savePrimes(outputStream);
+				outputStream.close();
 
 #				ifdef DEBUG_OUTPUT
 				if (!_sendResultsToRoot && _numberProcesses > 1) {

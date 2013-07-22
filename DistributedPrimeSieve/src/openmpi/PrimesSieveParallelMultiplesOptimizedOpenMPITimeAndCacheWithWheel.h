@@ -25,8 +25,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 			return position + this->template getStartSieveNumber();
 		}
 
-
-
 		// ------------------------------ <code from PrimesSieveParallelMultiplesOptimizedOpenMPI to avoid using virtuals in memory access functions (hotspots)> -------------------------------------------
 
 		inline bool getPrimesBitsetValueMPI(size_t number) {
@@ -36,7 +34,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 		inline void setPrimesBitsetValueMPI(size_t number, bool newValue) {
 			this->template getPrimesBitset()[this->template getBitsetPositionToNumberMPI(number)] = newValue;
 		}
-
 
 		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t sievingMultiplesSize = sievingMultiples.size();
@@ -82,7 +79,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 				}
 			}
 		}
-
 
 		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumberMPI(maxRangeSquareRoot);
@@ -226,9 +222,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 			primesValues.push_back(5);
 			primesValues.push_back(7);
 
-			size_t possiblePrime = this->template getStartSieveNumber();
 			size_t maxRange = this->template getMaxRange();
 			WheelType _wheelSieve = this->template getWheelSieve();
+
+			size_t possiblePrime = this->template getStartSieveNumber();
+			if (!(_wheelSieve.isNumberPossiblePrime(possiblePrime))) {
+				possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
+			}
 
 			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 				if (!(this->template getPrimesBitsetValueMPI(possiblePrime))) {

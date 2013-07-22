@@ -125,9 +125,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndC
 			primesValues.push_back(5);
 			primesValues.push_back(7);
 
-			size_t possiblePrime = this->template getStartSieveNumber();
 			size_t maxRange = this->template getMaxRange();
 			WheelType _wheelSieve = this->template getWheelSieve();
+
+			size_t possiblePrime = this->template getStartSieveNumber();
+			if (!(_wheelSieve.isNumberPossiblePrime(possiblePrime))) {
+				possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
+			}
 
 			for (; possiblePrime <= maxRange; possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime)) {
 				if (!(this->template getPrimesBitsetValueMPI(possiblePrime))) {
