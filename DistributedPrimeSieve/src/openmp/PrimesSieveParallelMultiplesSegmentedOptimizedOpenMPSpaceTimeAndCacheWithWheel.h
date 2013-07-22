@@ -119,7 +119,7 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 			++maxRangeSquareRoot; // maxRangeSquareRoot was already sieved
 
 			const size_t blockSizeInElements = _blockSizeInElements;
-			const size_t numberBlocks = ceil((double) ((maxRange + 1) - (maxRangeSquareRoot + 1)) / (double) blockSizeInElements);
+			const size_t numberBlocks = ceil((double) ((maxRange + 1) - maxRangeSquareRoot) / (double) blockSizeInElements);
 			const size_t numberSegments = ceil((double) numberBlocks / (double) _segmentSizeInBlocks);
 
 			size_t numberThreadsToUse = omp_get_max_threads();
@@ -131,18 +131,22 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 				}
 			}
 
-			vector<pair<size_t, size_t> > sievingMultiples;
-
 			size_t startBlock = 0;
 			size_t endBlock = min(_segmentSizeInBlocks, numberBlocks);
-			size_t numberElementsPerSegement = blockSizeInElements * _segmentSizeInBlocks;
+			size_t numberElementsPerSegment = _blockSizeInElements * _segmentSizeInBlocks;
 
 			for (size_t segmentNumber = 0; segmentNumber < numberSegments; ++segmentNumber) {
 				size_t priviousBlockNumber = -1;
+				vector<pair<size_t, size_t> > sievingMultiples;
+
 				size_t numberBlocksLeft = endBlock - startBlock;
 
 				_segmentStartNumber = startBlock * blockSizeInElements + maxRangeSquareRoot;
-				_segmentEndNumber = _segmentStartNumber + numberElementsPerSegement;
+				_segmentEndNumber = _segmentStartNumber + numberElementsPerSegment;
+
+				if (_segmentStartNumber % 2 == 0) {
+					++_segmentStartNumber;
+				}
 
 				if (_segmentEndNumber > maxRange) {
 					_segmentEndNumber = maxRange + 1;
@@ -153,7 +157,6 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 
 				this->template initPrimesBitSetSizeForSieving(_segmentEndNumber - _segmentStartNumber);
 
-
 #				pragma omp parallel for \
 					if (numberBlocksLeft > 16) \
 					default(shared) \
@@ -161,83 +164,83 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 					shared(sievingMultiplesFirstBlock) \
 					firstprivate(maxRange, maxRangeSquareRoot, blockSizeInElements, priviousBlockNumber, sievingMultiples) \
 					schedule(guided, 64)
-				for (size_t blockNumber = startBlock; blockNumber < endBlock; ++blockNumber) {
-					size_t blockBeginNumber = blockNumber * blockSizeInElements + maxRangeSquareRoot;
-					size_t blockEndNumber = blockBeginNumber + blockSizeInElements;
+					for (size_t blockNumber = startBlock; blockNumber < endBlock; ++blockNumber) {
+						size_t blockBeginNumber = blockNumber * blockSizeInElements + maxRangeSquareRoot;
+						size_t blockEndNumber = blockBeginNumber + blockSizeInElements;
 
-					if (blockEndNumber > maxRange) {
-						blockEndNumber = maxRange + 1;
+						if (blockEndNumber > maxRange) {
+							blockEndNumber = maxRange + 1;
+						}
+
+						if (blockNumber == 0) {
+							sievingMultiples = sievingMultiplesFirstBlock;
+						} else if (sievingMultiples.empty() || blockNumber != priviousBlockNumber + 1) {
+							this->template computeSievingMultiples(blockBeginNumber, blockEndNumber, sievingMultiples);
+						}
+						priviousBlockNumber = blockNumber;
+						this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
 					}
 
-					if (blockNumber == 0) {
-						sievingMultiples = sievingMultiplesFirstBlock;
-					} else if (sievingMultiples.empty() || blockNumber != priviousBlockNumber + 1) {
-						this->template computeSievingMultiples(blockBeginNumber, blockEndNumber, sievingMultiples);
+					if (_countNumberOfPrimes) {
+						_parcialPrimesCount += this->template getNumberPrimesFound();
 					}
-					priviousBlockNumber = blockNumber;
-					this->template removeMultiplesOfPrimesFromPreviousBlocks(blockBeginNumber, blockEndNumber, sievingMultiples);
+
+					this->template outputResults();
+
+					startBlock = endBlock;
+					endBlock += _segmentSizeInBlocks;
+					if (endBlock > numberBlocks) {
+						endBlock = numberBlocks;
+					}
 				}
 
-				this->template outputResults();
+			}
 
-				if (_countNumberOfPrimes) {
-					_parcialPrimesCount += this->template getNumberPrimesFound();
+			void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+				sievingMultiples.clear();
+				size_t sievingPrimesSize = _sievingPrimes.size();
+				for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
+					size_t primeNumber = _sievingPrimes[sievingPrimesIndex];
+					size_t primeMultiple = PrimesUtils::closestPrimeMultiple(primeNumber, blockBeginNumber);
+					size_t primeMultipleIncrement = primeNumber << 1;
+
+					if (primeMultiple < blockBeginNumber || primeMultiple == primeNumber) {
+						primeMultiple += primeNumber;
+					}
+
+					if (primeMultiple % 2 == 0) {
+						primeMultiple += primeNumber;
+					}
+
+					sievingMultiples.push_back(pair<size_t, size_t>(primeMultiple, primeMultipleIncrement));
 				}
+				//					cout << "init sievingMultiples in block [" << blockBeginNumber << ", " << blockEndNumber << "]" << endl;
+			}
 
-				startBlock = endBlock;
-				endBlock += _segmentSizeInBlocks;
-				if (endBlock > numberBlocks) {
-					endBlock = numberBlocks;
+			void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+				size_t sievingMultiplesSize = sievingMultiples.size();
+				for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
+					pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
+					size_t primeMultiple = primeCompositeInfo.first;
+					size_t primeMultipleIncrement = primeCompositeInfo.second;
+
+					for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
+						this->PrimesSieve<FlagsContainer>::template setPrimesBitsetValueBlock(primeMultiple, _segmentStartNumber, true);
+					}
+
+					sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
 				}
 			}
 
-		}
+			void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+				size_t numberThreadsToUse = omp_get_max_threads();
+				size_t numberOfThreads = this->template getNumberOfThreads();
 
-		void computeSievingMultiples(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
-			sievingMultiples.clear();
-			size_t sievingPrimesSize = _sievingPrimes.size();
-			for (size_t sievingPrimesIndex = 0; sievingPrimesIndex < sievingPrimesSize; ++sievingPrimesIndex) {
-				size_t primeNumber = _sievingPrimes[sievingPrimesIndex];
-				size_t primeMultiple = PrimesUtils::closestPrimeMultiple(primeNumber, blockBeginNumber);
-				size_t primeMultipleIncrement = primeNumber << 1;
-
-				if (primeMultiple < blockBeginNumber || primeMultiple == primeNumber) {
-					primeMultiple += primeNumber;
+				if (numberOfThreads != 0) {
+					numberThreadsToUse = numberOfThreads;
 				}
 
-				if (primeMultiple % 2 == 0) {
-					primeMultiple += primeNumber;
-				}
-
-				sievingMultiples.push_back(pair<size_t, size_t>(primeMultiple, primeMultipleIncrement));
-			}
-			//					cout << "init sievingMultiples in block [" << blockBeginNumber << ", " << blockEndNumber << "]" << endl;
-		}
-
-		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
-			size_t sievingMultiplesSize = sievingMultiples.size();
-			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
-				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
-				size_t primeMultiple = primeCompositeInfo.first;
-				size_t primeMultipleIncrement = primeCompositeInfo.second;
-
-				for (; primeMultiple < blockEndNumber; primeMultiple += primeMultipleIncrement) {
-					this->PrimesSieve<FlagsContainer>::template setPrimesBitsetValueBlock(primeMultiple, _segmentStartNumber, true);
-				}
-
-				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
-			}
-		}
-
-		void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
-			size_t numberThreadsToUse = omp_get_max_threads();
-			size_t numberOfThreads = this->template getNumberOfThreads();
-
-			if (numberOfThreads != 0) {
-				numberThreadsToUse = numberOfThreads;
-			}
-
-			size_t sievingMultiplesSize = sievingMultiples.size();
+				size_t sievingMultiplesSize = sievingMultiples.size();
 
 #				pragma omp parallel for \
 					if (sievingMultiplesSize > 8) \
