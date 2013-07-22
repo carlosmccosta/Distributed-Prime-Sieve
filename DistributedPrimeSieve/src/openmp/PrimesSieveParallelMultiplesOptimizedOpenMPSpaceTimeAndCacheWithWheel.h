@@ -29,7 +29,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel() {
 		}
 
-		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+		virtual void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t sievingMultiplesSize = sievingMultiples.size();
 			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
 				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
@@ -44,7 +44,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			}
 		}
 
-		void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+		virtual void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t numberThreadsToUse = omp_get_max_threads();
 			size_t numberOfThreads = this->template getNumberOfThreads();
 
@@ -72,7 +72,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			}
 		}
 
-		void calculatePrimesInBlock(size_t blockBeginNumber, size_t blockEndNumber, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
+		virtual void calculatePrimesInBlock(size_t blockBeginNumber, size_t blockEndNumber, size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxPrimeNumberSearch = blockEndNumber;
 			if (maxPrimeNumberSearch >= maxRangeSquareRoot) {
 				maxPrimeNumberSearch = maxRangeSquareRoot + 1;
@@ -101,7 +101,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			}
 		}
 
-		void initPrimesBitSetSize(size_t maxRange) {
+		virtual void initPrimesBitSetSize(size_t maxRange) {
 			this->template initPrimesBitset(maxRange);
 
 			vector<size_t>& _sievingPrimes = this->template getSievingPrimes();
@@ -111,11 +111,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			_sievingPrimes.reserve(numberSievingPrimes);
 		}
 
-		inline size_t getBlockBeginNumber() {
+		virtual inline size_t getBlockBeginNumber() {
 			return _wheelSieve.getFirstPrimeToSieve();
 		}
 
-		inline size_t getNumberBitsToStore(size_t maxRange) {
+		virtual inline size_t getNumberBitsToStore(size_t maxRange) {
 			return this->PrimesSieve<FlagsContainer>::template getNumberBitsToStore(maxRange);
 		}
 
@@ -123,11 +123,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			return (number - 3) >> 1;
 		}
 
-		inline size_t getNumberAssociatedWithBitsetPositionOpenMP(size_t position) {
+		virtual inline size_t getNumberAssociatedWithBitsetPositionOpenMP(size_t position) {
 			return (position << 1) + 3;
 		}
 
-		vector<size_t>& extractPrimesFromBitset() {
+		virtual vector<size_t>& extractPrimesFromBitset() {
 			vector<size_t>& primesValues = this->template getPrimesValues();
 
 			primesValues.clear();
@@ -146,7 +146,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			return primesValues;
 		}
 
-		void savePrimes(ostream& outputStream) {
+		virtual void savePrimes(ostream& outputStream) {
 			vector<size_t>& primesValues = this->template getPrimesValues();
 
 			if (primesValues.size() <= 2) {
@@ -169,7 +169,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPSpaceTimeAndCacheWithWheel: pub
 			}
 		}
 
-		size_t getNumberPrimesFound() {
+		virtual size_t getNumberPrimesFound() {
 			vector<size_t>& primesValues = this->template getPrimesValues();
 
 			if (primesValues.size() >= 2)

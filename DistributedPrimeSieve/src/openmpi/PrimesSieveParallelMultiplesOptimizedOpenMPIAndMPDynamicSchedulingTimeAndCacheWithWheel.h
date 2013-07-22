@@ -15,15 +15,15 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndC
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel() {
 		}
 
-		inline size_t getNumberBitsToStoreBlock(size_t blockSize) {
+		virtual inline size_t getNumberBitsToStoreBlock(size_t blockSize) {
 			return blockSize;
 		}
 
-		inline size_t getBitsetPositionToNumberMPI(size_t number) {
+		virtual inline size_t getBitsetPositionToNumberMPI(size_t number) {
 			return (number - this->template getStartSieveNumber());
 		}
 
-		inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
+		virtual inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
 			return position + this->template getStartSieveNumber();
 		}
 };

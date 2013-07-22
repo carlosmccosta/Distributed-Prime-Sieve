@@ -18,7 +18,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP() {
 		}
 
-		void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
+		virtual void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t numberThreadsToUse = omp_get_max_threads();
 			size_t numberOfThreads = this->template getNumberOfThreads();
 
@@ -45,7 +45,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 				sievingMultiples[sievingMultiplesIndex].first = primeMultiple;
 			}
 		}
-
 
 		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) {
 			size_t maxIndexRangeSquareRoot = this->template getBitsetPositionToNumberMPI(maxRangeSquareRoot);
@@ -82,7 +81,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 			}
 		}
 
-
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
 #			ifdef DEBUG_OUTPUT
 			int _processID = this->template getProcessId();
@@ -106,7 +104,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 			vector<pair<size_t, size_t> > sievingMultiples;
 			size_t priviousBlockNumber = -1;
 
-			#pragma omp parallel for \
+#			pragma omp parallel for \
 				default(shared) \
 				firstprivate(processBeginBlockNumberIndex, processEndBlockNumberIndex, blockSizeInElements, sievingMultiples, priviousBlockNumber) \
 				schedule(guided, 64) \
@@ -137,14 +135,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 			int numberProcesses = this->template getNumberProcesses();
 
-			#pragma omp parallel for \
+#			pragma omp parallel for \
 				default(shared) \
 				firstprivate(numberProcesses, maxRange) \
 				schedule(static)
 			for (int numberProcessesResultsCollected = 1; numberProcessesResultsCollected < numberProcesses; ++numberProcessesResultsCollected) {
-#ifdef DEBUG_OUTPUT
+#				ifdef DEBUG_OUTPUT
 				cout << "    > Probing for results..." << endl;
-#endif
+#				endif
 				MPI_Status status;
 				MPI_Probe(MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT, MPI_COMM_WORLD, &status);
 
@@ -195,7 +193,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP: public PrimesSieveParal
 
 			WheelType& wheelSieve = this->template getWheelSieve();
 
-			#pragma omp parallel for \
+#			pragma omp parallel for \
 				default(shared) \
 				firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, startSieveNumber) \
 				schedule(static) \
