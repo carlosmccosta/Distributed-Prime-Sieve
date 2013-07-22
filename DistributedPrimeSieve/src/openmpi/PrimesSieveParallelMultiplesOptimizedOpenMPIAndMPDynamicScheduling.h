@@ -42,6 +42,8 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling() {
 		}
 
+		virtual size_t receiveSievedBlockFromNode() = 0;
+
 		virtual void computePrimes(size_t maxRange) {
 			if (!(this->template checkifThereIsSufficientNumberOfProcess())) {
 				cerr << "!!!! Insufficient number of processes in work group !!!!!" << endl;
@@ -540,30 +542,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			this->template sendSievingDataMPI(primesBitset, 0, blockSize, processIDToSendResults, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
 		}
 
-		size_t receiveSievedBlockFromNode() {
-			// received block range
-			unsigned long long segmentRange[2];
-			MPI_Status status;
-
-#			ifdef DEBUG_OUTPUT
-			cout << "    --> Ready to receive segment results from sieving node..." << endl;
-#			endif
-
-			MPI_Recv(&segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_NODE_COMPUTATION_RESULTS_BLOCK_RANGE, MPI_COMM_WORLD, &status);
-
-			if (status.MPI_ERROR == MPI_SUCCESS) {
-				size_t blockSize = this->template getNumberBitsToStoreBlock(segmentRange[1] - segmentRange[0]);
-				size_t positionToStoreResults = this->template getBitsetPositionToNumberMPI(segmentRange[0]);
-
-				// receive sieving data
-				FlagsContainer& primesBitset = this->template getPrimesBitset();
-				this->template receiveSievingDataMPI(primesBitset, positionToStoreResults, blockSize, status.MPI_SOURCE, MSG_NODE_COMPUTATION_RESULTS_SEGMENT);
-				return blockSize;
-			} else {
-				cerr << "    !!!!! Detected error " << status.MPI_ERROR << " when receiving sieving segment results data from process with rank " << status.MPI_SOURCE << "!!!!!" << endl;
-				return 0;
-			}
-		}
 
 		void startCollectorOfSievingDataResults(size_t numberSegmentsCreated) {
 			size_t numberBytesReceived = 0;
