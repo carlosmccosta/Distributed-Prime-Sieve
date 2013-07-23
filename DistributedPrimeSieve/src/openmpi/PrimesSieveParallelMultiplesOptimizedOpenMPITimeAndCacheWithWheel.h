@@ -17,11 +17,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 			return blockSize;
 		}
 
-		virtual inline size_t getBitsetPositionToNumberMPI(size_t number) {
+		inline size_t getBitsetPositionToNumberMPI(size_t number) {
 			return (number - this->template getStartSieveNumber());
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
+		inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
 			return position + this->template getStartSieveNumber();
 		}
 
@@ -115,6 +115,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) {
 #			ifdef DEBUG_OUTPUT
+			int _processID = this->template getProcessId();
 			cout << "    --> Removing composites in process with rank " << _processID << " in [" << processBeginBlockNumber << ", " << (processEndBlockNumber - 1) << "]" << endl;
 #			endif
 

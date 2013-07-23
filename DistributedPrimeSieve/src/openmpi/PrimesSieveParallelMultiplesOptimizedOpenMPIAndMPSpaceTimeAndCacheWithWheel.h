@@ -22,11 +22,11 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWhee
 			}
 		}
 
-		virtual inline size_t getBitsetPositionToNumberMPI(size_t number) {
+		inline size_t getBitsetPositionToNumberMPI(size_t number) {
 			return (number - this->template getStartSieveNumber()) >> 1;
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
+		inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
 			return (position << 1) + this->template getStartSieveNumber();
 		}
 

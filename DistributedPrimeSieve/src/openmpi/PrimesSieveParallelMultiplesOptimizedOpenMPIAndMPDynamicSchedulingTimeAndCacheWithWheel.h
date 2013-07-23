@@ -5,11 +5,11 @@
 template<typename FlagsContainer, typename WheelType>
 class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType> {
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, size_t numberOfThreads = 0,
-				bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true, size_t dynamicSchedulingSegmentSizeInElements = 1048576,
-				size_t dynamicSchedulingNumberSegments = 0, string outputResultsFilename = "", bool outputOnlyLastSegment = false) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType>(maxRange, blockSizeInBytes * 8, numberOfThreads, sendResultsToRoot,
-						countNumberOfPrimesOnNode, sendPrimesCountToRoot, dynamicSchedulingSegmentSizeInElements, dynamicSchedulingNumberSegments, outputResultsFilename, outputOnlyLastSegment) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true,
+				bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true, size_t dynamicSchedulingSegmentSizeInElements = 1048576, size_t dynamicSchedulingNumberSegments = 0,
+				string outputResultsFilename = "", bool outputOnlyLastSegment = false) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType>(maxRange, blockSizeInBytes * 8, numberOfThreads, sendResultsToRoot, countNumberOfPrimesOnNode,
+						sendPrimesCountToRoot, dynamicSchedulingSegmentSizeInElements, dynamicSchedulingNumberSegments, outputResultsFilename, outputOnlyLastSegment) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndCacheWithWheel() {
@@ -19,14 +19,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndC
 			return blockSize;
 		}
 
-		virtual inline size_t getBitsetPositionToNumberMPI(size_t number) {
+		inline size_t getBitsetPositionToNumberMPI(size_t number) {
 			return (number - this->template getStartSieveNumber());
 		}
 
-		virtual inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
+		inline size_t getNumberAssociatedWithBitsetPositionMPI(size_t position) {
 			return position + this->template getStartSieveNumber();
 		}
-
 
 		// ------------------------------ <code from PrimesSieveParallelMultiplesOptimizedOpenMPI to avoid using virtuals in memory access functions (hotspots)> -------------------------------------------
 
@@ -228,7 +227,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndC
 				}
 			}
 
-			vector < pair<size_t, size_t> > sievingMultiples;
+			vector<pair<size_t, size_t> > sievingMultiples;
 			size_t priviousBlockNumber = -1;
 
 #			pragma omp parallel for \
@@ -353,8 +352,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingTimeAndC
 			return primesFound;
 		}
 		// ---------------------------- </code from PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP to avoid using virtuals in memory access functions (hotspots)> ---------------------------------------
-
-
 
 		// ------------------------<code from PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling to avoid using virtuals in memory access functions (hotspots)> ----------------------------
 		size_t receiveSievedBlockFromNode() {

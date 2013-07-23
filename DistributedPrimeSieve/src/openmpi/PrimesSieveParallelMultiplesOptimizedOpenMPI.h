@@ -182,13 +182,13 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			}
 		}
 
-		MPI_Status receiveSievingDataMPI(FlagsContainer& primesBitset, size_t positionToStoreResults, size_t blockSize, int source, int tag) {
+		virtual MPI_Status receiveSievingDataMPI(FlagsContainer& primesBitset, size_t positionToStoreResults, size_t blockSize, int source, int tag) {
 			MPI_Status status;
 			cerr << "\n\n!!!!! Missing implementation for " << typeid(primesBitset).name() << " bitset container !!!!!" << endl << endl;
 			return status;
 		}
 
-		void sendSievingDataMPI(FlagsContainer& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination, int tag) {
+		virtual void sendSievingDataMPI(FlagsContainer& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination, int tag) {
 			cerr << "\n\n!!!!! Missing implementation for " << typeid(primesBitset).name() << " bitset container !!!!!" << endl << endl;
 		}
 
@@ -211,22 +211,22 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 		size_t countPrimesInNode() {
 			this->template setPrimesCount(0);
-#					ifdef DEBUG_OUTPUT
-					size_t startPossiblePrime = this->template getStartSieveNumber();
-					size_t maxRange = this->template getMaxRange();
-					cout << "    --> Process with rank " << _processID << " counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
+#			ifdef DEBUG_OUTPUT
+			size_t startPossiblePrime = this->template getStartSieveNumber();
+			size_t maxRange = this->template getMaxRange();
+			cout << "    --> Process with rank " << _processID << " counting primes in [" << startPossiblePrime << ", " << maxRange << "]" << endl;
 
-					// compute primes in this process
-					PerformanceTimer performanceTimer;
-					performanceTimer.start();
-#					endif
+			// compute primes in this process
+			PerformanceTimer performanceTimer;
+			performanceTimer.start();
+#			endif
 
-					size_t numberPrimesFound = this->template getNumberPrimesFound();
+			size_t numberPrimesFound = this->template getNumberPrimesFound();
 
-#					ifdef DEBUG_OUTPUT
-					performanceTimer.stop();
-					cout << "    --> Process " << _processID << " counted " << numberPrimesFound << " primes in [" << startPossiblePrime << ", " << maxRange << "] in " << performanceTimer.getElapsedTimeFormated() << endl;
-#					endif
+#			ifdef DEBUG_OUTPUT
+			performanceTimer.stop();
+			cout << "    --> Process " << _processID << " counted " << numberPrimesFound << " primes in [" << startPossiblePrime << ", " << maxRange << "] in " << performanceTimer.getElapsedTimeFormated() << endl;
+#			endif
 			return numberPrimesFound;
 		}
 
