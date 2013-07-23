@@ -164,13 +164,14 @@ class PrimesSieve {
 					}
 				}
 
-				correctResultsStream.close();
-				resultsToTestStream.close();
-
 				// both files should have same amount of numbers
 				if (correctResultsStream >> correctNumber || resultsToTestStream >> numberToCheck) {
+					correctResultsStream.close();
+					resultsToTestStream.close();
 					return false;
 				} else {
+					correctResultsStream.close();
+					resultsToTestStream.close();
 					return true;
 				}
 			} else {

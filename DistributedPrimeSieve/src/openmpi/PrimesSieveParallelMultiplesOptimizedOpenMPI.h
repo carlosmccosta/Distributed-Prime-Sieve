@@ -186,12 +186,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 		MPI_Status receiveSievingDataMPI(FlagsContainer& primesBitset, size_t positionToStoreResults, size_t blockSize, int source, int tag) {
 			MPI_Status status;
-			cerr << "\n\n!!!!!Missing implementation for this type of bitset container !!!!!" << endl << endl;
+			cerr << "\n\n!!!!! Missing implementation for this type of bitset container !!!!!" << endl << endl;
 			return status;
 		}
 
 		void sendSievingDataMPI(FlagsContainer& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination, int tag) {
-			cerr << "\n\n!!!!!Missing implementation for this type of bitset container !!!!!" << endl << endl;
+			cerr << "\n\n!!!!! Missing implementation for this type of bitset container !!!!!" << endl << endl;
 		}
 
 		inline void sendFinishSievingMessageToRoot() {
