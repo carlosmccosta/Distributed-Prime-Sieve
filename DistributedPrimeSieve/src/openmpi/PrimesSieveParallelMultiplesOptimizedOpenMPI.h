@@ -1,5 +1,7 @@
 #pragma once
 
+#include <typeinfo>
+
 #include "../PrimesSieve.h"
 #include "../WheelFactorization.h"
 #include "../lib/PrimesUtils.h"
@@ -40,8 +42,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		WheelType _wheelSieve;
 
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 16 * 1024, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true,
-				bool sendPrimesCountToRoot = true) :
+		PrimesSieveParallelMultiplesOptimizedOpenMPI(size_t maxRange, size_t blockSizeInElements = 16 * 1024, bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true) :
 				_blockSizeInElements(blockSizeInElements), _sendResultsToRoot(sendResultsToRoot), _countNumberOfPrimesOnNode(countNumberOfPrimesOnNode), _sendPrimesCountToRoot(sendPrimesCountToRoot) {
 			int flag;
 			MPI_Initialized(&flag);
@@ -66,12 +67,10 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPI() {
 		}
 
-
 		virtual void collectResultsFromProcessGroup(size_t maxRange) = 0;
 		virtual void computeSievingPrimes(size_t maxRangeSquareRoot, vector<pair<size_t, size_t> >& sievingMultiples) = 0;
 		virtual void removeComposites(size_t processBeginBlockNumber, size_t processEndBlockNumber, vector<pair<size_t, size_t> >& sievingMultiplesFirstBlock) = 0;
 		virtual size_t getNumberBitsToStoreBlock(size_t blockSize) = 0;
-
 
 		virtual void computePrimes(size_t maxRange) {
 			PerformanceTimer& totalPerformanceTimer = this->template getPerformanceTimer();
@@ -138,7 +137,6 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 			this->template syncProcesses(maxRange);
 		}
 
-
 		void syncProcesses(size_t maxRange) {
 			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
 
@@ -186,12 +184,12 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPI: public PrimesSieve<FlagsCont
 
 		MPI_Status receiveSievingDataMPI(FlagsContainer& primesBitset, size_t positionToStoreResults, size_t blockSize, int source, int tag) {
 			MPI_Status status;
-			cerr << "\n\n!!!!! Missing implementation for this type of bitset container !!!!!" << endl << endl;
+			cerr << "\n\n!!!!! Missing implementation for " << typeid(primesBitset).name() << " bitset container !!!!!" << endl << endl;
 			return status;
 		}
 
 		void sendSievingDataMPI(FlagsContainer& primesBitset, size_t startPositionOfResults, size_t blockSize, int destination, int tag) {
-			cerr << "\n\n!!!!! Missing implementation for this type of bitset container !!!!!" << endl << endl;
+			cerr << "\n\n!!!!! Missing implementation for " << typeid(primesBitset).name() << " bitset container !!!!!" << endl << endl;
 		}
 
 		inline void sendFinishSievingMessageToRoot() {

@@ -93,7 +93,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot + 1);
 			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
 
-			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
+			size_t numberBlocks = (size_t) ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
 
 			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
 
@@ -123,7 +123,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPITimeAndCacheWithWheel: public 
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
 			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);
 
-			const size_t numberBlocks = ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
+			const size_t numberBlocks = (size_t) ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
 
 			vector<pair<size_t, size_t> > sievingMultiples;
 			size_t priviousBlockEndNumber = -1;

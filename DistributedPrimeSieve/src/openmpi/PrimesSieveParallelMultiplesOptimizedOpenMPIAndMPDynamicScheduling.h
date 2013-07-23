@@ -77,9 +77,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			this->template setMaxRange(maxRangeSquareRoot);
 
 			if (_dynamicSchedulingNumberSegments != 0) {
-				_dynamicSchedulingSegmentSizeInElements = ceil((double) maxRange / (double) _dynamicSchedulingNumberSegments);
+				_dynamicSchedulingSegmentSizeInElements = (size_t)ceil((double) maxRange / (double) _dynamicSchedulingNumberSegments);
 			} else {
-				_dynamicSchedulingNumberSegments = ceil((double) (maxRange - maxRangeSquareRoot) / (double) _dynamicSchedulingSegmentSizeInElements);
+				_dynamicSchedulingNumberSegments = (size_t)ceil((double) (maxRange - maxRangeSquareRoot) / (double) _dynamicSchedulingSegmentSizeInElements);
 			}
 
 			size_t numberProcesses = (size_t) this->template getNumberProcesses();
@@ -104,9 +104,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			}
 
 			size_t _numberOfThreads = this->template getNumberOfThreads();
-			size_t numberThreadsToUse = omp_get_max_threads();
+			int numberThreadsToUse = omp_get_max_threads();
 			if (_numberOfThreads != 0) {
-				numberThreadsToUse = _numberOfThreads;
+				numberThreadsToUse = (int) _numberOfThreads;
 			}
 
 			omp_set_num_threads(numberThreadsToUse);

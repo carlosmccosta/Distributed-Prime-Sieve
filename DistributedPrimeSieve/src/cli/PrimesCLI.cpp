@@ -121,7 +121,7 @@ void PrimesCLI::startInteractiveCLI() {
 
 			if (inputRangeInBits) {
 				_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
-				_primesMaxRange = (size_t) pow(2, _primesMaxRange);
+				_primesMaxRange = (size_t) pow(2.0, (double)_primesMaxRange);
 			} else {
 				_primesMaxRange = ConsoleInput::getInstance()->getNumberCin("    # Max search range: ", "Range must be >= 11", (size_t) 11);
 			}
@@ -428,7 +428,7 @@ bool PrimesCLI::checkPrimesFromFile() {
 		}
 		cout << "... " << endl;
 
-		bool validationResult = ((_algorithmToUse >= 15 && _sendResultsToRoot) ? _primesSieveMPI->checkPrimesFromFile(_resultsConfirmationFile) : _primesSieve->checkPrimesFromFile(_resultsConfirmationFile));
+		bool validationResult = false;
 
 		if (_algorithmToUse < 14) {
 			validationResult = _primesSieve->checkPrimesFromFile(_resultsConfirmationFile);
@@ -587,7 +587,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 				showUsage("  >>> Invalid primes max range in bits! Max range must be >= 4 and <= 64");
 				return false;
 			} else {
-				_primesMaxRange = (size_t) pow(2, rangeInBits);
+				_primesMaxRange = (size_t) pow(2.0, (double)rangeInBits);
 			}
 		} else if (argSelector == "--maxRange") {
 			stringstream sstream(argValue);
@@ -636,12 +636,12 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 			}
 		} else if (argSelector == "--numberThreads") {
 			stringstream sstream(argValue);
-			size_t numThreads;
+			int numThreads;
 			if (!(sstream >> numThreads) || (numThreads < 0)) {
 				showUsage("  >>> Invalid number of threads! Number of threads must be >= 0 (0 to use default)");
 				return false;
 			} else {
-				_numberOfThreadsToUseInSieving = numThreads;
+				_numberOfThreadsToUseInSieving = (size_t)numThreads;
 			}
 		} else if (argSelector == "--outputResultsFilename") {
 			_outputResultsFilename = argValue;

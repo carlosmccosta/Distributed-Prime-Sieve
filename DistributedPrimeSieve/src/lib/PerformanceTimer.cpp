@@ -68,7 +68,7 @@ void PerformanceTimer::calculateElapsedTimeMicroSec() {
 #ifdef _WIN32
 	elapsedTimeMicroSec = (endCountWin.QuadPart - startCountWin.QuadPart) * 1000000.0 / frequencyWin.QuadPart;
 #else
-	elapsedTimeMicroSec = (endCount.tv_sec - startCount.tv_sec) * 1000000 + (endCount.tv_usec - startCount.tv_usec);
+	elapsedTimeMicroSec = (double)((endCount.tv_sec - startCount.tv_sec) * 1000000 + (endCount.tv_usec - startCount.tv_usec));
 #endif
 	
 }

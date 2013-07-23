@@ -188,7 +188,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWhee
 			size_t blockIndexEnd = min(blockIndexBegin + blockSizeInElements, maxIndexRangeSquareRoot + 1);
 			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionMPI(blockIndexEnd);
 
-			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) blockSizeInElements);
+			size_t numberBlocks = (size_t) ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) blockSizeInElements);
 
 			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
 
@@ -219,7 +219,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWhee
 			const size_t processEndBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processEndBlockNumber);
 			const size_t processBeginBlockNumberIndex = this->template getBitsetPositionToNumberMPI(processBeginBlockNumber);
 
-			const size_t numberBlocks = ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
+			const size_t numberBlocks = (size_t) ceil((double) (processEndBlockNumberIndex - processBeginBlockNumberIndex) / (double) blockSizeInElements);
 			size_t numberThreadsToUse = omp_get_max_threads();
 			size_t _numberOfThreads = this->template getNumberOfThreads();
 			if (_numberOfThreads != 0) {
@@ -317,7 +317,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPSpaceTimeAndCacheWithWhee
 			size_t maxRange = this->template getMaxRange();
 			int maxNumberThreads = omp_get_max_threads();
 			size_t minNumberPrimesPerThread = 100;
-			int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
+			int numberThreads = min((int) maxNumberThreads, (int) ceil((double) maxRange / (double) minNumberPrimesPerThread));
 			size_t numberPrimesToCheckInBlock = (maxRange - startSieveNumber) / numberThreads;
 
 			WheelType& wheelSieve = this->template getWheelSieve();

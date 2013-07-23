@@ -58,7 +58,7 @@ class PrimesSieve {
 		 * @return
 		 */
 		static inline size_t getNumberOfPrimesInRange(size_t range) {
-			return ((30 * log(113) / 113) * range / log(range));   // 30*log(113)/113 = 1.2550587
+			return (size_t)((30.0 * log(113.0) / 113.0) * (double) range / log((double) range));   // 30*log(113)/113 = 1.2550587
 		}
 
 		inline size_t getBitsetPositionToNumber(size_t number) {

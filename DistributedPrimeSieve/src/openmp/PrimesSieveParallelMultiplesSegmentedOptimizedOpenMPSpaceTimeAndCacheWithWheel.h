@@ -61,10 +61,10 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 			this->template setStartSieveNumber(blockBeginNumber);
 			this->template setMaxRange(maxRangeSquareRoot);
 
-			size_t numberThreadsToUse = omp_get_max_threads();
+			int numberThreadsToUse = omp_get_max_threads();
 			size_t numberOfThreads = this->template getNumberOfThreads();
 			if (numberOfThreads != 0) {
-				numberThreadsToUse = numberOfThreads;
+				numberThreadsToUse = (int) numberOfThreads;
 			}
 			omp_set_num_threads(numberThreadsToUse);
 
@@ -106,7 +106,7 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 
 			this->template initPrimesBitSetSizeForSievingPrimes(maxRangeSquareRoot);
 			size_t blockEndNumber = min(blockBeginNumber + _blockSizeInElements, maxRangeSquareRoot + 1);
-			size_t numberBlocks = ceil((double) ((maxRangeSquareRoot + 1) - blockBeginNumber) / (double) _blockSizeInElements);
+			size_t numberBlocks = (size_t) ceil((double) ((maxRangeSquareRoot + 1) - blockBeginNumber) / (double) _blockSizeInElements);
 
 			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
 
@@ -131,15 +131,15 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 			++maxRangeSquareRoot; // maxRangeSquareRoot was already sieved
 
 			const size_t blockSizeInElements = _blockSizeInElements;
-			const size_t numberBlocks = ceil((double) ((maxRange + 1) - maxRangeSquareRoot) / (double) blockSizeInElements);
-			const size_t numberSegments = ceil((double) numberBlocks / (double) _segmentSizeInBlocks);
+			const size_t numberBlocks = (size_t) ceil((double) ((maxRange + 1) - maxRangeSquareRoot) / (double) blockSizeInElements);
+			const size_t numberSegments = (size_t) ceil((double) numberBlocks / (double) _segmentSizeInBlocks);
 
-			size_t numberThreadsToUse = omp_get_max_threads();
+			int numberThreadsToUse = omp_get_max_threads();
 			if (_numberOfThreads != 0) {
 				if (numberBlocks < _numberOfThreads) {
-					numberThreadsToUse = numberBlocks;
+					numberThreadsToUse = (int) numberBlocks;
 				} else {
-					numberThreadsToUse = _numberOfThreads;
+					numberThreadsToUse = (int) _numberOfThreads;
 				}
 			}
 
@@ -439,7 +439,7 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 
 					int numberThreadsToUse = omp_get_max_threads();
 					if (_numberOfThreads != 0) {
-						numberThreadsToUse = _numberOfThreads;
+						numberThreadsToUse = (int) _numberOfThreads;
 					}
 
 					size_t segmentStartNumber = _segmentStartNumber;
@@ -449,7 +449,7 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 					cout << "    --> Counting in [" << _segmentStartNumber << ", " << maxRange << "] using " << numberThreadsToUse << " threads" << endl;
 #					endif
 
-					size_t numberBlocks = ceil((double) ((maxRange + 1) - _segmentStartNumber) / (double) _blockSizeInElements);
+					size_t numberBlocks = (size_t) ceil((double) ((maxRange + 1) - _segmentStartNumber) / (double) _blockSizeInElements);
 					size_t blockSizeInElements = _blockSizeInElements;
 
 #					pragma omp parallel for \

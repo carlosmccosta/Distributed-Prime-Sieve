@@ -30,7 +30,7 @@ class PrimesSieveSequencialMultiplesOptimized: public PrimesSieve<FlagsContainer
 
 			size_t maxRangeSquareRoot = (size_t) sqrt(maxRange);
 			size_t maxIndexRange = this->template getNumberBitsToStore(maxRange);
-			size_t numberBlocks = ceil((double) maxIndexRange / (double) _blockSizeInElements);
+			size_t numberBlocks = (size_t) ceil((double) maxIndexRange / (double) _blockSizeInElements);
 			size_t blockIndexBegin = 0;
 			size_t blockIndexEnd = min(_blockSizeInElements, maxIndexRange);
 

@@ -68,7 +68,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			size_t blockIndexEnd = min(blockIndexBegin + _blockSizeInElements, maxIndexRangeSquareRoot + 1);
 			size_t blockEndNumber = this->template getNumberAssociatedWithBitsetPositionOpenMP(blockIndexEnd);
 
-			size_t numberBlocks = ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
+			size_t numberBlocks = (size_t)ceil((double) (maxRangeSquareRoot - blockBeginNumber) / (double) _blockSizeInElements);
 
 			this->template calculatePrimesInBlock(blockBeginNumber, blockEndNumber, maxRangeSquareRoot, sievingMultiples);
 
@@ -94,7 +94,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMP: public PrimesSieve<FlagsConta
 			const size_t maxIndexRange = this->template getNumberBitsToStore(maxRange) - 1;
 			const size_t blockIndexSquareRoot = this->template getBitsetPositionToNumberOpenMP(maxRangeSquareRoot);
 
-			const size_t numberBlocks = ceil((double) (maxIndexRange - blockIndexSquareRoot) / (double) blockSizeInElements);
+			const size_t numberBlocks = (size_t)ceil((double) (maxIndexRange - blockIndexSquareRoot) / (double) blockSizeInElements);
 			size_t numberThreadsToUse = omp_get_max_threads();
 			if (_numberOfThreads != 0) {
 				if (numberBlocks < _numberOfThreads) {

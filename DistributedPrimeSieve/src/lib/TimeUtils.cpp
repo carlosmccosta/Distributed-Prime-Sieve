@@ -4,12 +4,12 @@ string TimeUtils::formatSecondsToDate(double seconds) {
 	double secondsFinal = fmod(seconds, 60);
 
 	double minutes = seconds / 60.0;
-	unsigned short minutesFinal = fmod(minutes, 60);
+	unsigned short minutesFinal = (unsigned short) fmod(minutes, 60.0);
 
 	double hours = minutes / 60;
-	unsigned short hoursFinal = fmod(hours, 24);
+	unsigned short hoursFinal = (unsigned short) fmod(hours, 24.0);
 
-	unsigned short daysFinal = hours / 24;
+	unsigned short daysFinal = (unsigned short) (hours / 24.0);
 
 	stringstream timeFormated;
 	if (daysFinal != 0) {
