@@ -60,8 +60,12 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 			this->template setStartSieveNumber(blockBeginNumber);
 			this->template setMaxRange(maxRangeSquareRoot);
 
-			_segmentStartNumber = this->template getBlockBeginNumber();
-			_segmentEndNumber = maxRangeSquareRoot + 1;
+			size_t numberThreadsToUse = omp_get_max_threads();
+			size_t numberOfThreads = this->template getNumberOfThreads();
+			if (numberOfThreads != 0) {
+				numberThreadsToUse = numberOfThreads;
+			}
+			omp_set_num_threads(numberThreadsToUse);
 
 			// compute sieving primes
 			vector<pair<size_t, size_t> > sievingMultiples;
@@ -92,6 +96,9 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 				return;
 			}
 
+			_segmentStartNumber = blockBeginNumber;
+			_segmentEndNumber = maxRangeSquareRoot + 1;
+
 			this->template initPrimesBitSetSizeForSievingPrimes(maxRangeSquareRoot);
 			size_t blockEndNumber = min(blockBeginNumber + _blockSizeInElements, maxRangeSquareRoot + 1);
 			size_t numberBlocks = ceil((double) ((maxRangeSquareRoot + 1) - blockBeginNumber) / (double) _blockSizeInElements);
@@ -102,8 +109,8 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 				blockBeginNumber = blockEndNumber;
 				blockEndNumber += _blockSizeInElements;
 
-				if (blockEndNumber >= maxRange) {
-					blockEndNumber = maxRange + 1;
+				if (blockEndNumber >= maxRangeSquareRoot) {
+					blockEndNumber = maxRangeSquareRoot + 1;
 				}
 
 				this->template removeMultiplesOfPrimesFromPreviousBlocksParallel(blockBeginNumber, blockEndNumber, sievingMultiples);
@@ -130,6 +137,8 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 					numberThreadsToUse = _numberOfThreads;
 				}
 			}
+
+			omp_set_num_threads(numberThreadsToUse);
 
 			size_t startBlock = 0;
 			size_t endBlock = min(_segmentSizeInBlocks, numberBlocks);
@@ -158,9 +167,8 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 				this->template initPrimesBitSetSizeForSieving(_segmentEndNumber - _segmentStartNumber);
 
 #				pragma omp parallel for \
-					if (numberBlocksLeft > 16) \
+					if (numberBlocksLeft > 8) \
 					default(shared) \
-					num_threads(numberThreadsToUse) \
 					shared(sievingMultiplesFirstBlock) \
 					firstprivate(maxRange, maxRangeSquareRoot, blockSizeInElements, priviousBlockNumber, sievingMultiples) \
 					schedule(guided, 64)
@@ -233,20 +241,12 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 			}
 
 			void removeMultiplesOfPrimesFromPreviousBlocksParallel(size_t blockBeginNumber, size_t blockEndNumber, vector<pair<size_t, size_t> >& sievingMultiples) {
-				size_t numberThreadsToUse = omp_get_max_threads();
-				size_t numberOfThreads = this->template getNumberOfThreads();
-
-				if (numberOfThreads != 0) {
-					numberThreadsToUse = numberOfThreads;
-				}
-
 				size_t sievingMultiplesSize = sievingMultiples.size();
 
 #				pragma omp parallel for \
-					if (sievingMultiplesSize > 8) \
+					if (sievingMultiplesSize > 4) \
 					default(shared) \
-					schedule(guided, 8) \
-					num_threads(numberThreadsToUse)
+					schedule(guided, 4)
 					for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
 						pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
 						size_t primeMultiple = primeCompositeInfo.first;
@@ -421,33 +421,46 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 						return primesFound;
 					}
 
-					primesFound = _wheelSieve.getNumberPrimesSievedByTheWheel();
+					if (_segmentStartNumber == _wheelSieve.getFirstPrimeToSieve()) {
+						primesFound = _wheelSieve.getNumberPrimesSievedByTheWheel();
+					} else {
+						primesFound = 0;
+					}
+
 					size_t maxRange = _segmentEndNumber - 1;
-					int maxNumberThreads = omp_get_max_threads();
-					size_t minNumberPrimesPerThread = 100;
-					int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
+//					int maxNumberThreads = omp_get_max_threads();
+//					size_t minNumberPrimesPerThread = 100;
+//					int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
+
+					int numberThreads = omp_get_max_threads();
 					size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
+					size_t segmentStartNumber = _segmentStartNumber;
+					WheelType wheelSieve = _wheelSieve;
+
+					cout << "    --> Counting in [" << _segmentStartNumber << ", " << maxRange << "] using " << numberThreads << " threads" << endl;
 
 #					pragma omp parallel for \
 						default(shared) \
-						firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock) \
+						firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, segmentStartNumber, wheelSieve) \
 						reduction(+: primesFound) \
 						num_threads(numberThreads)
 					for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
-						size_t possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock + _segmentStartNumber;
-						if (!_wheelSieve.isNumberPossiblePrime(possiblePrime)) {
-							possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
+						size_t possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock + segmentStartNumber;
+						if (!wheelSieve.isNumberPossiblePrime(possiblePrime)) {
+							possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 						}
 
-						size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + _segmentStartNumber, maxRange + 1);
+						size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + segmentStartNumber, maxRange + 1);
 
 						while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
-							if (!(this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValueBlock(possiblePrime, _segmentStartNumber))) {
+							if (!(this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValueBlock(possiblePrime, segmentStartNumber))) {
 								++primesFound;
 							}
-							possiblePrime = _wheelSieve.getNextPossiblePrime(possiblePrime);
+							possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 						}
 					}
+
+					cout << "    --> Found " << primesFound << " primes in [" << _segmentStartNumber << ", " << maxRange << "]" << endl;
 
 					return primesFound;
 				}

@@ -61,6 +61,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPTimeAndCacheWithWheel: public P
 				if (sievingMultiplesSize > 8) \
 				default(shared) \
 				schedule(guided, 8) \
+				firstprivate(blockEndNumber) \
 				num_threads(numberThreadsToUse)
 			for (size_t sievingMultiplesIndex = 0; sievingMultiplesIndex < sievingMultiplesSize; ++sievingMultiplesIndex) {
 				pair<size_t, size_t> primeCompositeInfo = sievingMultiples[sievingMultiplesIndex];
