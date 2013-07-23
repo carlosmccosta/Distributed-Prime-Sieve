@@ -128,7 +128,7 @@ void PrimesCLI::startInteractiveCLI() {
 			}
 
 			if (_algorithmToUse >= 3) {
-				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("   ## Cache block size in bytes: ", "Block size must be >= 512", 512);
+				_cacheBlockSize = ConsoleInput::getInstance()->getIntCin("   ## Cache block size in bytes: ", "Block size must be >= 8", 8);
 			}
 
 			if (_algorithmToUse == 14) {
@@ -445,7 +445,7 @@ bool PrimesCLI::checkPrimesFromFile() {
 }
 
 bool PrimesCLI::outputResults() {
-	if (_algorithmToUse >= 19) {
+	if (_algorithmToUse >= 19 || _algorithmToUse == 14) {
 		return false;
 	}
 
@@ -564,8 +564,8 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		if (argSelector == "--algorithm") {
 			stringstream sstream(argValue);
 			int algorithm;
-			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 19)) {
-				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 19]");
+			if (!(sstream >> algorithm) || (algorithm < 1 || algorithm > 20)) {
+				showUsage("  >>> Invalid algorithm selector! Must be a number [1, 20]");
 				return false;
 			} else {
 				_algorithmToUse = algorithm;
@@ -591,8 +591,8 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		} else if (argSelector == "--cacheBlockSize") {
 			stringstream sstream(argValue);
 			size_t blockSize;
-			if (!(sstream >> blockSize) || (blockSize < 128)) {
-				showUsage("  >>> Invalid cache block size! Block size must be >= 128");
+			if (!(sstream >> blockSize) || (blockSize < 8)) {
+				showUsage("  >>> Invalid cache block size! Block size must be >= 8 bytes");
 				return false;
 			} else {
 				_cacheBlockSize = blockSize;
@@ -609,8 +609,8 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 		} else if (argSelector == "--dynamicSchedulingSegmentSize") {
 			stringstream sstream(argValue);
 			size_t dynamicScheduleBlockSize;
-			if (!(sstream >> dynamicScheduleBlockSize) || (dynamicScheduleBlockSize < 256)) {
-				showUsage("  >>> Invalid scheduling segment size for mpi! Block size must be >= 256");
+			if (!(sstream >> dynamicScheduleBlockSize) || (dynamicScheduleBlockSize < 16)) {
+				showUsage("  >>> Invalid scheduling segment size for mpi! Block size must be >= 16");
 				return false;
 			} else {
 				_dynamicSchedulingSegmentSizeInElements = dynamicScheduleBlockSize;
@@ -726,10 +726,10 @@ void PrimesCLI::showUsage(string message) {
 	cout << "\t --algorithm                        -> number in [1, 19]" << endl;
 	cout << "\t --maxRangeInBits                   -> number >= 4  and <= 64 (used to set maxRange using the number of bits instead of direct range -> 2^n)" << endl;
 	cout << "\t --maxRange                         -> number >= 11 and <= 2^64 (default 2^32)" << endl;
-	cout << "\t --cacheBlockSize                   -> block size in bytes >= 128 to optimize cache hit rate (default 16384; used in --algorithm >= 3)" << endl;
+	cout << "\t --cacheBlockSize                   -> block size in bytes >= 8 to optimize cache hit rate (default 16384; used in --algorithm >= 3)" << endl;
 	cout << "\t --segmentSizeInBlocks              -> number of blocks per segment used in algorithm 13 (default 4096)" << endl;
 	cout
-			<< "\t --dynamicSchedulingSegmentSize     -> block size in elements >= 256 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576; used in --algorithm 16 and 19)"
+			<< "\t --dynamicSchedulingSegmentSize     -> block size in elements >= 16 to split the primes domain in blocks to perform dynamic allocation in mpi (default 1048576; used in --algorithm 16 and 19)"
 			<< endl;
 	cout
 			<< "\t --dynamicSchedulingNumberSegments  -> number segments to use in mpi dynamic scheduling >= 1 (overrides dynamicSchedulingSegmentSize if set, default not used; applies to --algorithm 16 and 19)"

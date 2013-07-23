@@ -2,6 +2,7 @@
 
 #include "../PrimesSieve.h"
 #include "../lib/PrimesUtils.h"
+#include "../lib/Settings.h"
 
 #include <cmath>
 #include <algorithm>
@@ -76,6 +77,10 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 			cout << "    --> Computed " << sievingMultiples.size() << " sieving primes in " << computeSievingPrimesTimer.getElapsedTimeFormated() << endl;
 
 			this->template cleanOutputFile();
+
+			if (_outputResultsFilename != "") {
+				cout << "\n    > Exporting results to file " << _outputResultsFilename << endl;;
+			}
 			this->template outputResults();
 
 			// sieve remaining numbers
@@ -432,25 +437,34 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 //					size_t minNumberPrimesPerThread = 100;
 //					int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
 
-					int numberThreads = omp_get_max_threads();
-					size_t numberPrimesToCheckInBlock = maxRange / numberThreads;
+					int numberThreadsToUse = omp_get_max_threads();
+					if (_numberOfThreads != 0) {
+						numberThreadsToUse = _numberOfThreads;
+					}
+
 					size_t segmentStartNumber = _segmentStartNumber;
 					WheelType wheelSieve = _wheelSieve;
 
-					cout << "    --> Counting in [" << _segmentStartNumber << ", " << maxRange << "] using " << numberThreads << " threads" << endl;
+#					ifdef DEBUG_OUTPUT
+					cout << "    --> Counting in [" << _segmentStartNumber << ", " << maxRange << "] using " << numberThreadsToUse << " threads" << endl;
+#					endif
+
+					size_t numberBlocks = ceil((double) ((maxRange + 1) - _segmentStartNumber) / (double) _blockSizeInElements);
+					size_t blockSizeInElements = _blockSizeInElements;
 
 #					pragma omp parallel for \
 						default(shared) \
-						firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, segmentStartNumber, wheelSieve) \
+						firstprivate(maxRange, blockSizeInElements, numberBlocks, segmentStartNumber, wheelSieve) \
+						schedule(guided, 64) \
 						reduction(+: primesFound) \
-						num_threads(numberThreads)
-					for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
-						size_t possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock + segmentStartNumber;
+						num_threads(numberThreadsToUse)
+					for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
+						size_t possiblePrime = blockNumber * blockSizeInElements + segmentStartNumber;
+						size_t nextPossiblePrimeNumberEndBlock = min(possiblePrime + blockSizeInElements, maxRange + 1);
+
 						if (!wheelSieve.isNumberPossiblePrime(possiblePrime)) {
 							possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 						}
-
-						size_t nextPossiblePrimeNumberEndBlock = min((threadBlockNumber + 1) * numberPrimesToCheckInBlock + segmentStartNumber, maxRange + 1);
 
 						while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
 							if (!(this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValueBlock(possiblePrime, segmentStartNumber))) {
@@ -460,7 +474,9 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 						}
 					}
 
+#					ifdef DEBUG_OUTPUT
 					cout << "    --> Found " << primesFound << " primes in [" << _segmentStartNumber << ", " << maxRange << "]" << endl;
+#					endif
 
 					return primesFound;
 				}
