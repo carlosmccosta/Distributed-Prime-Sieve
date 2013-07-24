@@ -433,10 +433,6 @@ class PrimesSieveParallelMultiplesSegmentedOptimizedOpenMPSpaceTimeAndCacheWithW
 					}
 
 					size_t maxRange = _segmentEndNumber - 1;
-//					int maxNumberThreads = omp_get_max_threads();
-//					size_t minNumberPrimesPerThread = 100;
-//					int numberThreads = min((size_t) maxNumberThreads, (size_t) ceil((double) maxRange / (double) minNumberPrimesPerThread));
-
 					int numberThreadsToUse = omp_get_max_threads();
 					if (_numberOfThreads != 0) {
 						numberThreadsToUse = (int) _numberOfThreads;

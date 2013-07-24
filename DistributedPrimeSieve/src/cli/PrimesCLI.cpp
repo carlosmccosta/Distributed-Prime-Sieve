@@ -103,7 +103,7 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << " 22 - About\n";
 		cout << "  0 - Exit\n\n\n" << endl;
 
-		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 21]: ", "    -> Insert one of the listed algorithms!\n", 0, 22);
+		_algorithmToUse = ConsoleInput::getInstance()->getIntCin("  >>> Option [0, 22]: ", "    -> Insert one of the listed algorithms!\n", 0, 23);
 
 		if (_algorithmToUse == 0) {
 			break;

@@ -5,11 +5,11 @@
 template<typename FlagsContainer, typename WheelType>
 class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel: public PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType> {
 	public:
-		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, size_t numberOfThreads = 0,
-				bool sendResultsToRoot = true, bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true, size_t dynamicSchedulingSegmentSizeInElements = 1048576,
-				size_t dynamicSchedulingNumberSegments = 0, string outputResultsFilename = "", bool outputOnlyLastSegment = false) :
-				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType>(maxRange, blockSizeInBytes * 8, numberOfThreads, sendResultsToRoot,
-						countNumberOfPrimesOnNode, sendPrimesCountToRoot, dynamicSchedulingSegmentSizeInElements, dynamicSchedulingNumberSegments, outputResultsFilename, outputOnlyLastSegment) {
+		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel(size_t maxRange, size_t blockSizeInBytes = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true,
+				bool countNumberOfPrimesOnNode = true, bool sendPrimesCountToRoot = true, size_t dynamicSchedulingSegmentSizeInElements = 1048576, size_t dynamicSchedulingNumberSegments = 0,
+				string outputResultsFilename = "", bool outputOnlyLastSegment = false) :
+				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling<FlagsContainer, WheelType>(maxRange, blockSizeInBytes * 8, numberOfThreads, sendResultsToRoot, countNumberOfPrimesOnNode,
+						sendPrimesCountToRoot, dynamicSchedulingSegmentSizeInElements, dynamicSchedulingNumberSegments, outputResultsFilename, outputOnlyLastSegment) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTimeAndCacheWithWheel() {
@@ -316,36 +316,33 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicSchedulingSpaceTim
 			}
 
 			size_t maxRange = this->template getMaxRange();
-			int maxNumberThreads = omp_get_max_threads();
-			size_t minNumberPrimesPerThread = 100;
-			int numberThreads = min((int) maxNumberThreads, (int) ceil((double) maxRange / (double) minNumberPrimesPerThread));
-			size_t numberPrimesToCheckInBlock = (maxRange - startSieveNumber) / numberThreads;
+			WheelType wheelSieve = this->template getWheelSieve();
 
-			WheelType& wheelSieve = this->template getWheelSieve();
+			size_t blockSizeInElements = this->template getBlockSizeInElements();
+			size_t numberBlocks = (size_t) ceil((double) ((maxRange + 1) - startSieveNumber) / (double) blockSizeInElements);
+
+			int numberThreadsToUse = omp_get_max_threads();
+			size_t _numberOfThreads = this->template getNumberOfThreads();
+			if (_numberOfThreads != 0) {
+				numberThreadsToUse = (int) _numberOfThreads;
+			}
 
 #			pragma omp parallel for \
-						default(shared) \
-						firstprivate(maxRange, numberThreads, numberPrimesToCheckInBlock, startSieveNumber) \
-						schedule(static) \
-						reduction(+: primesFound) \
-						num_threads(numberThreads)
-			for (int threadBlockNumber = 0; threadBlockNumber < numberThreads; ++threadBlockNumber) {
-				size_t possiblePrime;
+				default(shared) \
+				firstprivate(maxRange, blockSizeInElements, numberBlocks, startSieveNumber, wheelSieve) \
+				schedule(guided, 64) \
+				reduction(+: primesFound) \
+				num_threads(numberThreadsToUse)
+			for (size_t blockNumber = 0; blockNumber < numberBlocks; ++blockNumber) {
+				size_t possiblePrime = blockNumber * blockSizeInElements + startSieveNumber;
+				size_t nextPossiblePrimeNumberEndBlock = min(possiblePrime + blockSizeInElements, maxRange + 1);
 
-				possiblePrime = threadBlockNumber * numberPrimesToCheckInBlock + startSieveNumber;
-				if (!(wheelSieve.isNumberPossiblePrime(possiblePrime))) {
+				if (!wheelSieve.isNumberPossiblePrime(possiblePrime)) {
 					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
 				}
 
-				size_t nextPossiblePrimeNumberEndBlock;
-				if (threadBlockNumber == numberThreads - 1) {
-					nextPossiblePrimeNumberEndBlock = maxRange + 1;
-				} else {
-					nextPossiblePrimeNumberEndBlock = (threadBlockNumber + 1) * numberPrimesToCheckInBlock + startSieveNumber;
-				}
-
 				while (possiblePrime < nextPossiblePrimeNumberEndBlock) {
-					if (!this->template getPrimesBitsetValueMPI(possiblePrime)) {
+					if (!(this->PrimesSieve<FlagsContainer>::template getPrimesBitsetValueBlock(possiblePrime, startSieveNumber))) {
 						++primesFound;
 					}
 					possiblePrime = wheelSieve.getNextPossiblePrime(possiblePrime);
