@@ -10,7 +10,7 @@ Single processor implementation using primes multiples to cross of composites
 
 ----- algorithm 3 -----
 Single processor implementation using block search with bitset with all even numbers
-./DistributedPrimeSieve --algorithm 3 --countPrimesInNode Y --cacheBlockSize 6291456 --maxRangeInBits 32
+./DistributedPrimeSieve --algorithm 3 --countPrimesInNode Y --cacheBlockSize 262144 --maxRangeInBits 32
 
 ----- algorithm 4 -----
 Single processor implementation using block search with bitset containing only the even numbers in the block
