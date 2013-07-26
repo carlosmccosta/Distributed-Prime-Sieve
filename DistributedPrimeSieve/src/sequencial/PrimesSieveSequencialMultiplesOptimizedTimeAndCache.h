@@ -22,7 +22,7 @@ class PrimesSieveSequencialMultiplesOptimizedTimeAndCache: public PrimesSieveSeq
 		virtual ~PrimesSieveSequencialMultiplesOptimizedTimeAndCache() {
 		}
 
-		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
+		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t maxIndexToSearch) {
 			this->template resetPrimesBitsetBlock();
 
 			size_t primesMultiplesSize = _primesMultiples.size();

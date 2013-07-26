@@ -256,8 +256,8 @@ class PrimesSieve {
 		}
 
 		virtual size_t getNumberPrimesFound() {
-			if (_primesValues.size() >= 2)
-				return _primesValues.size();
+//			if (_primesValues.size() >= 2)
+//				return _primesValues.size();
 
 			size_t primesFound = 1;   // prime number 2 isn't in _primesBitset
 			size_t iSize = _primesBitset.size();

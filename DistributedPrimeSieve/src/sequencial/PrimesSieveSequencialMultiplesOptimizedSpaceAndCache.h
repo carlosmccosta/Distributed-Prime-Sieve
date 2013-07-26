@@ -18,10 +18,10 @@ class PrimesSieveSequencialMultiplesOptimizedSpaceAndCache: public PrimesSieveSe
 		virtual ~PrimesSieveSequencialMultiplesOptimizedSpaceAndCache() {
 		}
 
-		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t blockIndexBegin) {
+		void removeMultiplesOfPrimesFromPreviousBlocks(size_t blockBeginNumber, size_t blockEndNumber, size_t maxIndexToSearch) {
 			FlagsContainer& primesBitset = this->template getPrimesBitset();
 
-			for (size_t primesIndex = 0; primesIndex < blockIndexBegin; ++primesIndex) {
+			for (size_t primesIndex = 0; primesIndex < maxIndexToSearch; ++primesIndex) {
 				if (!primesBitset[primesIndex]) {
 					size_t primeNumber = this->template getNumberAssociatedWithBitsetPosition(primesIndex);
 					size_t primeDoubled = primeNumber << 1;

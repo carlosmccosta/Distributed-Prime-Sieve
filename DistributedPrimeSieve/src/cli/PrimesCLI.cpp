@@ -83,7 +83,7 @@ void PrimesCLI::startInteractiveCLI() {
 		cout << "  2 - Single processor implementation using primes multiples to cross of composites\n";
 		cout << "  3 - Single processor implementation using block search with bitset with all even numbers\n";
 		cout << "  4 - Single processor implementation using block search with bitset containing only the even numbers in the block\n";
-		cout << "  5 - Single processor implementation using block search with bitset with all even numbers optimized for time\n";
+		cout << "  5 - Single processor implementation using block search with bitset with all numbers optimized for time\n";
 		cout << "  6 - Single processor implementation using block search with bitset with only possible primes numbers optimized for space and with modulo 30 wheel factorization\n";
 		cout << "  7 - Single processor implementation using block search with bitset with only possible primes numbers optimized for space and with modulo 210 wheel factorization\n";
 		cout << "  8 - Single processor implementation using block search with bitset with all even numbers optimized for time and space and with modulo 30 wheel factorization\n";
@@ -134,7 +134,7 @@ void PrimesCLI::startInteractiveCLI() {
 				_segmentSizeInBlocks = ConsoleInput::getInstance()->getIntCin("   ## Number of blocks per segment: ", "Number of blocks per segment must be >= 1", 1);
 			}
 
-			if (_algorithmToUse >= 12 || _algorithmToUse <= 18) {
+			if (_algorithmToUse >= 12 && _algorithmToUse <= 18) {
 				_numberOfThreadsToUseInSieving = ConsoleInput::getInstance()->getIntCin("   ## Number of threads to use in sieving (0 to let openMP decide): ", "Number of threads must be >= 0", 0);
 			}
 
