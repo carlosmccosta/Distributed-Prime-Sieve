@@ -587,7 +587,11 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 				showUsage("  >>> Invalid primes max range in bits! Max range must be >= 4 and <= 64");
 				return false;
 			} else {
-				_primesMaxRange = (size_t) pow(2.0, (double)rangeInBits);
+				if (rangeInBits == 64) {
+					_primesMaxRange = (size_t)(-1);
+				} else {
+					_primesMaxRange = (size_t) pow(2.0, (double)rangeInBits);
+				}
 			}
 		} else if (argSelector == "--maxRange") {
 			stringstream sstream(argValue);
