@@ -1,0 +1,95 @@
+# =======================================================================================
+# Connection (https://www.grid.fe.up.pt/)
+# =======================================================================================
+
+# ssh (feup credentials)
+ssh -X user@submit.grid.fe.up.pt
+
+-X -> allow X11 forwarding
+
+
+
+# =======================================================================================
+# Jobs
+# =======================================================================================
+
+Jobs are specified in bash scripts.
+
+# submit job
+qsub -l nodes=10:ppn=2 script.sh
+
+# interactive job
+qsub -I
+
+# interactive job with X11 forwarding
+qsub -I -X
+
+# resources are requested with the -l option when calling qsub
+# ppn -> processors-per-node
+
+# using 2 nodes
+qsub -l nodes=2 script.sh
+
+# with a job name
+qsub -l nodes=2 -N jobName script.sh
+
+# Using 8 processes per node
+qsub -l nodes=2:ppn=8 script.sh
+
+# ask for email notification when job starts, ends or aborts
+qsub -l nodes=2:ppn=8 -m abe -M mail@provider script.sh
+or add inside script.sh the directives
+#PBS -m abe
+#PBS -M mail@provider
+
+# running on a specific host
+qsub -l nodes=avafat01.grid.fe.up.pt -I
+
+# limiting runtime
+qsub -l walltime=02:00:00,nodes=1 script.sh
+
+# job status
+qstat [jobID]
+
+# delete job
+qdel jobID
+
+
+
+# =======================================================================================
+# Resources
+# =======================================================================================
+
+# see resources
+man pbs_resources
+
+# see resources allocated to a given job
+qstat -f jobID
+
+# see cluster resources load
+qtop
+
+
+# =======================================================================================
+# Modules
+# =======================================================================================
+
+# see available modules
+module avail --long
+
+# see loaded modules
+module list
+
+# load modules
+module load moduleName
+
+# remove loaded modules
+module remove moduleName
+
+
+
+# =======================================================================================
+# MPI
+# =======================================================================================
+
+mpiexec --prefix $MPI_HOME --hostfile $PBS_NODEFILE ./binaryName [programArguments]

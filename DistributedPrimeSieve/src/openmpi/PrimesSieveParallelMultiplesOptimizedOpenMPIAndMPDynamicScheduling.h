@@ -28,6 +28,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 		vector<vector<pair<size_t, size_t> > > _segmentsDistribution;
 
 		size_t _globalMaxRange;
+		double _globalCPUTime;
 
 	public:
 		PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling(size_t maxRange, size_t blockSizeInElements = 16 * 1024, size_t numberOfThreads = 0, bool sendResultsToRoot = true,
@@ -36,7 +37,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				PrimesSieveParallelMultiplesOptimizedOpenMPIAndMP<FlagsContainer, WheelType>(maxRange, blockSizeInElements, numberOfThreads, sendResultsToRoot, countNumberOfPrimesOnNode, sendPrimesCountToRoot), _processStartBlockNumber(
 						0), _processEndBlockNumber(0), _outputResultsFilename(outputResultsFilename), _outputOnlyLastSegment(outputOnlyLastSegment), _dynamicSchedulingSegmentSizeInElements(
 						dynamicSchedulingSegmentSizeInElements), _dynamicSchedulingNumberSegments(dynamicSchedulingNumberSegments), _mpiThreadSupport(MPI_THREAD_SINGLE), _processIDWithFirstPrimesBlock(0), _numberSievingProcesses(
-						1), _numberSegmentsSieved(0), _numberSegmentsCreated(0), _globalMaxRange(11) {
+						1), _numberSegmentsSieved(0), _numberSegmentsCreated(0), _globalMaxRange(11), _globalCPUTime(0) {
 		}
 
 		virtual ~PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling() {
@@ -386,15 +387,17 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 
 		bool getNewSegmentFromRoot() {
 			unsigned long long segmentRange[2];
+			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
+			double currentCPUTime = performanceTimer.getCPUTimeInSec();
 
 #			ifdef DEBUG_OUTPUT
 			cout << "\n    > Requesting new segment from root node..." << endl;
 #			endif
 
 			MPI_Status status;
-			MPI_Send(&_numberSegmentsSieved, 1, MPI_UNSIGNED_LONG_LONG, 0, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD);
+			MPI_Send(&currentCPUTime, 1, MPI_DOUBLE, 0, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD);
 			MPI_Recv(&segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, 0, MSG_ASSIGN_NEW_SEGMET, MPI_COMM_WORLD, &status);
-//			MPI_Sendrecv(&_numberSegmentsSieved, 1, MPI_UNSIGNED_LONG_LONG, 0, MSG_REQUEST_NEW_SEGMET, &segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, 0, MSG_ASSIGN_NEW_SEGMET, MPI_COMM_WORLD, &status);
+//			MPI_Sendrecv(&currentCPUTime, 1, MPI_DOUBLE, 0, MSG_REQUEST_NEW_SEGMET, &segmentRange[0], 2, MPI_UNSIGNED_LONG_LONG, 0, MSG_ASSIGN_NEW_SEGMET, MPI_COMM_WORLD, &status);
 
 			if (status.MPI_ERROR == MPI_SUCCESS) {
 				_processStartBlockNumber = segmentRange[0];
@@ -421,7 +424,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			cout << "    > Root server for available segments started..." << endl;
 			size_t numberSegmentsRemaining = numberSegmentsCreated;
 			unsigned long long segmentRange[2];
-			unsigned long long numberSegmentsSievedByNode;
+			double currentCPUTimeForNode;
 			MPI_Status status;
 
 			pair<size_t, size_t> newSegmentRange;
@@ -433,7 +436,7 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 				cout << "    --> Ready to send new segment..." << endl;
 #				endif
 
-				MPI_Recv(&numberSegmentsSievedByNode, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD, &status);
+				MPI_Recv(&currentCPUTimeForNode, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD, &status);
 
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					processPositionToTakeSegment = status.MPI_SOURCE - numberManagementProcesses;
@@ -470,13 +473,14 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			cout << "\n    > All segments processed. Terminating auxiliary nodes..." << endl;
 			for (size_t numberNodesTerminated = 0; numberNodesTerminated < numberSievingProcesses; ++numberNodesTerminated) {
 				MPI_Status status;
-				unsigned long long numberSegmentsSievedByNode;
+				double currentCPUTimeForNode;
 
 #				ifdef DEBUG_OUTPUT
 				cout << "    --> Waiting for sieve node to terminate..." << endl;
 #				endif
 
-				MPI_Recv(&numberSegmentsSievedByNode, 1, MPI_UNSIGNED_LONG_LONG, MPI_ANY_SOURCE, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD, &status);
+				MPI_Recv(&currentCPUTimeForNode, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MSG_REQUEST_NEW_SEGMET, MPI_COMM_WORLD, &status);
+				_globalCPUTime += currentCPUTimeForNode;
 
 				if (status.MPI_ERROR == MPI_SUCCESS) {
 					unsigned long long segmentRange[2];
@@ -494,7 +498,9 @@ class PrimesSieveParallelMultiplesOptimizedOpenMPIAndMPDynamicScheduling: public
 			}
 
 			PerformanceTimer& performanceTimer = this->template getPerformanceTimer();
-			cout << "\n    >>>>> Finish sieving in " << _numberSievingProcesses << " auxiliary processes in " << performanceTimer.getElapsedTimeFormated() << " <<<<<\n" << endl;
+			_globalCPUTime += performanceTimer.getCPUTimeInSec();
+			cout << "\n    >>>>> Finish sieving in " << _numberSievingProcesses << " auxiliary processes in " << performanceTimer.getElapsedTimeFormated();
+			cout << " with [ Global CPU time: " << TimeUtils::formatSecondsToDate(_globalCPUTime) << " ] <<<<<\n" << endl;
 
 			if (_mpiThreadSupport < MPI_THREAD_MULTIPLE) {
 				int processIDForPrimesCountCollector = 1;

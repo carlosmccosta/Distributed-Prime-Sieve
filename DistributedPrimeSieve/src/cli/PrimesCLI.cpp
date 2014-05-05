@@ -121,7 +121,11 @@ void PrimesCLI::startInteractiveCLI() {
 
 			if (inputRangeInBits) {
 				_primesMaxRange = ConsoleInput::getInstance()->getIntCin("    # n: ", "Range must be [4, 64]", 4, 65);
-				_primesMaxRange = (size_t) pow(2.0, (double)_primesMaxRange);
+				if (_primesMaxRange == 64) {
+					_primesMaxRange = (size_t) (-2);
+				} else {
+					_primesMaxRange = (size_t) pow(2.0, (double) _primesMaxRange);
+				}
 			} else {
 				_primesMaxRange = ConsoleInput::getInstance()->getNumberCin("    # Max search range: ", "Range must be >= 11", (size_t) 11);
 			}
@@ -588,7 +592,7 @@ bool PrimesCLI::parseCLIParameters(int argc, char** argv) {
 				return false;
 			} else {
 				if (rangeInBits == 64) {
-					_primesMaxRange = (size_t)(-1);
+					_primesMaxRange = (size_t)(-2);
 				} else {
 					_primesMaxRange = (size_t) pow(2.0, (double)rangeInBits);
 				}

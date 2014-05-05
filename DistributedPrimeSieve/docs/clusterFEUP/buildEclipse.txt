@@ -1,0 +1,119 @@
+# =======================================================================================
+# System packages
+# =======================================================================================
+
+- Install G++ and OpenMPI from a terminal
+sudo apt-get install build-essential
+sudo apt-get install libopenmpi-dev openmpi-bin
+
+
+
+# =======================================================================================
+# Eclipse IDE
+# =======================================================================================
+
+- Download Eclipse IDE for C/C++ Developers (http://www.eclipse.org/downloads/)
+- Or add Eclipse CDT to your current eclipse installation (https://www.eclipse.org/cdt/)
+- Setup workspace
+
+
+
+# =======================================================================================
+# Create eclipse project
+# =======================================================================================
+
+Eclipse can build and manage local projects and remote projects.
+Use local projects when you want to test in your machine.
+Use remote projects when you want to build in a cluster node.
+
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Option 1: Create new C++ local project
+
+- File -> New -> Project -> C/C++ -> C++ Project
+- Fill project name
+- Select Linux GCC
+- Finish
+
+
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Option 2: Create new C++ remote project
+
+- Setup ssh connection to remote machine
+	- Switch to RSE (Remote System Explorer) perspective
+	- Click in + icon to add a new connection
+	- Select SHH only
+	- Enter hostname
+	- Enter connection name
+	- Next
+	- Configure SFTP
+	- Next
+	- Configure SSH shells
+	- Next
+	- Configure SSH terminals
+	- Next
+	- Finish
+- Open your connection in the "Remote Systems" tab
+- Enter user and pass ir setup your ssh keys
+- Go to your home folder
+- Create a folder for your project
+
+- File -> New -> Project -> C/C++ -> C++ Project
+- Fill project name
+- Select Linux GCC
+- Uncheck "Use default location"
+- In "Choose file system" select RSE instead of default
+- Click Browse
+- In connection select the one you created before
+- Navigate to the folder you created before
+- OK
+- Finish
+
+
+
+# =======================================================================================
+# Setup eclipse project
+# =======================================================================================
+
+Eclipse has configurations for both Release and Debug builds.
+Make sure you apply these changes to both of then.
+
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Add GCC OpenMP to project settings
+
+- Go to Project properties -> C/C++ build -> Settings
+- GCC C++ Compiler -> Miscellaneous -> Other flags
+	- Add the OpenMP flag
+		-fopenmp
+
+- GCC C++ Linker -> Miscellaneous -> Linker flags
+	- Add the OpenMP flag
+		-fopenmp
+
+
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Configure OpenMPI
+
+- Go to Project properties -> C/C++ build -> Settings -> GCC C++ Compiler
+- Change the command from g++ to mpic++
+- Go to Includes section
+	- Add the include path for OpenMPI
+		/usr/lib/openmpi/include
+
+- Go to - Project properties -> C/C++ build -> Settings -> GCC C++ Linker
+- Change the command from g++ to mpic++
+
+
+
+# =======================================================================================
+# Build project
+# =======================================================================================
+
+If eclipse fails to build the project remotely, you can use the makefiles that it generated.
+Launch a ssh terminal in the project folder and navigate to either the Release or Debug subfolder
+In there you will find a makefile (generated for the first time when you build the project in eclipse).
+To build just type: make
+To remove build files type: make clean

@@ -6,6 +6,7 @@
 #include <windows.h>
 #else           // Unix based system specific
 #include <sys/time.h>
+#include <ctime>
 #endif
 
 #include <stdlib.h>
@@ -23,10 +24,14 @@ class PerformanceTimer {
 		void start();                             // start timer
 		void stop();                              // stop the timer
 		void reset();
+		unsigned long long getClockCounts();
+		double getCPUTimeInSec();
 		double getElapsedTimeInSec();             // get elapsed time in second
 		double getElapsedTimeInMilliSec();        // get elapsed time in milli-second
 		double getElapsedTimeInMicroSec();        // get elapsed time in micro-second
 		string getElapsedTimeFormated();
+
+		bool updateState();
 
 
 	private:
@@ -39,6 +44,8 @@ class PerformanceTimer {
 #else
 		timeval startCount;
 		timeval endCount;
+		clock_t clockTicksStart;
+		clock_t clockTicksEnd;
 #endif
 		
 		void calculateElapsedTimeMicroSec();

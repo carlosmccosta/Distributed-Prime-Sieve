@@ -1,0 +1,1 @@
+mpic++ -fopenmp -I/usr/lib/openmpi/include -O3 -Wall -o outputBinary srcFiles
