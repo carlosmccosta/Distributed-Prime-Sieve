@@ -1,0 +1,219 @@
+# dmidecode 2.12
+SMBIOS 2.7 present.
+
+Handle 0x0028, DMI type 16, 23 bytes
+Physical Memory Array
+	Location: System Board Or Motherboard
+	Use: System Memory
+	Error Correction Type: Multi-bit ECC
+	Maximum Capacity: 64 GB
+	Error Information Handle: Not Provided
+	Number Of Devices: 4
+
+Handle 0x002A, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0028
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P1_DIMMA1
+	Bank Locator: P1_CH_A
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2E0D900F    
+	Asset Tag: Dimm0_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x002C, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0028
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P1_DIMMB1
+	Bank Locator: P1_CH_B
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2E0D640F    
+	Asset Tag: Dimm1_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x002E, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0028
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P1_DIMMC1
+	Bank Locator: P1_CH_C
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2F0DDB0E    
+	Asset Tag: Dimm2_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x0030, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0028
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P1_DIMMD1
+	Bank Locator: P1_CH_D
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2D0D9C0F    
+	Asset Tag: Dimm3_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x0032, DMI type 16, 23 bytes
+Physical Memory Array
+	Location: System Board Or Motherboard
+	Use: System Memory
+	Error Correction Type: Multi-bit ECC
+	Maximum Capacity: 64 GB
+	Error Information Handle: Not Provided
+	Number Of Devices: 4
+
+Handle 0x0034, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0032
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P2_DIMME1
+	Bank Locator: P2_CH_A
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2D0D3C0F    
+	Asset Tag: Dimm0_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x0036, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0032
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P2_DIMMF1
+	Bank Locator: P2_CH_B
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2D0D7C0F    
+	Asset Tag: Dimm1_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x0038, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0032
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P2_DIMMG1
+	Bank Locator: P2_CH_C
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2F0D550F    
+	Asset Tag: Dimm2_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x003A, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x0032
+	Error Information Handle: Not Provided
+	Total Width: 72 bits
+	Data Width: 64 bits
+	Size: 8192 MB
+	Form Factor: DIMM
+	Set: None
+	Locator: P2_DIMMH1
+	Bank Locator: P2_CH_D
+	Type: DDR3
+	Type Detail: Registered (Buffered)
+	Speed: 1600 MHz
+	Manufacturer: Kingston          
+	Serial Number: 2F0D680F    
+	Asset Tag: Dimm3_AssetTag
+	Part Number: 9965516-057.A
+	Rank: 1
+	Configured Clock Speed: 1600 MHz
+
+Handle 0x003C, DMI type 16, 23 bytes
+Physical Memory Array
+	Location: System Board Or Motherboard
+	Use: Flash Memory
+	Error Correction Type: None
+	Maximum Capacity: 16 MB
+	Error Information Handle: Not Provided
+	Number Of Devices: 1
+
+Handle 0x003E, DMI type 17, 34 bytes
+Memory Device
+	Array Handle: 0x003C
+	Error Information Handle: Not Provided
+	Total Width: 8 bits
+	Data Width: 8 bits
+	Size: 16 MB
+	Form Factor: Other
+	Set: None
+	Locator:  
+	Bank Locator:  
+	Type: Flash
+	Type Detail: Non-Volatile
+	Speed: 33 MHz
+	Manufacturer: Micron/Numonyx
+	Serial Number:  
+	Asset Tag:  
+	Part Number: 25Q Series
+	Rank: Unknown
+	Configured Clock Speed: Unknown
+

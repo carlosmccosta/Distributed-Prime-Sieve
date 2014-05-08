@@ -29,6 +29,7 @@
 #include <mpi.h>
 
 using std::string;
+using std::sqrt;
 
 class PrimesCLI {
 	protected:

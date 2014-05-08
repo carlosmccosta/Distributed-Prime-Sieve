@@ -5,15 +5,18 @@
 - 29 nodes
 - Each node has:
   - 16 cores (2 Intel(R) Xeon(R) CPU E5-2450 per node)
-  	- Level 1 cache size
-  		- 8 x 32 KB instruction caches
-		- 8 x 32 KB data caches
-	- Level 2 cache size
-		- 8 x 256 KB
-	- Level 3 cache size
-		- 20 MB
+    - from 2.1 up to 2.9 GHz clock rate
+    - Level 1 cache size
+      - 8 x 32 KB instruction caches
+      - 8 x 32 KB data caches
+    - Level 2 cache size
+      - 8 x 256 KB
+    - Level 3 cache size
+      - 20 MB
   - between 64 and 128 GB of RAM
+    - DDR3
   - Connected to other nodes with 40 Gbps InfiniBand
+    - NetXtreme BCM5721 Gigabit Ethernet PCI Express
   - 500 GB local storage
 - 10 TB central storage
 
