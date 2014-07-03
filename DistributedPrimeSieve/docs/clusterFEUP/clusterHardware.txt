@@ -14,7 +14,7 @@
     - Level 3 cache size
       - 20 MB
   - between 64 and 128 GB of RAM
-    - DDR3
+    - DDR3 1600 MHz
   - Connected to other nodes with 40 Gbps InfiniBand
     - NetXtreme BCM5721 Gigabit Ethernet PCI Express
   - 500 GB local storage
